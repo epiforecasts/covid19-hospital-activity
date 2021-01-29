@@ -61,7 +61,7 @@ w <- trust_ltla_full %>%
   dplyr::summarise(n = sum(ind, na.rm = TRUE)) %>%
   dplyr::mutate(ind = ifelse(n > 0, 1, 0))
 
-saveRDS(object = w, file = here::here("data", "trust", "trust_interaction.rds"))
+saveRDS(object = w, file = here::here("data", "trust", "estimate_interaction.rds"))
 
 
 ```

@@ -53,7 +53,7 @@ beds <- occ_data %>%
   dplyr::group_by(nhs_region, trust_code, trust_name) %>%
   dplyr::summarise(beds = round(mean(occ_est, na.rm = TRUE)))
 
-saveRDS(object = beds, file = here::here("data", "trust", "beds_available.rds"))
+saveRDS(object = beds, file = here::here("data", "trust", "estimate_beds.rds"))
 
 ```
 
