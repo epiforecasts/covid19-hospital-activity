@@ -1,3 +1,49 @@
+
+
+# ARIMA with xreg wrapper -------------------------------------------------
+
+## - based on EpiSoon::forecast_model, with some modifications
+
+forecast_model_xreg <- function(y = NULL, samples = NULL, horizon = NULL,
+                                model_params = NULL, forecast_params = NULL,
+                                ...) {
+  
+  # check_suggests("forecast")
+  
+  # convert to timeseries object
+  timeseries <- stats::ts(y)
+  
+  # fit and forecast
+  fit <- suppressMessages(
+    suppressWarnings(
+      do.call(forecast::auto.arima,
+              c(list(y = timeseries), model_params))
+    )
+  )
+  prediction <- do.call(forecast::forecast,
+                        c(list(object = fit, h = horizon), forecast_params))
+  
+  ## Extract samples and tidy format
+  sample_from_model <- prediction
+  
+  if (samples == 1) {
+    sample_from_model <- data.frame(t(as.data.frame(sample_from_model$mean)))
+    rownames(sample_from_model) <- NULL
+  }else{
+    mean <- as.numeric(prediction$mean)
+    upper <- prediction$upper[, ncol(prediction$upper)]
+    lower <-  prediction$lower[, ncol(prediction$lower)]
+    sd <- (upper - lower) / 3.92
+    sample_from_model <- purrr::map2(mean, sd,
+                                     ~ rnorm(samples, mean = .x,  sd = .y))
+    
+    sample_from_model <- suppressMessages(dplyr::bind_cols(sample_from_model))
+  }
+  
+  return(sample_from_model)
+}
+
+
 # Fit time series model(s) ------------------------------------------------
 
 # Fit single time series model based on `forecast` and `forecastHybrid` wrappers in `EpiSoon`
@@ -55,15 +101,20 @@ timeseries_samples <- function(data = NULL, yvar = NULL, xvars = NULL,
       
       forecast <- data %>%
         dplyr::group_by(id) %>%
-        dplyr::group_modify(~ EpiSoon::forecast_model(y = .x %>% filter(!forecast) %>% pull(yvar),
-                                                      xreg =
-                                                        as.matrix(.x %>%
-                                                                    dplyr::filter(!forecast) %>%
-                                                                    dplyr::select(xvars)
-                                                        ),
-                                                      samples = samples, 
-                                                      horizon = horizon,
-                                                      model = forecast::auto.arima)) %>%
+        dplyr::group_modify( ~ forecast_model_xreg(y = .x %>% filter(!forecast) %>% pull(yvar),
+                                                samples = samples, 
+                                                horizon = horizon,
+                                                model_params = list(
+                                                  xreg = as.matrix(.x %>%
+                                                                     filter(!forecast) %>%
+                                                                     select(xvars))
+                                                  ),
+                                                forecast_params = list(
+                                                  xreg = as.matrix(.x %>%
+                                                                     filter(forecast) %>%
+                                                                     select(xvars))
+                                                  )
+                                                )) %>%
         dplyr::mutate(sample = rep(1:samples)) %>%
         tidyr::pivot_longer(cols = starts_with("..."), names_to = "horizon") %>%
         dplyr::mutate(horizon = as.numeric(str_remove_all(horizon, "...")) - 1,

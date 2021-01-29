@@ -1,15 +1,19 @@
 library(tidyverse)
 library(covid19.nhs.data)
 library(covidregionaldata)
+library(future, quietly = TRUE)
 
 source(here::here("R", "timeseries_fns.R"))
+source(here::here("R", "utils.R"))
 
+future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
+options(mc.cores = 4)
 
 # Forecast dates ----------------------------------------------------------
 
 # Date(s) to forecast from (defined as first day of forecast)
 
-forecast_dates <- as.Date("2021-01-01")
+forecast_date <- as.Date("2021-01-01")
 
 
 # Load raw data -----------------------------------------------------------
@@ -49,6 +53,7 @@ source(here::here("forecasts", "admissions_ts_ensemble.R"))
 
 
 ## EpiNow2 forecast_secondary
+source(here::here("forecasts", "admissions_secondary.R"))
 
 
 
