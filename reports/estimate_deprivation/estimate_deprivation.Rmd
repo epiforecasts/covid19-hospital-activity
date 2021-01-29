@@ -1,0 +1,137 @@
+---
+title: "Estimating deprivation by Trust"
+author: "Sophie Meakin"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r load data}
+
+raw_data <- readr::read_csv(file = here::here("data", "raw", "deprivation.csv")) %>%
+  janitor::clean_names()
+
+nhs_regions <- covid19.nhs.data::download_trust_data() %>%
+  dplyr::select(nhs_region, trust_code = org_code) %>%
+  unique()
+
+```
+
+# Summary
+
+We can describe the deprivation with a number of measures:
+
+* `imd_average_score`: the average IMD score by LTLA (lower score = lower deprivation)
+* `imd_2019_extent`: the proportion of the population who live in the most deprived 30% of the country
+
+# Methods
+
+## By `imd_average_score`
+
+```{r by average score}
+
+by_score <- raw_data %>%
+  dplyr::select(contains("local_authority"), imd_average_score) %>%
+  dplyr::rename(ltla_code = local_authority_district_code_2019,
+                ltla_name = local_authority_district_name_2019,
+                imd_ltla = imd_average_score) %>% 
+  dplyr::left_join(covid19.nhs.data::trust_ltla_mapping %>%
+                     covid19.nhs.data::get_names(), by = c("ltla_code" = "geo_code")) %>%
+  dplyr::mutate(imd_trust = imd_ltla * p_geo) %>%
+  dplyr::group_by(trust_code, trust_name) %>%
+  dplyr::summarise(imd_trust = mean(imd_ltla, na.rm = TRUE),
+                   .groups = "drop") %>%
+  dplyr::filter(!is.na(trust_code)) %>%
+  dplyr::arrange(-imd_trust) %>%
+  dplyr::mutate(imd_quintile = case_when(imd_trust < quantile(imd_trust, 0.2) ~ 1,
+                                         imd_trust < quantile(imd_trust, 0.4) ~ 2,
+                                         imd_trust < quantile(imd_trust, 0.6) ~ 3,
+                                         imd_trust < quantile(imd_trust, 0.8) ~ 4,
+                                         TRUE ~ 5))
+
+```
+
+
+## By `imd_2019_extent`
+
+```{r by average extent}
+
+by_extent <- raw_data %>%
+  dplyr::select(contains("local_authority"), imd_2019_extent) %>%
+  dplyr::rename(ltla_code = local_authority_district_code_2019,
+                ltla_name = local_authority_district_name_2019,
+                extent_ltla = imd_2019_extent) %>% 
+  dplyr::left_join(covid19.nhs.data::trust_ltla_mapping %>%
+                     covid19.nhs.data::get_names(), by = c("ltla_code" = "geo_code")) %>%
+  dplyr::mutate(extent_trust = extent_ltla * p_geo) %>%
+  dplyr::group_by(trust_code, trust_name) %>%
+  dplyr::summarise(extent_trust = mean(extent_ltla, na.rm = TRUE),
+                   .groups = "drop") %>%
+  dplyr::filter(!is.na(trust_code)) %>%
+  dplyr::arrange(-extent_trust) %>%
+  dplyr::mutate(extent_quintile = case_when(extent_trust < quantile(extent_trust, 0.2) ~ 1,
+                                            extent_trust < quantile(extent_trust, 0.4) ~ 2,
+                                            extent_trust < quantile(extent_trust, 0.6) ~ 3,
+                                            extent_trust < quantile(extent_trust, 0.8) ~ 4,
+                                            TRUE ~ 5))
+
+```
+
+
+## Combined results
+
+```{r estimated deprivation}
+
+by_joint <- by_score %>%
+  dplyr::left_join(by_extent, by = c("trust_code", "trust_name")) %>%
+  dplyr::left_join(nhs_regions, by = "trust_code")
+
+out <- by_joint %>%
+  dplyr::select(nhs_region, trust_code, trust_name, imd_quintile, extent_quintile)
+
+saveRDS(object = out, file = here::here("data", "trust", "estimate_deprivation.rds"))
+
+```
+
+
+# Evaluation
+
+* Estimated deprivation by Trust varies by NHS region (due to regional variation in deprivation)
+* Estimating deprivation quintile by IMD score or extent gives very similar results
+
+```{r compare}
+
+by_joint %>%
+  ggplot(aes(x = imd_quintile, fill = nhs_region)) +
+  geom_histogram(binwidth = 1) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Average IMD quintile", y = "Count",
+       fill = "NHS region") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+by_joint %>%
+  ggplot(aes(x = extent_quintile, fill = nhs_region)) +
+  geom_histogram(binwidth = 1) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Average extent quintile", y = "Count",
+       fill = "NHS region") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+cor(by_joint$imd_quintile, by_joint$extent_quintile)
+
+by_joint %>% 
+  ggplot(aes(x = imd_quintile, y = extent_quintile, col = nhs_region)) +
+  geom_point(size = 2, position = position_jitter(width = 0.2, height = 0.2)) +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "Average IMD quintile", y = "Average extent quintile",
+       col = "NHS region") +
+  theme_bw()
+
+```

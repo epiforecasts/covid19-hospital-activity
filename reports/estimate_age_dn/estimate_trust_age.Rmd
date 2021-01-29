@@ -1,0 +1,74 @@
+---
+title: "Estimating the age distribution by Trust"
+author: "Sophie Meakin"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+```
+
+```{r load data}
+
+raw_age <- readxl::read_xls(path = here::here("data", "raw", "ukmidyearestimates20192020ladcodes-2.xls"),
+                            sheet = "MYE2 - Persons")
+
+colnames(raw_age) <- raw_age[4,]
+
+raw_age <- raw_age[5:nrow(raw_age),]
+
+raw_age <- raw_age %>%
+  janitor::clean_names()
+
+```
+
+```{r age by ltla}
+
+age_trust <- raw_age %>%
+  dplyr::filter(!(geography1 %in% c("Country", "Region", "County", "Metropolitan County")),
+                stringr::str_sub(code, 1, 1) == "E") %>% 
+  dplyr::select(-all_ages) %>%
+  dplyr::mutate_at(vars(contains("x")), as.integer) %>%
+  tidyr::pivot_longer(cols = -c(code, name, geography1), names_to = "age") %>%
+  dplyr::mutate(age = as.integer(str_remove(age, "x"))) %>%
+  dplyr::left_join(covid19.nhs.data::trust_ltla_mapping, by = c("code" = "geo_code")) %>%
+  dplyr::mutate(value_trust = value * p_geo) %>%
+  dplyr::group_by(trust_code, age) %>%
+  dplyr::summarise(value_trust = sum(value_trust, na.rm = TRUE)) %>%
+  dplyr::mutate(p_trust = value_trust/sum(value_trust))
+
+```
+
+```{r}
+
+mean_age <- age_trust %>%
+  dplyr::group_by(trust_code) %>%
+  dplyr::summarise(mean_age = sum(age * p_trust, na.rm = TRUE))
+
+over_65 <- age_trust %>%
+  dplyr::filter(age >= 65) %>%
+  dplyr::group_by(trust_code) %>%
+  dplyr::summarise(p_over65 = sum(p_trust, na.rm = TRUE))
+
+over_85 <- age_trust %>%
+  dplyr::filter(age >= 85) %>%
+  dplyr::group_by(trust_code) %>%
+  dplyr::summarise(p_over85 = sum(p_trust, na.rm = TRUE))
+
+estimate_age <- mean_age %>%
+  dplyr::left_join(over_65, by = "trust_code") %>%
+  dplyr::left_join(over_85, by = "trust_code") %>%
+  dplyr::left_join(covid19.nhs.data::trust_ltla_mapping %>%
+                     covid19.nhs.data::get_names() %>%
+                     dplyr::select(trust_code, trust_name) %>%
+                     unique(),
+                   by = "trust_code") %>%
+  dplyr::select(trust_code, trust_name, mean_age, p_over65, p_over85)
+
+saveRDS(object = estimate_age, file = here::here("data", "trust", "estimate_age.rds"))
+
+
+```
