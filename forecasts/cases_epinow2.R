@@ -2,17 +2,17 @@
 library(tidyverse)
 library(EpiNow2)
 
-
 # Define forecast dates ---------------------------------------------------
 
-forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02") + 56,
+forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02") + 56 + 7,
                                         by = "week",
-                                        length = 12))
+                                        length = 11))
 
 
 # Download raw UTLA-level case data ---------------------------------------
 
-raw_case <- covidregionaldata::get_regional_data("UK", include_level_2_regions = TRUE)
+# raw_case <- covidregionaldata::get_regional_data("UK", include_level_2_regions = TRUE)
+raw_case <- readRDS(file = here::here("data", "raw", "uk_utla_case.rds"))
 
 
 
@@ -28,9 +28,8 @@ reported_cases <- raw_case %>%
 
 # Set up ------------------------------------------------------------------
 
-options(mc.cores = 12)
-EpiNow2::setup_future(reported_cases = reported_cases,
-                      strategies = c("multiprocess", "multiprocess"))
+n_cores <- EpiNow2::setup_future(reported_cases = reported_cases)
+options(mc.cores = n_cores)
 
 ## COVID-19 distributions and delays
 generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
@@ -72,7 +71,7 @@ for(forecast_date in forecast_dates){
     dplyr::mutate(across(where(is.double), round))
   
   file_name <- paste0("epinow_utla_", forecast_date, ".rds")
-  saveRDS(object = out_reported, file = here::here("data", "utla_case_forecast"))
+  saveRDS(object = out_reported, file = here::here("data", "utla_case_forecast", file_name))
   
 }
 
