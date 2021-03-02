@@ -1,5 +1,72 @@
 
 
+# Seasonal-naive model wrapper --------------------------------------------
+
+forecast_snaive <- function(y = NULL, horizon = NULL){
+  
+  f <- forecast::snaive(y = y,
+                        h = horizon,
+                        drift = TRUE,
+                        level = c(50, 90))
+  out <- tibble::tibble(q_0.5 = as.double(f$mean),
+                        q_0.25 = f$lower[,1],
+                        q_0.05 = f$lower[,2],
+                        q_0.75 = f$upper[,1],
+                        q_0.95 = f$upper[,2]) %>%
+    dplyr::mutate(horizon = 1:horizon) %>%
+    dplyr::mutate_at(vars(contains("q_")), ~ ifelse(.x < 0, 0, .x)) %>%
+    tidyr::pivot_longer(cols = c(contains("q_")), names_to = "quantile") %>%
+    dplyr::mutate(quantile = as.double(stringr::str_remove(quantile, "q_")),
+                  quantile_label = paste0(ifelse(quantile <= 0.5, "lower", "upper"), "_", abs(1 - 2 * quantile) * 100))
+  
+  out <- out %>%
+    dplyr::bind_rows(out %>%
+                       dplyr::filter(quantile_label == "lower_0") %>%
+                       dplyr::mutate(quantile_label = "upper_0"))
+  
+  return(out)
+  
+}
+
+
+
+# Full implementation of snaive -------------------------------------------
+
+full_snaive <- function(data = NULL, yvar = NULL,
+                        horizon = 14, samples = 1000, train_from = NULL, forecast_from = NULL){
+  
+  data <- data %>%
+    dplyr::mutate(forecast = date > forecast_from) %>%
+    # na.omit() %>%
+    dplyr::filter(date > as.Date(train_from),
+                  date <= as.Date(forecast_from) + horizon)
+  
+  snaive_summary <- data %>%
+    dplyr::group_by(id) %>%
+    dplyr::group_modify( ~ forecast_snaive(y = .x %>% filter(!forecast) %>% pull(yvar),
+                                           horizon = 14)) %>%
+    dplyr::mutate(model = "snaive",
+                  forecast_from = as.Date(forecast_from),
+                  date_horizon = forecast_from + horizon)
+  
+  snaive_samples <- snaive_summary %>%
+    dplyr::filter(quantile_label %in% c("upper_0", "upper_90")) %>%
+    dplyr::select(model, forecast_from, id, horizon, quantile, value) %>%
+    tidyr::pivot_wider(id_cols = -c(quantile, value), names_from = quantile) %>%
+    dplyr::rename(mean = `0.5`) %>%
+    dplyr::mutate(sd = (`0.95` - mean)/qnorm(0.95)) %>%
+    dplyr::group_by(model, forecast_from, id, horizon) %>%
+    dplyr::group_modify(.f = ~ { out <- tibble::tibble(sample = 1:samples,
+                                                       value = rnorm(n = samples, mean = .x$mean, sd = .x$sd))}
+    ) %>%
+    dplyr::mutate(value = ifelse(value < 0, 0, value))
+  
+  return(list(samples = snaive_samples, summary = snaive_summary))
+  
+}
+
+
+
 # ARIMA with xreg wrapper -------------------------------------------------
 
 ## - based on EpiSoon::forecast_model, with some modifications
@@ -64,7 +131,8 @@ timeseries_samples <- function(data = NULL, yvar = NULL, xvars = NULL,
   data <- data %>%
     dplyr::mutate(forecast = date > forecast_from) %>%
     # na.omit() %>%
-    dplyr::filter(date >= as.Date(train_from)) 
+    dplyr::filter(date > as.Date(train_from),
+                  date <= as.Date(forecast_from) + horizon) 
   
   if(stringr::str_length(models) > 1){
     
@@ -137,6 +205,20 @@ timeseries_samples <- function(data = NULL, yvar = NULL, xvars = NULL,
                     value = ifelse(value < 0, 0, value),
                     forecast_from = forecast_from)
     
+  } else if(models == "t") {
+    
+    forecast <- data %>%
+      dplyr::group_by(id) %>%
+      dplyr::group_modify(~ EpiSoon::forecast_model(y = .x %>% filter(!forecast) %>% pull(yvar),
+                                                    samples = samples, 
+                                                    horizon = horizon,
+                                                    model = forecast::tbats)) %>%
+      dplyr::mutate(sample = rep(1:samples)) %>%
+      tidyr::pivot_longer(cols = starts_with("..."), names_to = "horizon") %>%
+      dplyr::mutate(horizon = as.numeric(str_remove_all(horizon, "...")) - 1,
+                    value = ifelse(value < 0, 0, value),
+                    forecast_from = forecast_from)
+    
   } else {
     
     message("Check models used.")
@@ -159,7 +241,7 @@ timeseries_samples <- function(data = NULL, yvar = NULL, xvars = NULL,
 timeseries_summary <- function(samples = NULL, quantiles = c(0.05, 0.25, 0.5, 0.75, 0.95)){
   
   out <- samples %>%
-    group_by(id, horizon, forecast_from) %>%
+    group_by(model, id, horizon, forecast_from) %>%
     dplyr::group_modify( ~ quantile(.x$value, probs = quantiles, na.rm = T) %>%
                            tibble::enframe(name = "quantile", value = "value")) %>%
     dplyr::mutate(date_horizon = forecast_from + horizon,
@@ -168,7 +250,7 @@ timeseries_summary <- function(samples = NULL, quantiles = c(0.05, 0.25, 0.5, 0.
                   quantile_range = abs(1 - 2 * quantile) * 100,
                   quantile_boundary = ifelse(quantile <= 0.5, "lower", "upper"),
                   quantile_label = paste0(quantile_boundary, "_", quantile_range)) %>%
-    dplyr::select(forecast_from, id, horizon, date_horizon, quantile, quantile_label, value)
+    dplyr::select(model, forecast_from, id, horizon, date_horizon, quantile, quantile_label, value)
   
   out <- out %>%
     dplyr::bind_rows(out %>%
