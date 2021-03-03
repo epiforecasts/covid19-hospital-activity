@@ -1,14 +1,22 @@
+library(tidyverse)
+library(future, quietly = TRUE)
+
+source(here::here("R", "timeseries_fns.R"))
+source(here::here("R", "utils.R"))
 
 devtools::source_gist("https://gist.github.com/seabbs/4dad3958ca8d83daca8f02b143d152e6")
 
-plan(multisession)
+future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
+
+offline_hosp <- readRDS(file = here::here("data", "raw", "offline_hosp.rds"))
+offline_mapping <- readRDS(file = here::here("data", "raw", "offline_mapping.rds"))
 
 for(forecast_date in forecast_dates){
   
   forecast_date <- as.Date(forecast_date)
   
   # Reshape observed data
-  df_observed <- hosp %>%
+  df_observed <- offline_hosp %>%
     dplyr::filter(date >= forecast_date - 42,
                   date <= forecast_date) %>%
     dplyr::select(region = id, date, primary = new_case, secondary = all_adm) %>%
@@ -22,7 +30,8 @@ for(forecast_date in forecast_dates){
   case_forecast_samples <- epinow_samples(df = case_forecast_summary)
 
   df_forecast <- case_forecast_samples %>%
-    dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
+    dplyr::left_join(offline_mapping, by = c("id" = "geo_code")) %>%
+    # dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
     dplyr::mutate(trust_value = p_geo*value) %>%
     dplyr::group_by(forecast_from, trust_code, date, sample) %>%
     dplyr::summarise(value = round(sum(trust_value, na.rm = TRUE)),
