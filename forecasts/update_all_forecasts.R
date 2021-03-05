@@ -4,6 +4,7 @@ library(covidregionaldata)
 library(future, quietly = TRUE)
 
 source(here::here("R", "timeseries_fns.R"))
+source(here::here("R", "forecast_fns.R"))
 source(here::here("R", "utils.R"))
 
 future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
@@ -57,7 +58,7 @@ hosp <- raw_hosp %>%
                 id != "RPY") %>%
   dplyr::ungroup()
 
-
+saveRDS(object = covid19.nhs.data::utla_names, file = here::here("data", "raw", "offline_utla_names.rds"))
 
 # Update all forecasts ----------------------------------------------------
 
@@ -72,14 +73,14 @@ source(here::here("forecasts", "forecast_tbats.R"))
 source(here::here("forecasts", "forecast_tsensemble.R"))
 
 
-## Regression + ARIMA errors
-source(here::here("forecasts", "forecast_admissions_arima_xreg.R"))
-source(here::here("forecasts", "forecast_occupancy_arima_xreg.R"))
+## Regression + ARIMA errors (cases-admissions/admissions-occupancy)
+source(here::here("forecasts", "forecast_arima_xreg_admissions.R"))
+source(here::here("forecasts", "forecast_arima_xreg_occupancy.R"))
 
 
-## EpiNow2 forecast_secondary
-source(here::here("forecasts", "forecast_admissions_secondary.R"))
-source(here::here("forecasts", "forecast_occupancy_secondary.R"))
+## Convolution (cases-admissions/admissions-occupancy)
+source(here::here("forecasts", "forecast_convolution_admissions.R"))
+source(here::here("forecasts", "forecast_convolution_occupancy.R"))
 
 
 
