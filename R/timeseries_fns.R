@@ -1,6 +1,10 @@
 
 
 # Seasonal-naive model wrapper --------------------------------------------
+## Based around forecast::snaive with some modifications
+## Used internally in timeseries_samples
+
+## Returns forecast summary (median, and 50% and 90% CIs)
 
 forecast_snaive <- function(y = NULL, horizon = NULL){
   
@@ -31,6 +35,10 @@ forecast_snaive <- function(y = NULL, horizon = NULL){
 
 
 # Full implementation of snaive -------------------------------------------
+
+## Used internally in timeseries_samples
+
+## Returns snaive forecast samples and summary
 
 full_snaive <- function(data = NULL, yvar = NULL,
                         horizon = 14, samples = 1000, train_from = NULL, forecast_from = NULL){
@@ -69,7 +77,10 @@ full_snaive <- function(data = NULL, yvar = NULL,
 
 # ARIMA with xreg wrapper -------------------------------------------------
 
-## - based on EpiSoon::forecast_model, with some modifications
+## Based on EpiSoon::forecast_model, with some modifications
+## Used internally in timeseries_samples
+
+## Returns ARIMA + xreg forecast samples
 
 forecast_model_xreg <- function(y = NULL, samples = NULL, horizon = NULL,
                                 model_params = NULL, forecast_params = NULL,
@@ -112,18 +123,22 @@ forecast_model_xreg <- function(y = NULL, samples = NULL, horizon = NULL,
 
 
 # Fit time series model(s) ------------------------------------------------
-
-# Fit single time series model based on `forecast` and `forecastHybrid` wrappers in `EpiSoon`
+## Based on `forecast` and `forecastHybrid` wrappers in `EpiSoon`
+## Fits models:
+##  Autoregressive time series: ARIMA (models = "a"), ETS ("e"), TBATS ("t"), naive ("z")
+##  Dynamic regression: ARIMA + xreg (models = "a", xreg = c("predictor1", "predictor2"))
 
 # Parameters:
 #   data (data.frame): columns "id", "date", yvar, xvars
 #   yvar (string): name of column to forecast
-#   xvars (string): name(s) of predictors (used in ARIMA model only)
-#   horizon (integer): length of horizon (days) for forecasting
-#   samples (integer): number of samples to take for timeseries model(s)
+#   xvars (string): name(s) of predictors (used in dynamic regression model only)
+#   horizon (integer): length of horizon (days) for forecasting. Default value 14
+#   samples (integer): number of samples to take for timeseries model(s). Default value 1000
 #   train_from (date or string "YYYY-MM-DD"): date to begin training window from
 #   forecast_from (date or string "YYYY-MM-DD"): date to begin forecasting from
 #   models (string): model(s) to forecast with; if multiple models are given, an mean-weighted ensemble forecast is returned
+
+## Returns forecast samples
 
 timeseries_samples <- function(data = NULL, yvar = NULL, xvars = NULL,
                                horizon = 14, samples = 1000, train_from = NULL, forecast_from = NULL, models = NULL){
@@ -232,31 +247,4 @@ timeseries_samples <- function(data = NULL, yvar = NULL, xvars = NULL,
 
 
 
-# Summarise timeseries forecast -------------------------------------------
 
-# Parameters:
-#   samples : output from update_timeseries_forecast
-#   quantiles : vector of quantiles to output
-
-timeseries_summary <- function(samples = NULL, quantiles = c(0.05, 0.25, 0.5, 0.75, 0.95)){
-  
-  out <- samples %>%
-    group_by(model, id, horizon, forecast_from) %>%
-    dplyr::group_modify( ~ quantile(.x$value, probs = quantiles, na.rm = T) %>%
-                           tibble::enframe(name = "quantile", value = "value")) %>%
-    dplyr::mutate(date_horizon = forecast_from + horizon,
-                  value = round(value),
-                  quantile = as.numeric(str_remove(quantile, "%"))/100,
-                  quantile_range = abs(1 - 2 * quantile) * 100,
-                  quantile_boundary = ifelse(quantile <= 0.5, "lower", "upper"),
-                  quantile_label = paste0(quantile_boundary, "_", quantile_range)) %>%
-    dplyr::select(model, forecast_from, id, horizon, date_horizon, quantile, quantile_label, value)
-  
-  out <- out %>%
-    dplyr::bind_rows(out %>%
-                       dplyr::filter(quantile_label == "lower_0") %>%
-                       dplyr::mutate(quantile_label = "upper_0"))
-  
-  return(out)
-  
-}
