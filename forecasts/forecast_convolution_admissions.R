@@ -1,12 +1,5 @@
-library(tidyverse)
-library(future, quietly = TRUE)
-
-source(here::here("R", "timeseries_fns.R"))
-source(here::here("R", "utils.R"))
 
 devtools::source_gist("https://gist.github.com/seabbs/4dad3958ca8d83daca8f02b143d152e6")
-
-future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
 
 offline_hosp <- readRDS(file = here::here("data", "raw", "offline_hosp.rds"))
 offline_mapping <- readRDS(file = here::here("data", "raw", "offline_mapping.rds"))
@@ -61,7 +54,7 @@ for(forecast_date in forecast_dates){
                   model = "epinow2_secondary") %>%
     dplyr::select(id = region, sample, horizon, value, forecast_from, model)
   
-  secondary_summary <- timeseries_summary(samples = secondary_samples)
+  secondary_summary <- forecast_summary(samples = secondary_samples)
   
   
   # Save results

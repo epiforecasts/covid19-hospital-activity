@@ -41,7 +41,7 @@ for(forecast_date in forecast_dates){
                                         horizon = 14, samples = 1000, models = "a",
                                         train_from = forecast_date - 42, forecast_from = forecast_date) %>%
                        dplyr::mutate(model = "arima_case0_forecast_roll"))
-  arima_case0_summary <- timeseries_summary(samples = arima_case0_samples)
+  arima_case0_summary <- forecast_summary(samples = arima_case0_samples)
   
   forecast_name <- paste0("admissions_arimacase0_", forecast_date, ".rds")
   saveRDS(object = arima_case0_samples, file = here::here("forecasts", "samples", forecast_name))
@@ -70,7 +70,7 @@ for(forecast_date in forecast_dates){
                                         horizon = 14, samples = 1000, models = "a",
                                         train_from = forecast_date - 42, forecast_from = forecast_date) %>%
                        dplyr::mutate(model = "arima_case4_forecast_roll"))
-  arima_case4_summary <- timeseries_summary(samples = arima_case4_samples)
+  arima_case4_summary <- forecast_summary(samples = arima_case4_samples)
   
   forecast_name <- paste0("admissions_arimacase4_", forecast_date, ".rds")
   saveRDS(object = arima_case4_samples, file = here::here("forecasts", "samples", forecast_name))
@@ -99,7 +99,7 @@ for(forecast_date in forecast_dates){
                                         horizon = 14, samples = 1000, models = "a",
                                         train_from = forecast_date - 42, forecast_from = forecast_date) %>%
                        dplyr::mutate(model = "arima_case7_forecast_roll"))
-  arima_case7_summary <- timeseries_summary(samples = arima_case7_samples)
+  arima_case7_summary <- forecast_summary(samples = arima_case7_samples)
   
   forecast_name <- paste0("admissions_arimacase7_", forecast_date, ".rds")
   saveRDS(object = arima_case7_samples, file = here::here("forecasts", "samples", forecast_name))

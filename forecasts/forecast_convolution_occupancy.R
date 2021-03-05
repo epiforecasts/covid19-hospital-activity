@@ -2,8 +2,6 @@
 devtools::source_gist("https://gist.github.com/seabbs/4dad3958ca8d83daca8f02b143d152e6")
 samples_dir <- here::here("forecasts", "samples")
 
-plan(multisession)
-
 for(forecast_date in forecast_dates){
   
   forecast_date <- as.Date(forecast_date)
@@ -45,7 +43,7 @@ for(forecast_date in forecast_dates){
                   model = "epinow2_secondary_ensemble") %>%
     dplyr::select(id = region, sample, horizon, value, forecast_from, model)
   
-  secondary_ensemble_summary <- timeseries_summary(samples = secondary_ensemble_samples)
+  secondary_ensemble_summary <- forecast_summary(samples = secondary_ensemble_samples)
   
   
   # ARIMA + cases forecast
@@ -77,7 +75,7 @@ for(forecast_date in forecast_dates){
                   model = "epinow2_secondary_arima") %>%
     dplyr::select(id = region, sample, horizon, value, forecast_from, model)
   
-  secondary_arima_summary <- timeseries_summary(samples = secondary_arima_samples)
+  secondary_arima_summary <- forecast_summary(samples = secondary_arima_samples)
   
    
   

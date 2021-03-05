@@ -9,7 +9,7 @@ for(forecast_date in forecast_dates){
   ets_samples <- timeseries_samples(data = hosp, yvar = "all_adm", models = "e", horizon = 14, samples = 1000,
                                     train_from = forecast_date - 42, forecast_from = forecast_date) %>%
     dplyr::mutate(model = "ets")
-  ets_summary <- timeseries_summary(samples = ets_samples) 
+  ets_summary <- forecast_summary(samples = ets_samples) 
   
   forecast_name <- paste0("admissions_ets_", forecast_date, ".rds")
   saveRDS(object = ets_samples, file = here::here("forecasts", "samples", forecast_name))
@@ -19,7 +19,7 @@ for(forecast_date in forecast_dates){
   ets_samples <- timeseries_samples(data = hosp, yvar = "bed_occ", models = "e", horizon = 14, samples = 1000,
                                     train_from = forecast_date - 42, forecast_from = forecast_date) %>%
     dplyr::mutate(model = "ets")
-  ets_summary <- timeseries_summary(samples = ets_samples) 
+  ets_summary <- forecast_summary(samples = ets_samples) 
   
   forecast_name <- paste0("occupancy_ets_", forecast_date, ".rds")
   saveRDS(object = ets_samples, file = here::here("forecasts", "samples", forecast_name))

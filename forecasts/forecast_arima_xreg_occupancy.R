@@ -21,7 +21,7 @@ for(forecast_date in forecast_dates){
     #                                     horizon = 14, samples = 1000, models = "a",
     #                                     train_from = forecast_date - 42, forecast_from = forecast_date) %>%
     #                    dplyr::mutate(model = "arima_adm0_forecast_roll"))
-  arima_adm0_summary <- timeseries_summary(samples = arima_adm0_samples)
+  arima_adm0_summary <- forecast_summary(samples = arima_adm0_samples)
   
   forecast_name <- paste0("occupancy_arima_adm0_", forecast_date, ".rds")
   saveRDS(object = arima_adm0_samples, file = here::here("forecasts", "samples", forecast_name))
