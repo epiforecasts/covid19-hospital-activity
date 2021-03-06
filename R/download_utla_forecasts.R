@@ -29,8 +29,7 @@ saveRDS(object = utla_forecast,
 
 # Download past forecasts (if any are missed) -----------------------------
 
-commit_ids <- c("69bb0150f3958d652300a5363f41cb240a565030",
-                "c72b41c681238805fe85095ad7d556cc9660b102")
+commit_ids <- c("ececce3607ed313f991eb61b4c221cff4d767996")
 
 for(c in commit_ids){
   
