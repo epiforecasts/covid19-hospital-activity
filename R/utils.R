@@ -21,7 +21,7 @@ epinow_samples <- function(df = NULL, n = 1000){
     
     df <- df %>%
       dplyr::mutate(region = ifelse(grepl("Cornwall", region), "Cornwall", region)) %>%
-      dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
+      dplyr::left_join(readRDS(here::here("data", "raw", "offline_utla_names.rds")), by = c("region" = "geo_name")) %>%
       dplyr::rename(id = geo_code) %>%
       dplyr::filter(!is.na(id))
     

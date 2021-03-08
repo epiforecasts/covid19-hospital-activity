@@ -4,9 +4,11 @@ library(EpiNow2)
 
 # Define forecast dates ---------------------------------------------------
 
-forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02") + 56 + 7,
-                                        by = "week",
-                                        length = 11))
+# forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02") + 56 + 7,
+#                                         by = "week",
+#                                         length = 11))
+
+forecast_dates <- "2021-01-31"
 
 
 # Download raw UTLA-level case data ---------------------------------------
