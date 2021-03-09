@@ -31,8 +31,8 @@ for(forecast_date in forecast_dates){
   dt_forecast <- data.table::data.table(df_forecast)
   
   ## Run regional_secondary with observed cases
-  convolution_forecast_observed <- regional_secondary(reports = dt_observed %>% filter(region == "R0A"),
-                                                      case_forecast = dt_forecast %>% filter(region == "R0A"),
+  convolution_forecast_observed <- regional_secondary(reports = dt_observed,
+                                                      case_forecast = dt_forecast,
                                                       secondary = secondary_opts(type = "incidence"),
                                                       obs = EpiNow2::obs_opts(week_effect = FALSE,
                                                                               scale = list(mean = 0.2, sd = 0.1)),

@@ -14,7 +14,7 @@ options(mc.cores = 4)
 
 # Date(s) to forecast from (defined as first day of forecast)
 
-forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02")+63, by = "week", length = 17))
+forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02")+63, by = "week", length = 18))
 
 
 # Load raw data -----------------------------------------------------------
