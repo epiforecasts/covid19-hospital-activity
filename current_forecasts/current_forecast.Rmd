@@ -1,0 +1,152 @@
+---
+title: "Trust-level Covid-19 admissions forecasts"
+author: "Sophie Meakin"
+date: "`r format.Date(Sys.Date(), format = '%d %B %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+source(here::here("R", "load_data.R"))
+source(here::here("R", "plot_forecasts.R"))
+
+today_date <- as.Date("2021-03-19")
+forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
+
+```
+
+```{r observed}
+
+admissions <- load_hospital_data(keep_data = c("all_adm", "new_adm"))
+
+plot_trusts <- admissions %>%
+  dplyr::filter(date > forecast_date - 28) %>%
+  dplyr::group_by(id) %>%
+  dplyr::summarise(total_adm = sum(new_adm, na.rm = TRUE)) %>%
+  dplyr::arrange(-total_adm) %>%
+  dplyr::slice_head(n = 25) %>%
+  dplyr::pull(id)
+
+```
+
+# Summary
+
+The current forecast date is **`r format.Date(forecast_date, format = "%d %B")`**.
+
+The forecasting model is an unweighted ensemble of three individual models:
+
+1. unweighted time series ensemble model (autoregressive ARIMA, ETS, TBATS and naive models)
+2. regression + 7-day-lagged cases (cases mapped from UTLA to Trust using Trust-UTLA mapping in `covid19.nhs.data`)
+3. convolution from cases to admissions (scaled; cases mapped to Trusts as above)
+
+All models are trained on the last 6 weeks of data (from `r format.Date(forecast_date - 42, format = "%d %B")`) and forecasts are made for the following 14 days. 
+
+
+# Current forecast
+
+```{r load forecasts}
+
+file_name <- here::here("current_forecasts", "admissions_trust", "admissions_latest.rds")
+
+current_forecast <- readRDS(file = file_name) %>%
+  dplyr::select(-quantile) %>%
+  tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label) %>%
+  dplyr::select(forecast_from, model, id, date = date_horizon, horizon,
+                median = lower_0, lower_90, lower_50, upper_50, upper_90)
+
+```
+
+```{r plot current forecasts, fig.width=16, fig.height=9}
+
+plot_forecast_ribbons(observed = admissions %>%
+                       dplyr::filter(date >= as.Date("2021-02-01")) %>%
+                       dplyr::select(id, date, observed = all_adm),
+                     forecast = current_forecast,
+                     trusts = plot_trusts,
+                     models = "mean_ensemble",
+                     facet_models = FALSE) +
+  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
+  labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
+       subtitle = "Top-25 Trusts with highest admissions in last 28 days") +
+  theme(legend.position = "none")
+
+```
+
+```{r table current forecats}
+
+admissions %>%
+  dplyr::filter(date > forecast_date - 7) %>%
+  dplyr::select(id, date, adm = all_adm) %>%
+  dplyr::bind_rows(current_forecast %>%
+                     dplyr::filter(model == "mean_ensemble") %>%
+                     dplyr::select(id, date, adm = median, upper_50, upper_90)) %>%
+  dplyr::arrange(id, date) %>%
+  dplyr::mutate(week = lubridate::floor_date(date - 1, unit = "week", week_start = 7) + 7,
+                week = case_when(week == forecast_date ~ "current_week",
+                                 week == forecast_date + 7 ~ "one_week",
+                                 week == forecast_date + 14 ~ "two_weeks"),
+                week = ordered(week, c("current_week", "one_week", "two_weeks"))) %>%
+  dplyr::group_by(id, week) %>%
+  dplyr::summarise(adm = sum(adm, na.rm = TRUE)) %>%
+  tidyr::pivot_wider(id_cols = id, names_from = week, values_from = adm) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  dplyr::arrange(id) %>%
+  dplyr::select(ID = id, Name = trust_name, `Last week` = current_week, `One-week ahead forecast` = one_week, `Two-weeks ahead forecast` = two_weeks) %>%
+  kableExtra::kbl() %>%
+  kableExtra::kable_styling()
+
+```
+
+
+# Past forecasts
+
+```{r load past forecasts}
+
+file_dir <- here::here("current_forecasts", "admissions_trust")
+file_names <- list.files(file_dir)[which(!grepl("latest", list.files(file_dir)))]
+
+all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
+  
+  out <- readRDS(file = here::here(file_dir, .x))
+  return(out)
+  
+}) %>%
+  dplyr::bind_rows() %>%
+  dplyr::select(-quantile) %>%
+  tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label) %>%
+  dplyr::select(forecast_from, model, id, date = date_horizon, horizon,
+                median = lower_0, lower_90, lower_50, upper_50, upper_90)
+
+```
+
+```{r plot past forecasts, fig.width=16, fig.height=9}
+
+plot_forecast_bars(observed = admissions %>%
+                       dplyr::filter(date >= as.Date("2021-02-01")) %>%
+                       dplyr::select(id, date, observed = all_adm),
+                   forecast = all_forecasts,
+                   h = 7,
+                   trusts = plot_trusts,
+                   models = "mean_ensemble",
+                   facet_models = FALSE) +
+  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
+  labs(subtitle = "Top-25 Trusts with highest admissions in last 28 days") +
+  theme(legend.position = "none")
+
+plot_forecast_bars(observed = admissions %>%
+                       dplyr::filter(date >= as.Date("2021-02-01")) %>%
+                       dplyr::select(id, date, observed = all_adm),
+                   forecast = all_forecasts,
+                   h = 14,
+                   trusts = plot_trusts,
+                   models = "mean_ensemble",
+                   facet_models = FALSE) +
+  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
+  labs(subtitle = "Top-25 Trusts with highest admissions in last 28 days") +
+  theme(legend.position = "none")
+
+```
+
