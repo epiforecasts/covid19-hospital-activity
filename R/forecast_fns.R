@@ -27,3 +27,38 @@ forecast_summary <- function(samples = NULL, quantiles = c(0.05, 0.25, 0.5, 0.75
   return(out)
   
 }
+
+
+# Make ensemble forecast --------------------------------------------------
+
+# Parameters
+#   model_forecasts (data.frame): individual forecast summaries, 
+      # with columns "model", "forecast_from", "id", "horizon", "date_horizon", "quantile", "quantile_label" and "value"
+#   models (string): names of 2+ models (as appear in model_forecats$model) to use in ensemble
+
+ensemble_forecast <- function(model_forecasts, models){
+  
+  mean_ensemble <- model_forecasts %>%
+    dplyr::filter(model %in% models) %>%
+    dplyr::group_by(forecast_from, id, horizon, date_horizon, quantile, quantile_label) %>%
+    dplyr::summarise(value =  round(mean(value, na.rm = TRUE)),
+                     .groups = "drop") %>%
+    dplyr::mutate(model = "mean_ensemble")
+  
+  median_ensemble <- model_forecasts %>%
+    dplyr::filter(model %in% models) %>%
+    dplyr::group_by(forecast_from, id, horizon, date_horizon, quantile, quantile_label) %>%
+    dplyr::summarise(value =  round(median(value, na.rm = TRUE)),
+                     .groups = "drop") %>%
+    dplyr::mutate(model = "median_ensemble")
+  
+  out <- dplyr::bind_rows(mean_ensemble, median_ensemble)
+  
+  return(out)
+  
+}
+
+
+
+
+
