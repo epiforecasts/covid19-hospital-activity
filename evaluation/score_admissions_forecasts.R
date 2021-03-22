@@ -43,6 +43,33 @@ score_summary_in <- data.table::setDT(score_summary_in)
 score_summary_out <- scoringutils::eval_forecasts(score_summary_in,
                                                   by = c("forecast_from", "id", "model", "horizon")) %>%
   dplyr::select(-c(bias, sharpness))
+
+# Overall (WIS)
+wis_overall_out <- scoringutils::eval_forecasts(score_summary_in,
+                                                by = c("forecast_from", "id", "model", "horizon"),
+                                                summarise_by = c("model"))
+
+# Horizon (WIS)
+wis_horizon_out <- scoringutils::eval_forecasts(score_summary_in,
+                                                by = c("forecast_from", "id", "model", "horizon"),
+                                                summarise_by = c("horizon", "model"))
+
+# Time (WIS)
+wis_time_out <- scoringutils::eval_forecasts(score_summary_in,
+                                                by = c("forecast_from", "id", "model", "horizon"),
+                                                summarise_by = c("forecast_from", "model"))
+
+# Peaks (WIS)
+adm_peaks <- readRDS(file = here::here("data", "out", "peaks_adm.rds")) %>%
+  dplyr::filter(!is.na(group),
+                name == "second_peak" | group != "two_unclear") %>%
+  dplyr::select(id, peak_date = date)
+
+wis_peak_out <- scoringutils::eval_forecasts(score_summary_in %>%
+                                               dplyr::left_join(adm_peaks, by = "id") %>%
+                                               dplyr::filter(forecast_from == peak_date),
+                                             by = c("forecast_from", "id", "model", "horizon"),
+                                             summarise_by = c("horizon", "model"))
                                 
 
 # Samples -----------------------------------------------------------------
@@ -87,5 +114,13 @@ score_out <- score_summary_out %>%
   dplyr::left_join(score_samples_out,
                    by = c("forecast_from", "model", "id", "horizon")) 
 
-saveRDS(object = score_out, file = here::here("evaluation", "admissions_scores.rds"))
+saveRDS(object = score_out, file = here::here("data", "evaluation", "admissions_scores.rds"))
+
+
+# WIS scores --------------------------------------------------------------
+
+saveRDS(object = wis_overall_out, file = here::here("data", "evaluation", "admissions_wis_overall.rds"))
+saveRDS(object = wis_horizon_out, file = here::here("data", "evaluation", "admissions_wis_horizon.rds"))
+saveRDS(object = wis_time_out, file = here::here("data", "evaluation", "admissions_wis_time.rds"))
+saveRDS(object = wis_peak_out, file = here::here("data", "evaluation", "admissions_wis_peak.rds"))
 
