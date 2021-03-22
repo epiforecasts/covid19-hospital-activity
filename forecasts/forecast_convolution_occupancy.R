@@ -58,7 +58,7 @@ for(forecast_date in forecast_dates){
   
   # Time series ensemble forecast
   adm_forecast_ensemble <- readRDS(file = here::here(samples_dir,
-                                                     paste0("admissions_ensemble_aet_trust_", forecast_date, ".rds")))
+                                                     paste0("admissions_ensemble_aet_", forecast_date, ".rds")))
   df_forecast_ensemble <- adm_forecast_ensemble %>%
     dplyr::mutate(date = forecast_from + horizon) %>%
     dplyr::select(region = id, date, sample, cases = value) %>%
