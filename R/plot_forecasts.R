@@ -52,6 +52,7 @@ plot_forecast_bars <- function(observed, forecast,
                                h = 7,
                                trusts = NULL,
                                models = NULL,
+                               trust_facet_var = "trust_name",
                                facet_models = TRUE ,
                                use_dates = NULL){
   
@@ -84,7 +85,7 @@ plot_forecast_bars <- function(observed, forecast,
     geom_errorbar(data = forecast_plt,
                   aes(x = date, y = median, col = model, ymin = lower_50, ymax = upper_50),
                   alpha = 1, width = 0, lwd = 2) +
-    facet_wrap(facets = vars(id), scales = "free_y") +
+    facet_wrap(as.formula(paste("~", trust_facet_var)), scales = "free_y") +
     scale_color_brewer(palette = "Set2") +
     labs(x = "Date", y = "Admissions",
          title = paste0(h, "-days ahead forecasts"),
@@ -102,7 +103,7 @@ plot_forecast_bars <- function(observed, forecast,
   if(facet_models){
     
     g <- g +
-      facet_grid(rows = vars(id), cols = vars(model), scales = "free_y") +
+      facet_grid(as.formula(paste("model ~", trust_facet_var)), scales = "free_y") +
       theme(legend.position = "none")
     
   }
@@ -119,6 +120,7 @@ plot_forecast_bars <- function(observed, forecast,
 plot_forecast_ribbons <- function(observed, forecast,
                                   trusts = NULL,
                                   models = NULL,
+                                  trust_facet_var = "trust_name",
                                   facet_models = TRUE,
                                   forecast_dates = NULL){
   
@@ -157,7 +159,7 @@ plot_forecast_ribbons <- function(observed, forecast,
     geom_ribbon(data = forecast_plt,
                 aes(x = date, y = median, fill = model, group = forecast_from, ymin = lower_50, ymax = upper_50),
                 alpha = 0.4) +
-    facet_wrap(facets = vars(id), scales = "free_y") +
+    facet_wrap(as.formula(paste("~", trust_facet_var)), scales = "free_y") +
     scale_y_continuous(limits = c(0, NA)) +
     scale_color_brewer(palette = "Set2") +
     scale_fill_brewer(palette = "Set2") +
@@ -176,7 +178,7 @@ plot_forecast_ribbons <- function(observed, forecast,
   if(facet_models){
     
     g <- g +
-      facet_grid(rows = vars(id), cols = vars(model), scales = "free_y") +
+      facet_grid(as.formula(paste("model", "~", trust_facet_var)), scales = "free_y") +
       theme(legend.position = "none")
     
   }
