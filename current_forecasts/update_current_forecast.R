@@ -124,10 +124,10 @@ baseline_summary <- baseline_out$summary
 
 ## Autoregressive time series 
 tsensemble_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm",
-                                         horizon = 14, samples = 1000, models = "aetz", 
+                                         horizon = 14, samples = 1000, models = "aez", 
                                          train_from = forecast_date - 42,
                                          forecast_from = forecast_date) %>%
-  dplyr::mutate(model = "ts_ensemble_aetz")
+  dplyr::mutate(model = "ts_ensemble")
 tsensemble_summary <- forecast_summary(samples = tsensemble_samples)
 
 
@@ -172,7 +172,10 @@ convolution_samples <- convolution_forecast_rt$samples %>%
 convolution_summary <- forecast_summary(samples = convolution_samples)
 
 
-## Mean-ensemble
+
+# Mean ensemble -----------------------------------------------------------
+
+## Summary
 models_summary <- baseline_summary %>%
   dplyr::bind_rows(tsensemble_summary) %>%
   dplyr::bind_rows(arimareg_summary) %>%
@@ -188,4 +191,17 @@ saveRDS(object = forecast_out, file = here::here("current_forecasts",
 saveRDS(object = forecast_out, file = here::here("current_forecasts",
                                                  "admissions_trust",
                                                  "admissions_latest.rds"))
+
+
+## Samples 
+models_samples <- tsensemble_samples %>%
+  dplyr::bind_rows(arimareg_samples) %>%
+  dplyr::bind_rows(convolution_samples)
+
+forecast_samples_out <- ensemble_samples(model_samples = models_samples, models = unique(models_samples$model))
+saveRDS(object = forecast_samples_out, file = here::here("current_forecasts",
+                                                         "admissions_trust",
+                                                         paste0("samples_admissions_", forecast_date, ".rds")))
+  
+  
 
