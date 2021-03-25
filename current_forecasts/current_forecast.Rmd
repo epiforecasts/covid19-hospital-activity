@@ -1,6 +1,6 @@
 ---
-title: "Trust-level Covid-19 admissions forecasts"
-author: "Sophie Meakin"
+title: "Trust-level Covid-19 hospital admissions forecasts"
+author: "Sophie Meakin, Sam Abbott, Seb Funk"
 date: "`r format.Date(Sys.Date(), format = '%d %B %Y')`"
 output:
   html_document:
@@ -51,7 +51,7 @@ The current forecast date is **`r format.Date(forecast_date, format = "%d %B")`*
 
 The forecasting model is an unweighted ensemble of three individual models:
 
-1. unweighted time series ensemble model (autoregressive ARIMA, ETS, TBATS and naive models)
+1. unweighted time series ensemble model (autoregressive ARIMA, ETS and naive models)
 2. regression + 7-day-lagged cases (cases mapped from UTLA to Trust using Trust-UTLA mapping in `covid19.nhs.data`)
 3. convolution from cases to admissions (scaled; cases mapped to Trusts as above)
 
@@ -308,7 +308,7 @@ all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
 
 ```
 
-```{r plot past forecasts, fig.width=16, fig.height=9}
+```{r plot past forecasts, fig.width=14, fig.height=7}
 
 plot_forecast_bars(observed = admissions %>%
                        dplyr::filter(date >= as.Date("2021-02-01")) %>%
