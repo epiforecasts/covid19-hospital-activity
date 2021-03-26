@@ -18,7 +18,7 @@ source(here::here("R", "load_data.R"))
 source(here::here("R", "plot_forecasts.R"))
 source(here::here("R", "utils.R"))
 
-today_date <- as.Date("2021-03-19")
+today_date <- as.Date("2021-03-26")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 ```
@@ -108,27 +108,8 @@ current_forecast_tb <- forecast_point %>%
                 p_7 = round(p_7, 2),
                 p_14 = round(p_14, 2))
 
-# # Table summary of observed and forecast admissions (week)
-# current_forecast_tb <- admissions %>%
-#   dplyr::filter(date > forecast_date - 7) %>%
-#   dplyr::select(id, date, adm = all_adm) %>%
-#   dplyr::bind_rows(current_forecast %>%
-#                      dplyr::filter(model == "mean_ensemble") %>%
-#                      dplyr::select(id, date, adm = median, upper_50, upper_90)) %>%
-#   dplyr::arrange(id, date) %>%
-#   dplyr::mutate(week = lubridate::floor_date(date - 1, unit = "week", week_start = 7) + 7,
-#                 week = case_when(week == forecast_date ~ "current_week",
-#                                  week == forecast_date + 7 ~ "one_week",
-#                                  week == forecast_date + 14 ~ "two_weeks"),
-#                 week = ordered(week, c("current_week", "one_week", "two_weeks"))) %>%
-#   dplyr::group_by(id, week) %>%
-#   dplyr::summarise(adm = sum(adm, na.rm = TRUE)) %>%
-#   tidyr::pivot_wider(id_cols = id, names_from = week, values_from = adm) %>%
-#   dplyr::mutate(diff_one = one_week - current_week,
-#                 diff_two = two_weeks - current_week)
-
 plot_trusts_forecast <- current_forecast_tb %>%
-  dplyr::filter(forecast_7 - observed >= 0) %>%
+  # dplyr::filter(forecast_7 - observed >= 0) %>%
   dplyr::arrange(-(forecast_7 - observed)) %>%
   dplyr::ungroup() %>%
   dplyr::slice_head(n = 25) %>%
@@ -149,7 +130,7 @@ plot_forecast_ribbons(observed = admissions %>%
                      models = "mean_ensemble",
                      facet_models = FALSE) +
   scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(breaks = integer_breaks()) +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
   labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
        subtitle = "Top 25 Trusts with most admissions in last 28 days") +
   theme(legend.position = "none", strip.text.x = element_text(size = 8))
@@ -290,7 +271,8 @@ covid19.nhs.data::england_utla_shape %>%
 
 file_dir <- here::here("current_forecasts", "admissions_trust")
 file_names <- list.files(file_dir)[which(!grepl("latest", list.files(file_dir)) &
-                                           !grepl("samples", list.files(file_dir)))]
+                                           !grepl("samples", list.files(file_dir)) &
+                                           !grepl(forecast_date, list.files(file_dir)))]
 
 all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
   
@@ -311,7 +293,7 @@ all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
 ```{r plot past forecasts, fig.width=14, fig.height=7}
 
 plot_forecast_bars(observed = admissions %>%
-                       dplyr::filter(date >= as.Date("2021-02-01")) %>%
+                       dplyr::filter(date >= forecast_date - 42) %>%
                        dplyr::rename(observed = adm),
                    forecast = all_forecasts,
                    h = 7,

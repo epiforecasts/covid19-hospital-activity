@@ -3,6 +3,7 @@ library(covid19.nhs.data)
 library(covidregionaldata)
 library(future, quietly = TRUE)
 
+source(here::here("R", "load_data.R"))
 source(here::here("R", "timeseries_fns.R"))
 source(here::here("R", "forecast_fns.R"))
 source(here::here("R", "utils.R"))
@@ -11,9 +12,8 @@ source(here::here("R", "utils.R"))
 
 # Forecasts made from last Sunday before current date 
 
-today_date <- as.Date("2021-03-19")
+today_date <- as.Date("2021-03-26")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
-
 
 
 # Load raw observed data --------------------------------------------------
