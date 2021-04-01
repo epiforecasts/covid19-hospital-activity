@@ -129,6 +129,8 @@ tsensemble_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm"
                                          forecast_from = forecast_date) %>%
   dplyr::mutate(model = "ts_ensemble")
 tsensemble_summary <- forecast_summary(samples = tsensemble_samples)
+tsensemble_summary_long <- forecast_summary(samples = tsensemble_samples,
+                                            quantiles = seq(0.01, 0.99, 0.01))
 
 
 ## Regression + ARIMA errors
@@ -138,6 +140,8 @@ arimareg_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm", 
                                        forecast_from = forecast_date) %>%
   dplyr::mutate(model = "regression_arima")
 arimareg_summary <- forecast_summary(samples = arimareg_samples)
+arimareg_summary_long <- forecast_summary(samples = arimareg_samples,
+                                          quantiles = seq(0.01, 0.99, 0.01))
 
 
 ## Convolution
@@ -170,6 +174,8 @@ convolution_samples <- convolution_forecast_rt$samples %>%
   dplyr::select(id = region, sample, horizon, value, forecast_from, model)
 
 convolution_summary <- forecast_summary(samples = convolution_samples)
+convolution_summary_long <- forecast_summary(samples = convolution_samples,
+                                             quantiles = seq(0.01, 0.99, 0.01))
 
 
 
@@ -192,16 +198,15 @@ saveRDS(object = forecast_out, file = here::here("current_forecasts",
                                                  "admissions_trust",
                                                  "admissions_latest.rds"))
 
+## Long summary
+models_summary_long <- tsensemble_summary_long %>%
+  dplyr::bind_rows(arimareg_summary_long) %>%
+  dplyr::bind_rows(convolution_summary_long)
+ensemble_summary_long <- ensemble_forecast(model_forecasts = models_summary_long,
+                                      models = unique(models_summary_long$model))
 
-## Samples 
-models_samples <- tsensemble_samples %>%
-  dplyr::bind_rows(arimareg_samples) %>%
-  dplyr::bind_rows(convolution_samples)
-
-forecast_samples_out <- ensemble_samples(model_samples = models_samples, models = unique(models_samples$model))
-saveRDS(object = forecast_samples_out, file = here::here("current_forecasts",
-                                                         "admissions_trust",
-                                                         paste0("samples_admissions_", forecast_date, ".rds")))
-  
+saveRDS(object = forecast_out, file = here::here("current_forecasts",
+                                                 "admissions_trust",
+                                                 paste0("admissions_long_", forecast_date, ".rds")))
   
 
