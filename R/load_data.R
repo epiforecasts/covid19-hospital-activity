@@ -10,14 +10,14 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
     
     out <- raw_data %>%
       dplyr::filter(data %in% c("Hosp ads & diag", "New hosp cases", "All beds COVID")) %>%
-      dplyr::select(id = org_code, date, data, value) %>%
+      dplyr::select(nhs_region, id = org_code, date, data, value) %>%
       dplyr::mutate(data = dplyr::case_when(data == "Hosp ads & diag" ~ "all_adm",
                                             data == "All beds COVID" ~ "bed_occ",
                                             data == "New hosp cases" ~ "new_adm"),
                     id = ifelse(id %in% c("RD3", "RDZ"), "R0D", id)) %>%
       dplyr::filter(data %in% keep_data,
                     id %in% covid19.nhs.data::trust_ltla_mapping$trust_code) %>%
-      dplyr::group_by(id, date, data) %>%
+      dplyr::group_by(nhs_region, id, date, data) %>%
       dplyr::summarise(value = sum(value, na.rm = TRUE),
                        .groups = "drop") %>%
       dplyr::ungroup() %>%
@@ -32,3 +32,54 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
   return(out)
   
 }
+
+
+
+# Load UTLA-level case data -----------------------------------------------
+
+# Wrapper around covidregionaldata::get_regional_data(); England only
+
+load_case_data <- function(){
+  
+  raw_case <- covidregionaldata::get_regional_data("UK", include_level_2_regions = TRUE) %>%
+    dplyr::filter(grepl("E", utla_code)) %>%
+    dplyr::mutate(utla_code = ifelse(utla_code == "E10000002", "E06000060", utla_code)) %>%
+    dplyr::group_by(id = utla_code, date) %>%
+    dplyr::summarise(cases = sum(cases_new, na.rm = TRUE)) %>%
+    dplyr::ungroup()
+  
+  return(raw_case)
+  
+}
+
+
+
+
+# Load combined data (NHS Trust) ------------------------------------------
+
+load_combined_data <- function(){
+  
+  adm <- load_hospital_data()
+  case <- load_case_data()
+  
+  case_trust <- case %>%
+    dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
+    dplyr::mutate(trust_case = p_geo*cases) %>%
+    dplyr::group_by(trust_code, date) %>%
+    dplyr::summarise(trust_case = round(sum(trust_case, na.rm = TRUE)),
+                     trust_case = ifelse(is.na(trust_case), 0, trust_case),
+                     .groups = "drop") %>%
+    dplyr::filter(!is.na(trust_code)) %>%
+    dplyr::select(id = trust_code, date, cases = trust_case)
+  
+  df <- case_trust %>%
+    dplyr::full_join(adm, by = c("id", "date"))
+  
+  return(df)
+  
+}
+
+
+
+
+
