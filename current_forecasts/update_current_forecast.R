@@ -12,7 +12,7 @@ source(here::here("R", "utils.R"))
 
 # Forecasts made from last Sunday before current date 
 
-today_date <- as.Date("2021-03-26")
+today_date <- as.Date("2021-03-21")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 
@@ -26,18 +26,8 @@ cases_utla_obs <- covidregionaldata::get_regional_data("UK", include_level_2_reg
 
 # Forecast cases (Rt)
 file_dir <- here::here("current_forecasts", "cases_utla")
-recent_file_name <- paste0("cases_by_report_", today_date, ".csv")
-if(!file.exists(here::here(file_dir, recent_file_name))){
-  
-  cases_utla_rt <- readr::read_csv(file = here::here(file_dir, recent_file_name))
-  
-} else {
-  
-  cases_utla_rt <- readr::read_csv(file = "https://raw.githubusercontent.com/epiforecasts/covid-rt-estimates/master/subnational/united-kingdom-local/cases/summary/cases_by_report.csv")
-  
-  readr::write_csv(x = cases_utla_rt, path = here::here(file_dir, recent_file_name))
-  
-}
+recent_file_name <- paste0("cases_by_report_", forecast_date, ".csv")
+cases_utla_rt <- readr::read_csv(file = here::here(file_dir, recent_file_name))
 
 
 # Reshape data ------------------------------------------------------------
@@ -205,8 +195,8 @@ models_summary_long <- tsensemble_summary_long %>%
 ensemble_summary_long <- ensemble_forecast(model_forecasts = models_summary_long,
                                       models = unique(models_summary_long$model))
 
-saveRDS(object = forecast_out, file = here::here("current_forecasts",
-                                                 "admissions_trust",
-                                                 paste0("admissions_long_", forecast_date, ".rds")))
+saveRDS(object = ensemble_summary_long, file = here::here("current_forecasts",
+                                                          "admissions_trust",
+                                                          paste0("admissions_long_", forecast_date, ".rds")))
   
 
