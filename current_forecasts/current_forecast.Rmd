@@ -18,7 +18,7 @@ source(here::here("R", "load_data.R"))
 source(here::here("R", "plot_forecasts.R"))
 source(here::here("R", "utils.R"))
 
-today_date <- as.Date("2021-03-26")
+today_date <- as.Date("2021-03-21")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 ```
@@ -31,7 +31,8 @@ admissions <- load_hospital_data(keep_data = c("all_adm")) %>%
   dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40))
 
 plot_trusts_observed <- admissions %>%
-  dplyr::filter(date > forecast_date - 28) %>%
+  dplyr::filter(date > forecast_date - 28,
+                date <= forecast_date) %>%
   dplyr::group_by(id) %>%
   dplyr::summarise(total_adm = sum(adm, na.rm = TRUE)) %>%
   dplyr::arrange(-total_adm) %>%
@@ -39,9 +40,10 @@ plot_trusts_observed <- admissions %>%
   dplyr::pull(id)
 
  trusts_observed7 <- admissions %>%
-  dplyr::filter(date > forecast_date - 7) %>%
+  dplyr::filter(date > forecast_date - 7,
+                date <= forecast_date) %>%
   dplyr::group_by(id) %>%
-  dplyr::summarise(observed = sum(adm, na.rm = TRUE)/7)
+  dplyr::summarise(observed = mean(adm, na.rm = TRUE))
 
 ```
 
@@ -70,6 +72,7 @@ current_forecast <- readRDS(file = here::here("current_forecasts",
   tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label) %>%
   dplyr::select(forecast_from, model, id, date = date_horizon, horizon,
                 median = lower_0, lower_90, lower_50, upper_50, upper_90) %>%
+  dplyr::filter(horizon <= 14) %>%
   dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
   dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40))
 
@@ -85,21 +88,25 @@ forecast_point <- current_forecast %>%
 
 
 # Load forecast samples
-forecast_samples <- readRDS(file = here::here("current_forecasts",
+current_forecast_long <- readRDS(file = here::here("current_forecasts",
                                               "admissions_trust",
-                                              paste0("samples_admissions_", forecast_date, ".rds")))
+                                              paste0("admissions_long_", forecast_date, ".rds")))
 
-forecast_prob <- forecast_samples %>%
-  dplyr::filter(horizon %in% c(7, 14)) %>%
-  dplyr::left_join(trusts_observed7, by = "id") %>%
+forecast_prob <- current_forecast_long %>%
+  dplyr::filter(model == "mean_ensemble",
+                horizon %in% c(7, 14)) %>%
+  dplyr::left_join(trusts_observed7, by = c("id")) %>%
   dplyr::mutate(observed = round(observed)) %>%
-  dplyr::group_by(id, horizon, increase = value > observed) %>%
-  dplyr::summarise(n_increase = n()) %>%
+  dplyr::group_by(forecast_from, id, horizon) %>%
+  dplyr::filter(value > observed) %>%
+  dplyr::group_by(forecast_from, id, horizon) %>%
+  dplyr::filter(quantile == min(quantile)) %>%
   dplyr::mutate(horizon = paste0("p_", horizon),
-                p_increase = n_increase/sum(n_increase)) %>%
-  dplyr::filter(increase) %>%
+                p_increase = 1-quantile) %>%
+  dplyr::ungroup() %>%
   dplyr::select(id, horizon, p_increase) %>%
-  tidyr::pivot_wider(id_cols = id, names_from = horizon, values_from = p_increase)
+  unique() %>%
+  tidyr::pivot_wider(id_cols = -c(horizon, p_increase), names_from = horizon, values_from = p_increase)
 
 current_forecast_tb <- forecast_point %>%
   dplyr::left_join(forecast_prob, by = "id") %>%
@@ -123,7 +130,8 @@ plot_trusts_forecast <- current_forecast_tb %>%
 ```{r plot current forecasts (top observed), fig.width=14, fig.height=7}
 
 plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date >= as.Date("2021-02-01")) %>%
+                        dplyr::filter(date > forecast_date - 42,
+                                      date <= forecast_date) %>%
                         dplyr::rename(observed = adm),
                       forecast = current_forecast,
                      trusts = plot_trusts_observed,
@@ -143,14 +151,15 @@ plot_forecast_ribbons(observed = admissions %>%
 ```{r plot current forecasts (top forecast), fig.width=14, fig.height=7}
 
 plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date >= as.Date("2021-02-01")) %>%
+                        dplyr::filter(date > forecast_date - 42,
+                                      date <= forecast_date) %>%
                         dplyr::rename(observed = adm),
                      forecast = current_forecast,
                      trusts = plot_trusts_forecast,
                      models = "mean_ensemble",
                      facet_models = FALSE) +
   scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(breaks = integer_breaks()) +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
   labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
        subtitle = "Top 25 Trusts with biggest forecast increase in admissions") +
   theme(legend.position = "none", strip.text.x = element_text(size = 8))
@@ -192,9 +201,9 @@ scatter_data %>%
                   point.padding = 0.2, min.segment.length = 0.1) +
   scale_x_continuous(limits = c(0, 1)) +
   scale_y_continuous(limits = c(0, NA), breaks = seq(0, 40, 4)) +
-  scale_color_fermenter(breaks = integer_breaks(), palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
-  # scale_color_distiller(palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
+  scale_color_fermenter(n.breaks = 7, palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
   labs(x = "Probability of increase (14 days ahead)", y = "Current admissions (7-day average)",
+       title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
        col = "Forecast\nchange") +
   theme_bw()
 
@@ -271,7 +280,7 @@ covid19.nhs.data::england_utla_shape %>%
 
 file_dir <- here::here("current_forecasts", "admissions_trust")
 file_names <- list.files(file_dir)[which(!grepl("latest", list.files(file_dir)) &
-                                           !grepl("samples", list.files(file_dir)) &
+                                           !grepl("long", list.files(file_dir)) &
                                            !grepl(forecast_date, list.files(file_dir)))]
 
 all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
@@ -301,6 +310,7 @@ plot_forecast_bars(observed = admissions %>%
                    models = "mean_ensemble",
                    facet_models = FALSE) +
   scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
+  scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
   labs(subtitle = "Top 25 Trusts with most admissions in last 28 days") +
   theme(legend.position = "none")
 
@@ -313,6 +323,7 @@ plot_forecast_bars(observed = admissions %>%
                    models = "mean_ensemble",
                    facet_models = FALSE) +
   scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
+  scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
   labs(subtitle = "Top 25 Trusts with most admissions in last 28 days") +
   theme(legend.position = "none")
 
