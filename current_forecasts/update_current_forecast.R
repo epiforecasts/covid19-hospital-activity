@@ -12,7 +12,7 @@ source(here::here("R", "utils.R"))
 
 # Forecasts made from last Sunday before current date 
 
-today_date <- as.Date("2021-03-21")
+today_date <- as.Date("2021-03-28")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 
