@@ -18,7 +18,7 @@ source(here::here("R", "load_data.R"))
 source(here::here("R", "plot_forecasts.R"))
 source(here::here("R", "utils.R"))
 
-today_date <- as.Date("2021-04-11")
+today_date <- as.Date("2021-04-18")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 ```
@@ -200,7 +200,7 @@ scatter_data %>%
   geom_text_repel(aes(label = label), size = 3, col = "grey20",
                   point.padding = 0.2, min.segment.length = 0.1) +
   scale_x_continuous(limits = c(0, 1)) +
-  scale_y_continuous(limits = c(0, NA), breaks = seq(0, 200, 5)) +
+  scale_y_continuous(limits = c(0, NA), breaks = seq(0, 20, 2)) +
   scale_color_fermenter(n.breaks = 7, palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
   labs(x = "Probability of increase (14 days ahead)", y = "Current admissions (7-day average)",
        title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
