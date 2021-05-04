@@ -6,8 +6,6 @@ library(gganimate)
 source("R/load_data.R")
 source("R/forecast_fns.R")
 
-
-
 # Output: scatter plot of admissions vs. prob of increase for historical forecasts
 
 # Need
@@ -16,9 +14,7 @@ source("R/forecast_fns.R")
   # (3) probability of increase (based on samples)
 
 
-
 # (1) 7-day average observed admissions ------------------------------------
-
 
 # Load observed admissions data and reshape
 admissions <- load_hospital_data(keep_data = c("all_adm")) %>%
@@ -36,7 +32,6 @@ trusts_observed7 <- admissions %>%
 
 
 # (2) point forecasts -----------------------------------------------------
-
 
 # Load ensemble forecast summary and reshape
 ensemble_summary <- readRDS(file = here::here("forecasts", "summary", "admissions_ensemble.rds")) %>%
@@ -57,7 +52,6 @@ ensemble_point <- ensemble_summary %>%
   dplyr::left_join(trusts_observed7, by = c("id", "forecast_from" = "week_ending")) %>%
   dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
   dplyr::select(forecast_from, id, trust_name, observed, forecast_7, forecast_14)
-
 
 
 # (3) probability of increase ---------------------------------------------
@@ -177,8 +171,4 @@ for(d in as.list(unique(scatter_data$forecast_from))){
          width = 16, height = 9, units = "in")
   
 }
-
-
-
-
 
