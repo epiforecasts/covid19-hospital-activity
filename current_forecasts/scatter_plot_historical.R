@@ -58,7 +58,7 @@ ensemble_point <- ensemble_summary %>%
 
 # Make forecast summaries using all quantiles
 ensemble_files <- c("admissions_ensemble_aez", "admissions_arimacase7", "admissions_convolution")
-ensemble_models <- c("ts_ensemble_aez", "arima_case7_observed_raw", "convolution_rt")
+ensemble_models <- c("ts_ensemble_aez", "arima_case7_forecast_raw", "convolution_rt")
 
 samples_dir <- here::here("forecasts", "samples")
 samples_files <- list.files(samples_dir)[which(grepl(ensemble_files[1], list.files(samples_dir)) |
@@ -145,6 +145,23 @@ scatter_data %>%
   ease_aes('cubic-in-out')
 
 anim_save("scatter_plot_historical.gif", path = here::here("current_forecasts", "plots"))
+
+# # GIF (Kent/Medway highlighted)
+# scatter_data %>%
+#   dplyr::filter(grepl("Kent", trust_name) | grepl("Medway", trust_name)) %>%
+#   ggplot(aes(x = p_14, y = observed, col = change_14)) +
+#   geom_point(size = 3) +
+#   scale_x_continuous(limits = c(0, 1)) +
+#   scale_y_continuous(limits = c(0, 120), breaks = seq(0, 200, 10)) +
+#   scale_color_fermenter(n.breaks = 9, palette = "RdBu", limits = c(-20, 20)) +
+#   labs(x = "Probability of increase (14 days ahead)", y = "Current admissions (7-day average)",
+#        title = 'Forecast date: {closest_state}',
+#        col = "Forecast\nchange") +
+#   theme_bw() +
+#   transition_states(forecast_from,
+#                     transition_length = 2,
+#                     state_length = 1) + 
+#   ease_aes('cubic-in-out')
 
 
 # Individual plots for each forecast date

@@ -12,7 +12,7 @@ source(here::here("R", "utils.R"))
 
 # Forecasts made from last Sunday before current date 
 
-today_date <- as.Date("2021-04-25")
+today_date <- as.Date("2021-05-02")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 
@@ -124,7 +124,7 @@ tsensemble_summary_long <- forecast_summary(samples = tsensemble_samples,
 
 
 ## Regression + ARIMA errors
-arimareg_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm", xvars = "cases_lag7",
+arimareg_samples <- timeseries_samples(data = combined_trust %>% filter(id != "RBS"), yvar = "all_adm", xvars = "cases_lag7",
                                        horizon = 14, samples = 1000, models = "a", 
                                        train_from = forecast_date - 42,
                                        forecast_from = forecast_date) %>%

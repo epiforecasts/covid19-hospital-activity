@@ -18,7 +18,7 @@ source(here::here("R", "load_data.R"))
 source(here::here("R", "plot_forecasts.R"))
 source(here::here("R", "utils.R"))
 
-today_date <- as.Date("2021-04-25")
+today_date <- as.Date("2021-05-02")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 ```
