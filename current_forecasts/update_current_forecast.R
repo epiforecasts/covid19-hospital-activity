@@ -12,17 +12,19 @@ source(here::here("R", "utils.R"))
 
 # Forecasts made from last Sunday before current date 
 
-today_date <- as.Date("2021-05-02")
+today_date <- as.Date("2021-05-09")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 
 # Load raw observed data --------------------------------------------------
 
 # Admissions (wrapper for covid19.nhs.data::download_trust_data() )
-admissions <- load_hospital_data(keep_data = "all_adm")
+admissions <- load_hospital_data(keep_data = "all_adm", add_private = TRUE)
 
 # Observed cases
 cases_utla_obs <- covidregionaldata::get_regional_data("UK", include_level_2_regions = TRUE)
+saveRDS(object = cases_utla_obs,
+        file = here::here("data", "raw", "uk_utla_case.rds"))
 
 # Forecast cases (Rt)
 file_dir <- here::here("current_forecasts", "cases_utla")
@@ -102,6 +104,23 @@ cases_trust_rt_samples <- epinow_samples(df = cases_utla_rt_in) %>%
   dplyr::select(region = trust_code, date, sample, cases = value)
 
 
+# Drop Trusts missing data ------------------------------------------------
+
+drop_trusts <- combined_trust %>%
+  dplyr::filter(date > forecast_date - 42,
+                date <= forecast_date) %>%
+  dplyr::group_by(id) %>%
+  dplyr::summarise(total_adm = sum(all_adm),
+                   total_case = sum(cases)) %>%
+  dplyr::filter(is.na(total_adm) | total_adm == 0 | is.na(total_case) | total_case == 0) %>%
+  dplyr::pull(id)
+
+message(paste0(c("Dropping the following Trusts for missing data or no recent activity:", drop_trusts), collapse = " "))
+
+combined_trust <- combined_trust %>%
+  filter(!id %in% drop_trusts)
+
+
 # Update all forecasts ----------------------------------------------------
 
 ## Baseline forecast
@@ -124,7 +143,7 @@ tsensemble_summary_long <- forecast_summary(samples = tsensemble_samples,
 
 
 ## Regression + ARIMA errors
-arimareg_samples <- timeseries_samples(data = combined_trust %>% filter(id != "RBS"), yvar = "all_adm", xvars = "cases_lag7",
+arimareg_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm", xvars = "cases_lag7",
                                        horizon = 14, samples = 1000, models = "a", 
                                        train_from = forecast_date - 42,
                                        forecast_from = forecast_date) %>%
