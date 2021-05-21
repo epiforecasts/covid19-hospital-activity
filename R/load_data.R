@@ -2,18 +2,26 @@
 
 # Download and format admissions data -------------------------------------
 
-load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ")){
+load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"), add_private = FALSE){
   
   raw_data <- covid19.nhs.data::download_trust_data()
   
   if(format){
     
     out <- raw_data %>%
-      dplyr::filter(data %in% c("Hosp ads & diag", "New hosp cases", "All beds COVID")) %>%
+      dplyr::filter(data %in% c("Hosp ads & diag",
+                                "New hosp cases",
+                                "All beds COVID",
+                                "Adult G&A Beds Occupied COVID",
+                                "Adult G&A Bed Occupied NonCOVID",
+                                "Adult G&A Beds Unoccupied")) %>%
       dplyr::select(nhs_region, id = org_code, date, data, value) %>%
       dplyr::mutate(data = dplyr::case_when(data == "Hosp ads & diag" ~ "all_adm",
                                             data == "All beds COVID" ~ "bed_occ",
-                                            data == "New hosp cases" ~ "new_adm"),
+                                            data == "New hosp cases" ~ "new_adm",
+                                            data == "Adult G&A Beds Occupied COVID" ~ "ga_covid",
+                                            data == "Adult G&A Bed Occupied NonCOVID" ~ "ga_other",
+                                            data == "Adult G&A Beds Unoccupied" ~ "ga_unocc"),
                     id = ifelse(id %in% c("RD3", "RDZ"), "R0D", id)) %>%
       dplyr::filter(data %in% keep_data,
                     id %in% covid19.nhs.data::trust_ltla_mapping$trust_code) %>%
@@ -26,6 +34,20 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
   } else {
     
     out <- raw_data
+    
+  }
+  
+  if(add_private){
+    
+    out_private <- readRDS(file = here::here("current_forecasts", "admissions_in", "hospitalisations_trusts.rds")) %>%
+      dplyr::select(id = org_code, date, all_adm = hospitalisations) %>%
+      dplyr::filter(date > max(out$date)) %>%
+      dplyr::mutate(all_adm = ifelse(is.na(all_adm), 0, all_adm)) %>%
+      tidyr::complete(id = unique(out$id), date) %>%
+      dplyr::right_join(out %>% dplyr::select(nhs_region, id) %>% unique() %>% na.omit(), by = "id")
+    
+    out <- out %>%
+      dplyr::bind_rows(out_private)
     
   }
   
@@ -55,7 +77,7 @@ load_case_data <- function(){
 
 
 
-# Load combined data (NHS Trust) ------------------------------------------
+# Load combined data (by Trust) -------------------------------------------
 
 load_combined_data <- function(){
   
