@@ -19,7 +19,7 @@ source(here::here("R", "load_data.R"))
 source(here::here("R", "plot_forecasts.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-05-09")
+forecast_date <- as.Date("2021-05-16")
 utla_names <- c("Bolton",
                 "Blackburn with Darwen",
                 "Bedford")
@@ -64,7 +64,7 @@ plot_trusts_observed <- admissions %>%
 
 # Summary
 
-The current forecast date is **`r format.Date(forecast_date, format = "%d %B")`**, showing data until **`r format.Date(max(admissions$date), format = "%d %B")`**.
+The current forecast date is **`r format.Date(forecast_date, format = "%d %B")`**, showing data until **`r format.Date(max(admissions$date, na.rm = TRUE), format = "%d %B")`**.
 
 The forecasting model is an unweighted ensemble of three individual models:
 
