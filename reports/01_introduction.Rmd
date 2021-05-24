@@ -1,0 +1,443 @@
+---
+title: "Introduction"
+author: "Sophie Meakin"
+date: "25/03/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.width = 16, fig.height = 9)
+
+library(tidyverse)
+library(patchwork)
+library(covid19.nhs.data)
+
+source(here::here("R", "load_data.R"))
+source(here::here("R", "plot_forecasts.R"))
+source(here::here("R", "utils.R"))
+
+```
+
+# Outputs
+
+* Summary of Covid-19 hospital admissions (national, Trust by week, top-5 Trust examples)
+* Example of combined data (cases and admissions)
+* Example of forecast
+
+```{r observed data}
+
+# Load combined data
+dat <- load_combined_data() %>%
+  dplyr::filter(date >= as.Date("2020-08-01"),
+                date < max(date)) %>%
+  dplyr::rename(adm = all_adm, occ = bed_occ) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code"))
+
+# Weekly data (week ending Sundays) (sum cases/admissions, mean occupancy)
+dat_weekly <- dat %>%
+  dplyr::mutate(week = lubridate::ceiling_date(date, unit = "week", week_start = 7)) %>%
+  dplyr::group_by(nhs_region, id, week_ending = week) %>%
+  dplyr::summarise(n = n(),
+                   cases = sum(cases, na.rm = TRUE),
+                   adm = sum(adm, na.rm = TRUE),
+                   occ = mean(occ, na.rm = TRUE),
+                  .groups = "drop") %>%
+  dplyr::filter(n == 7) %>%
+  dplyr::select(-n)
+
+```
+
+```{r, include = FALSE}
+
+utla_cases <- load_case_data()
+
+utla_cases %>%
+  dplyr::left_join(utla_names, by = c("id" = "geo_code")) %>%
+  dplyr::mutate(cases_trend = (stl(ts(cases, freq = 7), s.window = 7)$time.series)[,2]) %>%
+  dplyr::filter(date >= as.Date("2021-03-01"),
+                date < as.Date("2021-04-17"),
+                id %in% c("E10000003", "E06000055", "E10000012", "E10000029", "E10000020", "E10000015", "E06000056")) %>%
+  ggplot(aes(x = date, y = cases, col = geo_name)) +
+  geom_vline(xintercept = as.Date("2021-04-11"), lty = 2) +
+  geom_line(alpha = 0.4) +
+  geom_line(aes(y = cases_trend), lwd = 0.8) +
+  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
+  scale_color_brewer(palette = "Set2") +
+  theme_bw()
+
+```
+
+
+```{r forecast data}
+
+forecast_dir <- here::here("forecasts", "summary")
+forecast_adm_files <- list.files(forecast_dir)[which(grepl("admissions", list.files(forecast_dir)))]
+
+forecast_adm <- purrr::map_df(.x = forecast_adm_files, .f = ~ {
+  
+  out <- readRDS(file = here::here(forecast_dir, .x))
+  
+}) %>%
+  dplyr::bind_rows() %>%
+  dplyr::select(-quantile) %>%
+  tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label)
+
+```
+
+
+```{r new variables}
+
+total_admissions <- dat %>%
+  dplyr::filter(date < as.Date("2021-02-01")) %>%
+  dplyr::group_by(id) %>%
+  dplyr::summarise(total_adm = sum(adm, na.rm = TRUE),
+                   .groups = "drop")
+
+top_admissions_50 <- total_admissions %>%
+  dplyr::arrange(-total_adm) %>%
+  dplyr::slice_head(n = 50)
+
+top_admissions_5 <- total_admissions %>%
+  dplyr::arrange(-total_adm) %>%
+  dplyr::slice_head(n = 5)
+
+plot_dates <- unique(forecast_adm$forecast_from)
+long_plot_dates <- seq.Date(from = as.Date("2020-08-02"), to = as.Date("2021-04-04"), by = "week")
+
+```
+
+
+
+## Temporal admissions summary
+
+```{r}
+
+# Admissions at top 5 Trusts (by total admissions)
+g0 <- dat %>%
+  dplyr::filter(id %in% top_admissions_5$id,
+                date <= as.Date("2021-02-28")) %>%
+  dplyr::mutate(id = ordered(id, top_admissions_5$id),
+                facet_label = stringr::str_wrap(paste0(trust_name, " (", id, ")"), width = 40)) %>%
+  ggplot(aes(x = date, y = adm)) +
+  geom_line() +
+  facet_wrap(. ~ facet_label, ncol = 1, scales = "free_y") +
+  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2, col = "grey50") +
+  scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b") +
+  labs(x = "Date", y = "Admissions",
+       title = "C") +
+  theme_bw() +
+  theme(strip.text.x = element_text(size = 8),
+        plot.title = element_text(face = "bold"))
+
+# National admissions
+g1 <- dat %>%
+  dplyr::filter(date <= as.Date("2021-02-28")) %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(adm = sum(adm, na.rm = TRUE)) %>%
+  ggplot(aes(x = date, y = adm)) +
+  geom_line() +
+  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2, col = "grey50") +
+  scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
+  labs(x = "", y = "Admissions",
+       title = "A") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"))
+
+# Weekly admissions by Trust
+g2 <- dat_weekly %>%
+  dplyr::left_join(total_admissions, by = "id") %>%
+  dplyr::filter(id %in% top_admissions_50$id,
+                week_ending <= as.Date("2021-02-28")) %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(adm_std = adm/sd(adm, na.rm = TRUE)) %>%
+  ggplot(aes(x = week_ending, y = reorder(id, total_adm))) +
+  geom_tile(aes(fill = adm)) +
+  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2) +
+  scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
+  scale_fill_fermenter(n.breaks = 9) +
+  labs(x = "Week ending", y = "NHS Trust",
+       title = "B",
+       fill = "Weekly\nadmissions") +
+  theme_bw() +
+  theme(plot.title = element_text(face = "bold"))
+
+```
+
+```{r temporal admissions summary plot}
+
+(g1 / g2 + plot_layout(heights = c(1, 4))) | g0
+
+```
+
+
+
+## Regional admissions plot
+
+```{r}
+
+dat %>%
+  dplyr::filter(!is.na(nhs_region)) %>%
+  dplyr::group_by(nhs_region, date) %>%
+  dplyr::summarise(adm = sum(adm, na.rm = TRUE)) %>%
+  dplyr::group_by(nhs_region) %>%
+  dplyr::mutate(adm_std = adm/sd(adm),
+                adm_trend = (stl(ts(adm, freq = 7), s.window = 7)$time.series)[,2]) %>%
+  ggplot(aes(x = date, y = adm_trend, col = nhs_region)) +
+  geom_line() +
+  geom_line(aes(y = adm), alpha = 0.4) +
+  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2) +
+  scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "Date", y = "Daily admissions",
+       col = "NHS region") +
+  theme_bw()
+
+```
+
+
+## Combined data example
+
+```{r}
+
+dat_in <- dat %>%
+  tidyr::pivot_longer(cols = c(cases, adm, occ)) %>%
+  dplyr::filter(name != "occ",
+                id %in% top_admissions_5$id) %>%
+  dplyr::mutate(id = trust_name,
+                name = ifelse(name == "cases", "Cases", "Admissions")) %>%
+  dplyr::select(-trust_name, -nhs_region) %>%
+  na.omit()
+
+dat_in <- dat %>%
+  tidyr::pivot_longer(cols = c(cases, adm, occ)) %>%
+  dplyr::filter(name != "occ",
+                id %in% "RDE") %>%
+  dplyr::mutate(id = trust_name,
+                name = ifelse(name == "cases", "Cases", "Admissions")) %>%
+  dplyr::select(-trust_name, -nhs_region) %>%
+  na.omit()
+
+```
+
+```{r combined data example}
+
+plot_observed(observed = dat_in, trusts = unique(dat_in$id),
+              plot_vars = c("Cases", "Admissions"), plot_raw = TRUE)
+
+dat_in %>%
+  dplyr::filter(date >= as.Date("2021-02-01")) %>%
+  ggplot(aes(x = date, y = value)) +
+  geom_line(lwd = 0.6) +
+  facet_wrap(. ~ name, ncol = 1, scales = "free_y") +
+  scale_x_date(date_breaks = "4 weeks")
+  
+
+```
+
+
+
+## Forecasts examples
+
+```{r}
+
+observed_in <- dat %>%
+  dplyr::select(id, date, observed = adm) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  dplyr::filter(date >= as.Date("2020-09-01"),
+                date < as.Date("2021-02-14"))
+
+forecast_in <- forecast_adm %>%
+  dplyr::rename(date = date_horizon, median = lower_0) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code"))
+
+use_dates <- unique(forecast_in$forecast_from)[seq(1, 18, 2)]
+
+```
+
+```{r forecast examples}
+
+# Ribbons (all horizons)
+g_example_ribbon <- plot_forecast_ribbons(observed = observed_in,
+                      forecast = forecast_in,
+                      trusts = top_admissions_5$id[c(1)],
+                      forecast_dates = use_dates[7],
+                      models = c("ts_ensemble_aez",
+                                 "arima_case7_forecast_raw",
+                                 "convolution_rt",
+                                 "median_ensemble_forecast"),
+                      facet_models = TRUE) +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-01"))) +
+  labs(title = "A")
+
+# Bars (fixed horizon)
+g_example_bar <- plot_forecast_bars(observed = observed_in,
+                   forecast = forecast_in,
+                   trusts = top_admissions_5$id[c(1)],
+                   use_dates = use_dates,
+                   models = c("ts_ensemble_aez",
+                              "arima_case7_forecast_raw",
+                              "convolution_rt",
+                              "median_ensemble_forecast"),
+                   h = 7) +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-01"))) +
+  labs(title = "B")
+
+#####
+
+g_example_ribbon | g_example_bar
+
+#####
+
+```
+
+
+## Trust characteristics
+
+```{r}
+
+# Estimated size and peak bed occupancy
+trust_size <- readRDS(file = here::here("data", "out", "trust_size.rds"))
+total_adm <- readRDS(file = here::here("data", "out", "trust_total.rds"))
+trust_mapping <- readRDS(file = here::here("data", "out", "trust_mapping.rds"))
+trust_cluster_weekly <- readRDS(file = here::here("data", "out", "trust_cluster_weekly.rds"))
+
+
+# Locations
+loc <- readRDS(file = here::here("data", "out", "trust_locations.rds"))
+
+loc_sf <- sf::st_as_sf(loc %>% filter(!is.na(lng)), coords = c("lng", "lat"),
+                       crs = 4326, agr = "constant", remove = FALSE) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code"))
+
+cities <- readr::read_csv(file = "~/Downloads/gb.csv") %>%
+  dplyr::filter(!city %in% c("Glasgow")) %>%
+  dplyr::slice_head(n = 11) %>%
+  dplyr::mutate(label_name = ifelse(city == "Birstall", admin_name, city))
+
+cities_sf <- sf::st_as_sf(cities, coords = c("lng", "lat"), crs = 4326, agr = "constant", remove = FALSE)
+
+```
+
+### Trust location map, location only
+```{r}
+
+g_trust_map <- covid19.nhs.data::england_utla_shape %>%
+  ggplot() +
+  geom_sf(lwd = 0.3, col = "grey60", fill = "white") +
+  # geom_sf(data = cities_sf, col = "grey40", shape = 15, size = 3) +
+  geom_sf(data = loc_sf, col = "grey10", size = 2) +
+  geom_sf_text(data = cities_sf, aes(label = label_name)) +
+  scale_color_brewer(palette = "Set2", na.value = "grey50") +
+  labs(x = "", y = "", col = "Group") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+```
+
+### Trust location map, cluster
+```{r}
+
+n_clusters <- 6
+
+# Admissions by cluster
+plot_dat <-dat_weekly %>%
+  dplyr::left_join(trust_cluster_weekly, by = "id") %>%
+  dplyr::mutate(cluster = as.factor(cluster)) %>%
+  dplyr::filter(k == n_clusters) %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(adm_std = adm/sd(adm))
+
+g_trust_cluster_adm <- plot_dat %>%
+  ggplot(aes(x = week_ending, y = adm)) +
+  geom_line(aes(group = id), col = "lightgrey", alpha = 0.4) +
+  geom_line(data = plot_dat %>%
+              dplyr::group_by(week_ending, cluster) %>%
+              dplyr::summarise(adm = median(adm),
+                               adm_std = median(adm_std)),
+            aes(col = cluster), lwd = 0.8) +
+  facet_wrap(. ~ paste0("Cluster ", cluster)) +
+  scale_x_date(breaks = long_plot_dates[seq(2, 36, 8)], date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
+  scale_color_brewer(palette = "Set2", na.value = "grey50") +
+  labs(x = "Week ending", y = "Weekly admissions (std)",
+       title = "C") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+# Map of cluster
+g_trust_cluster_map <- covid19.nhs.data::england_utla_shape %>%
+  ggplot() +
+  geom_sf(lwd = 0.3, col = "grey60", fill = "white") +
+  geom_sf(data = loc_sf %>%
+            dplyr::left_join(trust_cluster_weekly, by = "id") %>%
+            dplyr::mutate(cluster = as.factor(cluster)) %>%
+            dplyr::filter(k == n_clusters | is.na(k)),
+          aes(col = cluster), size = 2) +
+  geom_sf_text(data = cities_sf, aes(label = label_name)) +
+  scale_color_brewer(palette = "Set2", na.value = "grey50") +
+  labs(x = "", y = "", col = paste0("Cluster ID (", n_clusters, ")"),
+       title = "D") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+```
+
+### Other Trust characteristics
+```{r}
+
+# Trust-UTLA mapping
+## Summary
+summary(trust_mapping$n)
+## Top 10 Trusts by number of matched UTLAs
+trust_mapping %>%
+  dplyr::left_join(dat %>%
+                     dplyr::select(nhs_region, id) %>%
+                     dplyr::filter(!is.na(nhs_region)) %>%
+                     unique(),
+                   by = "id") %>%
+  dplyr::arrange(-n) %>%
+  dplyr::slice_head(n = 10)
+## Distribution of number of matched UTLAs
+g_trust_mapping <- trust_mapping %>%
+  ggplot() +
+  geom_histogram(aes(x = n), binwidth = 1, fill = "lightgrey") +
+  geom_histogram(aes(x = n_10), binwidth = 1) +
+  scale_x_continuous(breaks = integer_breaks()) +
+  labs(x = "Number of matched UTLAs", y = "Count",
+       title = "A") +
+  theme_bw()
+
+# Trust capacity
+## Summary
+summary(trust_size$total_bed)
+summary(total_adm$total_adm)
+
+## Correlation
+trust_size %>%
+  dplyr::left_join(total_adm, by = "id") %>%
+  with(cor(total_bed, total_adm))
+
+## Capacity vs. total admissions scatter
+g_trust_capacity <- trust_size %>%
+  dplyr::left_join(total_adm, by = "id") %>%
+  ggplot(aes(x = total_bed, y = total_adm)) +
+  geom_point(alpha = 0.4) +
+  geom_rug(alpha = 0.4) +
+  labs(x = "Estimated Trust capacity", y = "Total admissions",
+       title = "B") +
+  theme_bw()
+
+#####
+((g_trust_mapping | g_trust_capacity) / g_trust_cluster_adm + plot_layout(heights = c(1, 3))) | g_trust_cluster_map
+#####
+
+```
+
+
