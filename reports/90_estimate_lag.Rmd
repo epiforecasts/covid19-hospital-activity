@@ -1,0 +1,505 @@
+---
+title: "Estimate the lag between cases and admissions"
+author: "Sophie Meakin"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(patchwork)
+
+source(here::here("R", "load_data.R"))
+source(here::here("R", "correlation_fns.R"))
+source(here::here("R", "utils.R"))
+
+```
+
+# Summary
+
+Estimating the optimal lag between cases and hospital admissions (national and by NHS region) by considering the lag for which the Kendall rank correlation coefficient is maximised.
+
+# Initialise
+
+* define `forecast_dates` (week beginning)
+* load raw data
+* subset national/regional data
+
+```{r init}
+
+forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02")+63, by = "week", length = 18))
+df <- load_combined_data()
+
+```
+
+```{r new vars}
+
+df_nat <- df %>%
+  dplyr::filter(date >= as.Date("2020-08-02"),
+                date < as.Date("2021-02-01")) %>%
+  dplyr::mutate(id = "England") %>%
+  dplyr::group_by(id, date) %>%
+  dplyr::summarise(all_adm = sum(all_adm, na.rm = TRUE),
+                   cases = sum(cases, na.rm = TRUE)) %>%
+  dplyr::mutate(adm_trend = round((stl(ts(all_adm, freq = 7), s.window = 7)$time.series)[,2]),
+                cases_trend = round((stl(ts(cases, freq = 7), s.window = 7)$time.series)[,2])) %>%
+  dplyr::ungroup()
+
+df_reg <- df %>%
+    dplyr::filter(date >= as.Date("2020-08-02"),
+                date < as.Date("2021-02-01")) %>%
+  dplyr::group_by(id = nhs_region, date) %>%
+  dplyr::summarise(all_adm = sum(all_adm, na.rm = TRUE),
+                   cases = sum(cases, na.rm = TRUE)) %>%
+  dplyr::mutate(adm_trend = round((stl(ts(all_adm, freq = 7), s.window = 7)$time.series)[,2]),
+                cases_trend = round((stl(ts(cases, freq = 7), s.window = 7)$time.series)[,2])) %>%
+  dplyr::ungroup()
+
+```
+
+# Analyses
+
+```{r cross correlation}
+
+corr_nat <- purrr::map_df(.x = forecast_dates, .f = ~{
+    
+    out <- calc_cor(df = df_nat %>%
+                      dplyr::select(id, date, admissions = adm_trend, cases_trend),
+                    var = "cases_trend", lags = 0:14, date_end = as.Date(.x)) %>%
+      dplyr::mutate(forecast_from = .x)
+    
+  })
+
+corr_reg <- purrr::map_df(.x = forecast_dates, .f = ~{
+    
+    out <- calc_cor(df = df_reg %>%
+                      dplyr::select(id, date, admissions = adm_trend, cases_trend),
+                    var = "cases_trend", lags = 0:14, date_end = as.Date(.x)) %>%
+      dplyr::mutate(forecast_from = .x)
+    
+  })
+
+```
+
+# Output
+
+## Plot combined data
+```{r data nat}
+
+# National
+g_combined_nat <- df_nat %>%
+  dplyr::select(id, date, cases, cases_trend, adm = all_adm, adm_trend) %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(adm = adm/sd(adm),
+                adm_trend = adm_trend/sd(adm_trend),
+                cases = cases/sd(cases),
+                cases_trend = cases_trend/sd(cases_trend)) %>%
+  tidyr::pivot_longer(cols = -c(id, date)) %>%
+  dplyr::mutate(name = ordered(name, c("cases", "cases_trend", "adm", "adm_trend"))) %>%
+  ggplot(aes(x = date, y = value, col = name)) +
+  geom_line() +
+  scale_x_date(date_breaks = "4 weeks",
+               date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), NA)) +
+  facet_wrap(. ~ id) +
+  scale_color_brewer(palette = "Paired") +
+  labs(x = "Date", y = "Value (standardised)",
+       col = "Data") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+# By NHS region
+g_combined_reg <- df_reg %>%
+  dplyr::select(id, date, cases, cases_trend, adm = all_adm, adm_trend) %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(adm = adm/sd(adm),
+                adm_trend = adm_trend/sd(adm_trend),
+                cases = cases/sd(cases),
+                cases_trend = cases_trend/sd(cases_trend)) %>%
+  tidyr::pivot_longer(cols = -c(id, date)) %>%
+  dplyr::mutate(name = ordered(name, c("cases", "cases_trend", "adm", "adm_trend"))) %>%
+  dplyr::filter(!is.na(id)) %>%
+  ggplot(aes(x = date, y = value, col = name)) +
+  geom_line() +
+  scale_x_date(date_breaks = "4 weeks",
+               date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), NA)) +
+  facet_wrap(. ~ id) +
+  scale_color_brewer(palette = "Paired") +
+  labs(x = "Date", y = "Value (standardised)",
+       col = "Data") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+```
+
+## Cross-correlation, text
+```{r cc text}
+
+# National
+corr_nat %>%
+  dplyr::group_by(id, lag_days) %>%
+  dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
+  dplyr::filter(corr > 0.99*max(corr))
+
+# By NHS region
+corr_reg %>%
+  dplyr::group_by(id, lag_days) %>%
+  dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
+  dplyr::filter(corr > 0.99*max(corr))
+
+```
+
+## Cross-correlation, tile
+
+```{r cc tile}
+
+g_tile_nat <- corr_nat %>%
+  dplyr::filter(lag_days <= 10) %>%
+  dplyr::mutate(forecast_from = as.Date(forecast_from)) %>%
+  ggplot(aes(x = forecast_from, y = lag_days, fill = corr)) +
+  geom_tile() +
+  scale_x_date(date_breaks = "4 weeks",
+               date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), NA)) +
+  scale_y_continuous(breaks = integer_breaks()) +
+  scale_fill_distiller(palette = "RdBu", limits = c(-1, 1)) +
+  facet_wrap(. ~ id) +
+  labs(x = "Forecast date", y = "Lag (days)",
+       title = "A",
+       fill = "Correlation") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+g_tile_reg <- corr_reg %>%
+  dplyr::filter(lag_days <= 10,
+                !is.na(id)) %>%
+  dplyr::mutate(forecast_from = as.Date(forecast_from)) %>%
+  ggplot(aes(x = forecast_from, y = lag_days, fill = corr)) +
+  geom_tile() +
+  scale_x_date(date_breaks = "4 weeks",
+               date_labels = "%d %b",
+               limits = c(as.Date("2020-08-01"), NA)) +
+  scale_y_continuous(breaks = seq(0, 10, 2)) +
+  scale_fill_distiller(palette = "RdBu", limits = c(-1, 1)) +
+  facet_wrap(. ~ id, ncol = 2) +
+  labs(x = "Forecast date", y = "Lag (days)",
+       title = "B",
+       fill = "Correlation") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+#####
+guide_area() / (g_tile_nat | g_tile_reg) +
+  plot_layout(heights = c(0.1, 1), guides = "collect")
+#####
+
+```
+
+## Cross-correlation, line
+
+```{r cc line}
+
+g_correlation_nat <- corr_nat %>%
+  dplyr::group_by(id, lag_days) %>%
+  dplyr::summarise(corr = mean(corr)) %>%
+  ggplot(aes(x = lag_days, y = corr)) +
+  geom_line() +
+  scale_x_continuous(breaks = seq(0, 20, 2)) +
+  scale_y_continuous(limits = c(0.5, 1)) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Lag (days)", y = "Correlation",
+       col = "NHS region",
+       title = "A") +
+  theme_bw()
+
+g_correlation_reg <- corr_reg %>%
+  dplyr::filter(!is.na(id)) %>%
+  dplyr::group_by(id, lag_days) %>%
+  dplyr::summarise(corr = mean(corr)) %>%
+  ggplot(aes(x = lag_days, y = corr)) +
+  geom_line(aes(col = id), lwd = 0.6) +
+  geom_line(data = corr_reg %>%
+              dplyr::filter(!is.na(id)) %>%
+              dplyr::group_by(lag_days) %>%
+              dplyr::summarise(corr = mean(corr)), lwd = 0.6, lty = 2) +
+  scale_x_continuous(breaks = seq(0, 20, 2)) +
+  scale_y_continuous(limits = c(0.5, 1)) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Lag (days)", y = "",
+       col = "NHS region",
+       title = "B") +
+  theme_bw()
+
+#####
+g_correlation_nat | g_correlation_reg
+#####
+
+```
+
+
+# Extra
+
+```{r penalised regression, eval = FALSE, include = FALSE}
+
+pen_nat <- purrr::map_df(.x = forecast_dates, .f = ~ {
+  
+  df_pen_in <- df_nat %>%
+  dplyr::select(id, date, adm_trend, contains("cases"), -cases) %>%
+  dplyr::rename(adm = adm_trend,
+                cases = cases_trend) %>%
+  dplyr::filter(date > as.Date(.x) - 42,
+                date <= as.Date(.x)) %>%
+  dplyr::mutate(across(contains("cases"), ~.x/sd(.x))) %>%
+  dplyr::mutate(adm = adm/sd(adm))
+
+  y_in <- df_pen_in$adm
+  x_in <- df_pen_in %>%
+    dplyr::select(contains("case")) %>%
+    dplyr::mutate(ones = rep(1, length(y_in))) %>%
+    as.matrix()
+  
+  cv_ridge <- cv.glmnet(x_in, y_in, alpha = 0)
+  cv_ridge$lambda.min
+  model_ridge <- glmnet(x_in, y_in, alpha = 0, lambda = cv_ridge$lambda.min)
+  out_ridge <- as.matrix(coef(model_ridge))
+  tb_ridge <- tibble::tibble(name = rownames(out_ridge), value = out_ridge[,1]) %>%
+    dplyr::filter(grepl("case", name)) %>%
+    dplyr::mutate(forecast_from = .x,
+                  method = "ridge")
+  
+  cv_lasso <- cv.glmnet(x_in, y_in, alpha = 1)
+  cv_lasso$lambda.min
+  model_lasso <- glmnet(x_in, y_in, alpha = 1, lambda = cv_lasso$lambda.min)
+  out_lasso <- as.matrix(coef(model_lasso))
+  tb_lasso <- tibble::tibble(name = rownames(out_lasso), value = out_lasso[,1]) %>%
+    dplyr::filter(grepl("case", name)) %>%
+    dplyr::mutate(forecast_from = .x,
+                  method = "lasso") 
+  
+  tb_out <- tb_ridge %>%
+    dplyr::bind_rows(tb_lasso)
+  
+  return(tb_out)
+  
+} ) %>%
+  dplyr::bind_rows()
+
+pen_grid = tidyr::expand_grid(date = forecast_dates, region = unique(df_reg$id))
+
+pen_reg <- purrr::map2_df(.x = pen_grid$date, .y = pen_grid$region, .f = ~ {
+  
+  df_pen_in <- df_reg %>%
+  dplyr::select(id, date, adm_trend, contains("case"), -case) %>%
+  dplyr::rename(adm = adm_trend,
+                case = case_trend) %>%
+  dplyr::filter(id == .y,
+                date > as.Date(.x) - 42,
+                date <= as.Date(.x)) %>%
+  dplyr::mutate(across(contains("case"), ~.x/sd(.x))) %>%
+  dplyr::mutate(adm = adm/sd(adm)) %>%
+    dplyr::ungroup()
+
+  y_in <- df_pen_in$adm
+  x_in <- df_pen_in %>%
+    dplyr::select(adm, contains("case"))
+  x_in <- model.matrix(adm ~ ., x_in)[,-1]
+  
+  cv_ridge <- cv.glmnet(x_in, y_in, alpha = 0)
+  cv_ridge$lambda.min
+  model_ridge <- glmnet(x_in, y_in, alpha = 0, lambda = cv_ridge$lambda.min)
+  out_ridge <- as.matrix(coef(model_ridge))
+  tb_ridge <- tibble::tibble(name = rownames(out_ridge), value = out_ridge[,1]) %>%
+    dplyr::filter(grepl("case", name)) %>%
+    dplyr::mutate(forecast_from = .x,
+                  method = "ridge")
+  
+  cv_lasso <- cv.glmnet(x_in, y_in, alpha = 1)
+  cv_lasso$lambda.min
+  model_lasso <- glmnet(x_in, y_in, alpha = 1, lambda = cv_lasso$lambda.min)
+  out_lasso <- as.matrix(coef(model_lasso))
+  tb_lasso <- tibble::tibble(name = rownames(out_lasso), value = out_lasso[,1]) %>%
+    dplyr::filter(grepl("case", name)) %>%
+    dplyr::mutate(forecast_from = .x,
+                  method = "lasso") 
+  
+  tb_out <- tb_ridge %>%
+    dplyr::bind_rows(tb_lasso) %>%
+    dplyr::mutate(region = .y)
+  
+  return(tb_out)
+  
+} ) %>%
+  dplyr::bind_rows()
+
+```
+
+```{r ARIMA regression fit}
+
+map_grid <- expand.grid(x_var = c("cases", paste0("cases_", 1:7)), fdate = forecast_dates)
+
+fit_nat <- purrr::map2_df(.x = map_grid$x_var, .y = map_grid$fdate, .f = ~{
+  
+  df_in <- df_nat %>%
+  dplyr::select(id, date, adm_trend, contains("cases"), -cases) %>%
+  dplyr::rename(adm = adm_trend,
+                cases = cases_trend) %>%
+  dplyr::filter(date > as.Date(.y) - 42,
+                date <= as.Date(.y))
+  
+  fit <- forecast::auto.arima(y = df_in$adm,
+                            xreg = df_in %>% pull(.x))
+  
+  out <- tibble::tibble(forecast_date = .y, var = .x, aic = fit$aic, bic = fit$bic, aicc = fit$aicc)
+  
+  return(out)
+  
+}) %>%
+  dplyr::bind_rows()
+
+
+map_grid <- expand.grid(x_var = c("case", paste0("case_", 1:7)), fdate = forecast_dates)
+
+fit_reg <- purrr::map2_df(.x = map_grid$x_var, .y = map_grid$fdate, .f = ~{
+  
+  out <- purrr::map_df(.x = unique(df_pen_reg$id), .f = ~ {
+    
+    
+    
+  })
+  
+  df_in <- df_pen_reg %>%
+    dplyr::filter(id == "Midlands") %>%
+    dplyr::filter(date > as.Date(.y) - 42,
+                  date <= as.Date(.y))
+  
+  fit <- forecast::auto.arima(y = df_in$adm,
+                            xreg = df_in %>% pull(.x))
+  
+  out <- tibble::tibble(forecast_date = .y, var = .x, aic = fit$aic, bic = fit$bic, aicc = fit$aicc)
+  
+  return(out)
+  
+}) %>%
+  dplyr::bind_rows()
+
+
+```
+
+## Penalised regression
+
+```{r lasso national, eval = FALSE}
+
+pen_nat %>%
+  dplyr::select(method, forecast_from, name, value) %>%
+  dplyr::filter(method == "lasso") %>%
+  dplyr::mutate(forecast_from = as.Date(forecast_from),
+                name = ifelse(name == "cases", 0, as.integer(str_remove(name, "cases_"))),
+                value = ifelse(value == 0, NA, value)) %>%
+  ggplot(aes(x = forecast_from, y = name, fill = value)) +
+  geom_tile() +
+  scale_x_date(date_breaks = "4 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = seq(0, 7, 1)) +
+  scale_fill_distiller(palette = "RdBu", na.value = "grey80", limits = c(-2, 2)) +
+  labs(x = "Forecast date", y = "Lag (days)",
+       title = "LASSO regression") +
+  theme_bw()
+
+pen_nat %>%
+  dplyr::select(method, forecast_from, name, value) %>%
+  dplyr::filter(method == "ridge") %>%
+  dplyr::mutate(forecast_from = as.Date(forecast_from),
+                name = ifelse(name == "cases", 0, as.integer(str_remove(name, "cases_"))),
+                value = ifelse(value == 0, NA, value)) %>%
+  ggplot(aes(x = forecast_from, y = name, fill = value)) +
+  geom_tile() +
+  scale_x_date(date_breaks = "4 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = seq(0, 7, 1)) +
+  scale_fill_distiller(palette = "RdBu", na.value = "grey50", limits = c(-0.6, 0.6)) +
+  labs(x = "Forecast date", y = "Lag (days)",
+       title = "Ridge regression",
+       fill = "Coefficient") +
+  theme_bw()
+
+pen_reg %>%
+  dplyr::select(method, region, forecast_from, name, value) %>%
+  dplyr::filter(method == "lasso") %>%
+  dplyr::mutate(forecast_from = as.Date(forecast_from),
+                name = ifelse(name == "case", 0, as.integer(str_remove(name, "case_"))),
+                value = ifelse(value == 0, NA, value)) %>%
+  ggplot(aes(x = forecast_from, y = name, fill = value)) +
+  geom_tile() +
+  facet_wrap(. ~ region) +
+  scale_x_date(date_breaks = "4 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = seq(0, 7, 1)) +
+  scale_fill_distiller(palette = "RdBu", na.value = "grey80", limits = c(-5, 5)) +
+  labs(x = "Forecast date", y = "Lag (days)") +
+  theme_bw()
+
+pen_reg %>%
+  dplyr::select(method, region, forecast_from, name, value) %>%
+  dplyr::filter(method == "ridge") %>%
+  dplyr::mutate(forecast_from = as.Date(forecast_from),
+                name = ifelse(name == "case", 0, as.integer(str_remove(name, "case_"))),
+                value = ifelse(value == 0, NA, value)) %>%
+  ggplot(aes(x = forecast_from, y = name, fill = value)) +
+  geom_tile() +
+  facet_wrap(. ~ region) +
+  scale_x_date(date_breaks = "4 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = seq(0, 7, 1)) +
+  scale_fill_distiller(palette = "RdBu", na.value = "grey50", limits = c(-0.8, 0.8)) +
+  labs(x = "Forecast date", y = "Lag (days)") +
+  theme_bw()
+
+
+```
+
+
+## Fit ARIMA regression
+
+```{r arima and cases, eval = FALSE}
+
+
+
+fit_nat %>%
+  dplyr::mutate(var = ifelse(var == "cases", 0, as.integer(str_remove(var, "cases_"))),
+                forecast_date = as.Date(forecast_date)) %>%
+  ggplot(aes(x = var, y = aic)) +
+  geom_point() +
+  facet_wrap(. ~ forecast_date) +
+  scale_x_continuous(breaks = 0:7) +
+  labs(x = "Lag (days)", y = "AIC") +
+  theme_bw()
+
+fit_nat %>%
+  dplyr::mutate(var = ifelse(var == "cases", 0, as.integer(str_remove(var, "cases_"))),
+                forecast_date = as.Date(forecast_date)) %>%
+  dplyr::group_by(forecast_date) %>%
+  dplyr::filter(aic == min(aic)) %>%
+  ggplot(aes(x = forecast_date, y = var)) +
+  geom_line()
+
+
+
+fit_reg %>%
+  dplyr::mutate(forecast_date = as.Date(forecast_date)) %>%
+  dplyr::group_by(forecast_date) %>%
+  dplyr::filter(aic == min(aic))
+
+fit_reg %>%
+  dplyr::mutate(forecast_date = as.Date(forecast_date)) %>%
+  ggplot(aes(x = var, y = aic)) +
+  geom_point() +
+  facet_wrap(. ~ forecast_date) +
+  # scale_x_date(date_breaks = "4 weeks", date_labels = "%d %b") +
+  theme_bw()
+
+
+
+```
+
