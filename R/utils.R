@@ -44,14 +44,14 @@ extract_postcode <- function(outcode = NULL){
   
 }
 
-## Generate samples from EpiNow2 forecast summary (df has columns "region", "date", "mean", "sd")
+## Generate samples from EpiNow2 forecast summary (df has columns "id", "date", "mean", "sd")
 epinow_samples <- function(df = NULL, n = 1000){
   
   if(!("id" %in% colnames(df))){
     
     df <- df %>%
       dplyr::mutate(region = ifelse(grepl("Cornwall", region), "Cornwall", region)) %>%
-      dplyr::left_join(readRDS(here::here("data", "raw", "offline_utla_names.rds")), by = c("region" = "geo_name")) %>%
+      dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
       dplyr::rename(id = geo_code) %>%
       dplyr::filter(!is.na(id))
     
@@ -102,8 +102,7 @@ epinow_samples <- function(df = NULL, n = 1000){
 return_clusters <- function(df, k = 6, exclude_ids = NULL){
   
   mat_in <- df %>%
-    dplyr::filter(!id %in% small_trust,
-                  !id %in% exclude_ids) %>%
+    dplyr::filter(!id %in% exclude_ids) %>%
     tidyr::pivot_wider(id_cols = date, names_from = id) %>%
     dplyr::select(-date)
   
@@ -120,73 +119,5 @@ return_clusters <- function(df, k = 6, exclude_ids = NULL){
   out_clusters <- tibble::tibble(id = names(clusters), cluster = clusters)
   
   return(list(tree_plot = g, clusters = out_clusters))
-  
-}
-
-## function to identify local peak(s) in weekly data
-find_local_peaks <- function(df = NULL,
-                             cutoff_date = "2020-12-09",
-                             threshold_max = 0.95,
-                             threshold_size = 70,
-                             threshold_ratio = 2){
-  
-  ## Get dates of peaks before/after cutoff_date
-  peaks <- df %>%
-    dplyr::group_by(id, early_max = date < as.Date(cutoff_date)) %>%
-    dplyr::filter(adm >= threshold_max*max(adm, na.rm = TRUE)) %>%
-    dplyr::group_by(id, early_max) %>%
-    dplyr::summarise(date = min(date, na.rm = TRUE),
-                     .groups = "drop_last") %>%
-    dplyr::arrange(id, -early_max) %>%
-    dplyr::mutate(early_max = ifelse(early_max, "first_peak", "second_peak")) %>%
-    tidyr::pivot_wider(id_cols = id, names_from = early_max, values_from = date)
-  
-  ## Get peak details (value, and minimum between them)
-  peaks_details <- df %>%
-    dplyr::left_join(peaks, by = "id") %>%
-    dplyr::filter(date >= first_peak,
-                  date <= second_peak) %>%
-    dplyr::group_by(id, first_peak, second_peak) %>%
-    dplyr::summarise(localmin_dat = date[which.min(adm)],
-                     first_peak_val = adm[which(first_peak == date)],
-                     second_peak_val = adm[which(second_peak == date)],
-                     localmin_val = min(adm),
-                     .groups = "drop_last") %>%
-    dplyr::select(id, first_peak, localmin_dat, second_peak, first_peak_val, localmin_val, second_peak_val)
-  
-  
-  exclude_trusts <- peaks_details %>%
-    dplyr::filter(first_peak_val < threshold_size | second_peak_val < threshold_size) %>%
-    dplyr::pull(id)
-  
-  ## One peak
-  one_peak <- peaks_details %>%
-    dplyr::filter(!id %in% exclude_trusts,
-                  first_peak == localmin_dat | second_peak == localmin_dat) %>%
-    dplyr::pull(id)
-  
-  ## Two distinct peaks
-  two_peaks <- peaks_details %>%
-    dplyr::filter(!id %in% c(exclude_trusts, one_peak),
-                  first_peak_val/localmin_val >= threshold_ratio,
-                  second_peak_val/localmin_val >= threshold_ratio) %>%
-    dplyr::pull(id)
-  
-  ## Two indistinct peaks
-  two_peaks_indistinct <- adm_localmax_det %>%
-    dplyr::filter(!id %in% c(exclude_trusts, one_peak, two_peaks),
-                  first_peak_val/localmin_val < threshold_ratio | second_peak_val/localmin_val < threshold_ratio) %>%
-    dplyr::pull(id)
-  
-  peaks_out <- peaks %>%
-    tidyr::pivot_longer(cols = -id, values_to = "date") %>%
-    dplyr::left_join(df %>% dplyr::rename(value = adm), by = c("id", "date")) %>%
-    dplyr::mutate(group = case_when(id %in% one_peak ~ "one",
-                                    id %in% two_peaks ~ "two",
-                                    id %in% two_peaks_indistinct ~ "two_unclear")) %>%
-    dplyr::filter(!(group == "one" & name == "first_peak")) %>%
-    dplyr::select(nhs_region, id, group, name, date, value)
-  
-  return(peaks_out)
   
 }
