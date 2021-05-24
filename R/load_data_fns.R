@@ -1,5 +1,4 @@
 
-
 # Download and format admissions data -------------------------------------
 
 load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"), add_private = FALSE){
@@ -55,10 +54,7 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
   
 }
 
-
-
 # Load UTLA-level case data -----------------------------------------------
-
 # Wrapper around covidregionaldata::get_regional_data(); England only
 
 load_case_data <- function(){
@@ -73,9 +69,6 @@ load_case_data <- function(){
   return(raw_case)
   
 }
-
-
-
 
 # Load combined data (by Trust) -------------------------------------------
 
@@ -95,13 +88,9 @@ load_combined_data <- function(){
     dplyr::select(id = trust_code, date, cases = trust_case)
   
   df <- case_trust %>%
-    dplyr::full_join(adm, by = c("id", "date"))
+    dplyr::full_join(adm, by = c("id", "date")) %>%
+    dplyr::filter(id != "RPY")
   
   return(df)
   
 }
-
-
-
-
-
