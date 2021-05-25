@@ -1,5 +1,5 @@
 ---
-title: "Score admissions forecasts"
+title: "Results - forecast evaluation"
 author: "Sophie Meakin"
 date: "11/03/2021"
 output: html_document
@@ -7,7 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width = 16, fig.height = 9)
 
 library(covid19.nhs.data)
 library(scoringutils)
@@ -20,7 +21,7 @@ source(here::here("R", "load_data_fns.R"))
 
 ```
 
-```{r, load data, include = FALSE}
+```{r load data}
 
 # Load observed data
 observed <- load_hospital_data(keep_data = "all_adm")
@@ -36,7 +37,7 @@ wis_horizon <- readRDS(file = here::here(score_dir, "wis_horizon.rds"))
 wis_time <- readRDS(file = here::here(score_dir, "wis_time.rds"))
 wis_trust <- readRDS(file = here::here(score_dir, "wis_time.rds"))
 
-# Load forecasts (quantile) - for empirical coverage
+# Load admissions forecasts
 summary_dir <- here::here("data", "out", "admissions_forecast", "summary")
 summary_files <- list.files(summary_dir)[grepl("admissions", list.files(summary_dir))]
 
@@ -53,44 +54,70 @@ forecast_summary <- purrr::map_df(.x = summary_files, .f = ~{
 
 ```
 
-```{r other prep, include = FALSE}
+```{r empirical coverage}
 
+emp_coverage_dat <- forecast_summary %>%
+  dplyr::left_join(observed %>% dplyr::select(id, date, true_value = all_adm), by = c("id", "date")) %>%
+  dplyr::filter(horizon %in% 1:14,
+                !is.na(true_value)) %>%
+  dplyr::mutate(range = paste0(boundary, "_", range)) %>%
+  dplyr::select(-boundary) %>%
+  tidyr::pivot_wider(id_cols = c(forecast_from, id, true_value, model, horizon, date),
+                     names_from = range,
+                     values_from = prediction) %>%
+  dplyr::group_by(model, horizon) %>%
+  dplyr::summarise(empirical50 = length(true_value[which(true_value > lower_50 & true_value < upper_50)])/n(),
+                   empirical90 = length(true_value[which(true_value > lower_90 & true_value < upper_90)])/n()) %>%
+  dplyr::filter(model %in% c(main_models, obs_models, "mean_ensemble_forecast", "mean_ensemble_observed")) %>%
+  tidyr::pivot_longer(cols = contains("empirical")) %>%
+  dplyr::mutate(truth = ifelse(name == "empirical50", 0.5, 0.9),
+                name = ifelse(name == "empirical50", "50% prediction interval", "90% prediction interval"))
+
+```
+
+```{r define new variables}
+
+# Date breaks based on forecast dates
 plot_dates <- unique(adm_scores$forecast_from)
 
-plot_50trusts <- observed %>%
+# Top-50 Trusts by total admissions
+top_admissions_50 <- observed %>%
   dplyr::filter(date < as.Date("2021-02-01")) %>%
   dplyr::group_by(id) %>%
   dplyr::summarise(total_adm = sum(all_adm, na.rm = TRUE)) %>%
   dplyr::arrange(-total_adm) %>%
   dplyr::slice_head(n = 50)
 
+# Define forecast ensemble model names
 ensemble_models <- c("snaive", "mean_ensemble_forecast", "median_ensemble_forecast")
 
+# Define main (forecast) models names and labels
 main_models <- c("snaive",
                  "ts_ensemble_aez",
                  "arima_case7_forecast_raw",
                  "convolution_rt",
                  "median_ensemble_forecast")
+main_model_labels <- c("Baseline",
+                       "Time series\nensemble",
+                       "ARIMA\nregression",
+                       "Convolution",
+                       "Median\nensemble")
+tb_main <- tibble::tibble(model = main_models, label = main_model_labels)
 
-main_model_names <- c("Baseline",
-                      "Time series\nensemble",
-                      "ARIMA\nregression",
-                      "Convolution",
-                      "Median\nensemble")
-
-tb_main <- tibble::tibble(model = main_models, label = main_model_names)
-
+# Define observed models names and labels
 obs_models <- c("snaive",
                 "ts_ensemble_aez",
                 "arima_case7_observed_raw",
                 "convolution_observed",
                 "median_ensemble_observed")
+tb_obs <- tibble::tibble(model = obs_models, label = main_model_labels)
 
 ```
 
 # Output
 
-## Overall
+
+## Overall forecasting accuracy
 
 ```{r}
 
@@ -136,29 +163,10 @@ rank_all <- pw_all %>%
   dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
   dplyr::arrange(horizon, forecast_from, id, rank)
 
-
-# Empirical coverage
-emp_coverage_dat <- forecast_summary %>%
-  dplyr::left_join(observed %>% dplyr::select(id, date, true_value = all_adm), by = c("id", "date")) %>%
-  dplyr::filter(horizon %in% 1:14,
-                !is.na(true_value)) %>%
-  dplyr::mutate(range = paste0(boundary, "_", range)) %>%
-  dplyr::select(-boundary) %>%
-  tidyr::pivot_wider(id_cols = c(forecast_from, id, true_value, model, horizon, date),
-                     names_from = range,
-                     values_from = prediction) %>%
-  dplyr::group_by(model, horizon) %>%
-  dplyr::summarise(empirical50 = length(true_value[which(true_value > lower_50 & true_value < upper_50)])/n(),
-                   empirical90 = length(true_value[which(true_value > lower_90 & true_value < upper_90)])/n()) %>%
-  dplyr::filter(model %in% c(main_models, obs_models, "mean_ensemble_forecast", "mean_ensemble_observed")) %>%
-  tidyr::pivot_longer(cols = contains("empirical")) %>%
-  dplyr::mutate(truth = ifelse(name == "empirical50", 0.5, 0.9),
-                name = ifelse(name == "empirical50", "50% prediction interval", "90% prediction interval"))
-
 ```
 
-### Overall (fig. 2)
-```{r overall plot}
+### Figure 2
+```{r}
 
 x_breaks <- c(seq(-1, 2, 0.2), 0)
 x_breaks <- x_breaks[order(x_breaks)]
@@ -167,7 +175,7 @@ g_overall_calibration <- emp_coverage_dat %>%
   dplyr::filter(model %in% main_models,
                 model != "snaive") %>%
   dplyr::left_join(tb_main, by = "model") %>%
-  dplyr::mutate(label = ordered(label, main_model_names)) %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
   ggplot(aes(x = horizon, y = value, col = label)) +
   geom_line(lwd = 0.6) +
   geom_point(size = 2) +
@@ -192,7 +200,7 @@ g_overall_calibration <- emp_coverage_dat %>%
 g_rwis_overall <- rank_overall %>%
   dplyr::filter(model != "snaive") %>%
   dplyr::left_join(tb_main, by = "model") %>%
-  dplyr::mutate(label = ordered(label, main_model_names)) %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
   ggplot(aes(y = label, x = scaled_rel_skill-1)) +
   geom_col(fill = "grey50") +
   geom_vline(xintercept = 0, lty = 2) +
@@ -209,7 +217,7 @@ g_rwis_horizon7 <- rank_horizon %>%
                 model != "snaive") %>%
   dplyr::left_join(tb_main, by = "model") %>%
   dplyr::group_by(horizon) %>%
-  dplyr::mutate(label = ordered(label, main_model_names)) %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
   ggplot(aes(y = label, x = scaled_rel_skill - 1)) +
   geom_col(fill = "grey50") +
   geom_vline(xintercept = 0, lty = 2) +
@@ -230,7 +238,7 @@ g_rwis_horizon14 <- rank_horizon %>%
                 model != "snaive") %>%
   dplyr::left_join(tb_main, by = "model") %>%
   dplyr::group_by(horizon) %>%
-  dplyr::mutate(label = ordered(label, main_model_names)) %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
   ggplot(aes(y = label, x = scaled_rel_skill - 1)) +
   geom_col(fill = "grey50") +
   geom_vline(xintercept = 0, lty = 2) +
@@ -251,7 +259,7 @@ g_individual_rank <- rank_all %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/sum(n),
                 rank = as.character(rank),
-                label = ordered(label, main_model_names)) %>%
+                label = ordered(label, main_model_labels)) %>%
   ggplot(aes(y = label, x = p, fill = rank)) +
   geom_col() +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
@@ -261,16 +269,15 @@ g_individual_rank <- rank_all %>%
        fill = "Rank") +
   theme_bw()
 
+```
 
-#####
+```{r figure 2}
 
 (g_overall_calibration / (g_rwis_horizon7 | g_rwis_horizon14) + plot_layout(heights = c(2, 1))) | g_individual_rank
 
-#####
-
 ```
 
-### Text values
+### In-text values
 ```{r}
 
 # empirical coverage 7 and 14 days
@@ -318,9 +325,7 @@ adm_scores %>%
 
 ```
 
-
-
-### WIS contributions (fig. Sx)
+### Figure S6
 ```{r}
 
 g_wiscontribution_horizon <- wis_horizon %>%
@@ -365,105 +370,26 @@ g_wiscontribution_time <- wis_time %>%
   theme_bw() +
   theme(legend.position = "none")
 
+```
 
-#####
+```{r figure s6}
 
 guide_area() / g_wiscontribution_horizon / g_wiscontribution_time +
   plot_layout(heights = c(0.2, 1, 3), guides = "collect")
 
-#####
-
 ```
-
-
-### ARIMA regression
-```{r}
-
-# ARIMA regression, observed cases
-pw_arima_obs <- scoringutils::pairwise_comparison(scores = adm_scores %>%
-                                                  dplyr::filter(model == "snaive" |
-                                                                  (grepl("arima_case", model) & grepl("observed", model))),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-rank_arima_obs <- pw_arima_obs %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-
-# ARIMA regression, forecast cases
-pw_arima_fct <- scoringutils::pairwise_comparison(scores = adm_scores %>%
-                                                  dplyr::filter(model == "snaive" |
-                                                                  (grepl("arima_case", model) & grepl("forecast", model))),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-rank_arima_fct <- pw_arima_fct %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-```
-
-### Ensemble
-```{r}
-
-# ARIMA regression, observed cases
-pw_ensemble_obs <- scoringutils::pairwise_comparison(scores = adm_scores %>%
-                                                  dplyr::filter(model %in% c("snaive",
-                                                                             "mean_ensemble_observed",
-                                                                             "median_ensemble_observed")),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-rank_ensemble_obs <- pw_ensemble_obs %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-
-# ARIMA regression, forecast cases
-pw_ensemble_fct <- scoringutils::pairwise_comparison(scores = adm_scores %>%
-                                                  dplyr::filter(model %in% c("snaive",
-                                                                             "mean_ensemble_forecast",
-                                                                             "median_ensemble_forecast")),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-rank_ensemble_fct <- pw_ensemble_fct %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-```
-
 
 
 ## By forecast date
 
 ```{r}
 
-# Pairwise comparison
 pw_time <- scoringutils::pairwise_comparison(adm_scores %>%
                                                 dplyr::filter(model %in% main_models),
                                              baseline = "snaive",
                                              by = c("horizon", "model", "forecast_from", "id"),
                                              summarise_by = c("forecast_from", "horizon", "model"))
 
-# Scaled relative skill ranking
 rank_time <- pw_time %>%
   dplyr::select(forecast_from, horizon, model, scaled_rel_skill) %>%
   unique() %>%
@@ -482,8 +408,57 @@ mae_time <- adm_scores %>%
 
 ```
 
-### By time, 7-day horizon (fig. 3)
-```{r by time plot 7 days}
+### In-text values
+```{r}
+
+# frequency outperforming baseline
+rank_time %>%
+  dplyr::filter(horizon == 7,
+                scaled_rel_skill < 1) %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(n = n())
+
+# rWIS values
+rank_time %>%
+  dplyr::filter(horizon == 7) %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(med_rwis = median(scaled_rel_skill),
+                   iq1_rwis = quantile(scaled_rel_skill, 0.25),
+                   iq3_rwis = quantile(scaled_rel_skill, 0.75)) %>%
+  dplyr::mutate(iqr = iq3_rwis - iq1_rwis)
+
+# first-ranked model by date
+rank_time %>%
+  dplyr::filter(horizon == 7) %>%
+  dplyr::filter(rank == 1)
+
+# % times first-ranked model
+rank_time %>%
+  dplyr::filter(horizon == 7,
+                rank == 1) %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(n = n())
+
+# % times first-ranked, individual models
+rank_time %>%
+  dplyr::filter(horizon == 7,
+                model != "median_ensemble_forecast",
+                model != "snaive") %>%
+  dplyr::group_by(forecast_from) %>%
+  dplyr::filter(rank == min(rank)) %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(n = n())
+
+# MAE 03 January 2021
+mae_time %>%
+  dplyr::filter(horizon == 7,
+                forecast_from == as.Date("2021-01-03"))
+
+
+```
+
+### Figure 3
+```{r}
 
 # Observed average daily admissions
 g_time_obs <- observed %>%
@@ -566,16 +541,16 @@ g_time_mae <- g_time_mae +
   geom_point(data = mae_time %>% filter(model == "snaive", horizon == 7),
              shape = 4, stroke = 0.8, col = "grey50")
 
-#####
+```
+
+```{r figure 3}
 
 guide_area() / g_time_rwis / g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
 
-#####
-
 ```
 
-### By time, 14-day horizon (fig. Sx)
-```{r by time plot}
+### Figure S7
+```{r}
 
 # Observed average daily admissions
 g_time_obs <- observed %>%
@@ -665,70 +640,17 @@ g_time_mae <- g_time_mae +
   geom_point(data = mae_time %>% filter(model == "snaive", horizon == 14),
              shape = 4, stroke = 0.8, col = "grey50")
 
-#####
+```
+
+```{r figure s7}
 
 guide_area() / g_time_rwis1 / g_time_rwis0 / g_time_mae / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
 
-#####
-
 ```
 
-### Text values
 ```{r}
 
-# outperform baseline
-rank_time %>%
-  dplyr::filter(horizon == 7,
-                scaled_rel_skill < 1) %>%
-  dplyr::group_by(model) %>%
-  dplyr::summarise(n = n())
-
-# rWIS values
-rank_time %>%
-  dplyr::filter(horizon == 7) %>%
-  dplyr::group_by(model) %>%
-  dplyr::summarise(med_rwis = median(scaled_rel_skill),
-                   iq1_rwis = quantile(scaled_rel_skill, 0.25),
-                   iq3_rwis = quantile(scaled_rel_skill, 0.75)) %>%
-  dplyr::mutate(iqr = iq3_rwis - iq1_rwis)
-
-# first-ranked model by date
-rank_time %>%
-  dplyr::filter(horizon == 7) %>%
-  dplyr::filter(rank == 1)
-
-# % times first-ranked model
-rank_time %>%
-  dplyr::filter(horizon == 7,
-                rank == 1) %>%
-  dplyr::group_by(model) %>%
-  dplyr::summarise(n = n())
-
-# % times first-ranked, individual models
-rank_time %>%
-  dplyr::filter(horizon == 7,
-                model != "median_ensemble_forecast",
-                model != "snaive") %>%
-  dplyr::group_by(forecast_from) %>%
-  dplyr::filter(rank == min(rank)) %>%
-  dplyr::group_by(model) %>%
-  dplyr::summarise(n = n())
-
-# MAE 03 January 2021
-mae_time %>%
-  dplyr::filter(horizon == 7,
-                forecast_from == as.Date("2021-01-03"))
-
-
-```
-
-### WIS contributions
-```{r}
-
-# 7 days
-
-
-# 14 days
+# rWIS contributions 14 days - NOT CURRENTLY USED
 wis_time %>%
   dplyr::filter(model %in% main_models,
                 horizon == 14) %>%
@@ -766,7 +688,7 @@ rank_trust <- pw_trust %>%
   dplyr::group_by(horizon, id) %>%
   dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
   dplyr::arrange(horizon, id, rank) %>%
-  dplyr::left_join(plot_50trusts, by = "id") %>%
+  dplyr::left_join(top_admissions_50, by = "id") %>%
   dplyr::ungroup()
 
 mae_trust <- adm_scores %>%
@@ -782,26 +704,7 @@ mae_trust <- adm_scores %>%
 
 ```
 
-```{r}
-# 
-# # Pairwise comparison, excluding ensemble model
-# pw_trust_ind <- scoringutils::pairwise_comparison(adm_scores %>%
-#                                                 dplyr::filter(model %in% setdiff(main_models, "mean_ensemble_observed")),
-#                                               baseline = "snaive",
-#                                               by = c("horizon", "model", "forecast_from", "id"),
-#                                               summarise_by = c("id", "model"))
-# 
-# # Ranking
-# rank_trust_ind <- pw_trust_ind %>%
-#   dplyr::select(id, model, scaled_rel_skill) %>%
-#   unique() %>%
-#   dplyr::group_by(id) %>%
-#   dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-#   dplyr::arrange(id, rank)
-
-```
-
-### Text values
+### In-text values
 ```{r}
 
 # % times outperforming baseline (rWIS < 1)
@@ -847,12 +750,12 @@ rank_trust %>%
 ```
 
 
-### By trust, 7-day horizon (fig. 4)
+### Figure 4
 ```{r}
 
 # Relative WIS (tile)
 g_location_tile <- rank_trust %>%
-  dplyr::filter(id %in% plot_50trusts$id,
+  dplyr::filter(id %in% top_admissions_50$id,
                 horizon == 7,
                 model != "snaive") %>%
   dplyr::left_join(mae_trust %>% dplyr::select(id, model, rank1_ae), by = c("id", "model")) %>%
@@ -916,7 +819,7 @@ g_location_rank <- rank_trust %>%
 
 # MAE
 g_location_mae0 <- mae_trust %>%
-  dplyr::filter(id %in% plot_50trusts$id,
+  dplyr::filter(id %in% top_admissions_50$id,
                 horizon == 7,
                 model != "snaive") %>%
   ggplot(aes(y = reorder(id, ensemble_ae), x = av_aem)) +
@@ -930,29 +833,28 @@ g_location_mae0 <- mae_trust %>%
   theme(legend.position = "top")
 
 g_location_mae0 <- g_location_mae0 +
-  geom_point(data = mae_trust %>% filter(horizon == 7, rank == 1, id %in% plot_50trusts$id),
+  geom_point(data = mae_trust %>% filter(horizon == 7, rank == 1, id %in% top_admissions_50$id),
              aes(col = model), size = 3, alpha = 0.4) +
-  geom_point(data = mae_trust %>% filter(horizon == 7, grepl("median_ensemble", model), id %in% plot_50trusts$id),
+  geom_point(data = mae_trust %>% filter(horizon == 7, grepl("median_ensemble", model), id %in% top_admissions_50$id),
              aes(col = model), size = 3) +
-  geom_point(data = mae_trust %>% filter(horizon == 7, model == "snaive", id %in% plot_50trusts$id),
+  geom_point(data = mae_trust %>% filter(horizon == 7, model == "snaive", id %in% top_admissions_50$id),
              col = "grey50", shape = 4, stroke = 1, size = 2)
 
+```
 
-#####
+```{r figure 4}
 
 guide_area() / (g_location_rwis + g_location_mae0) / (g_location_rank + plot_layout(guides = "keep")) +
   plot_layout(heights = c(0.2, 3, 1), guides = "collect")
 
-#####
-
 ```
 
-### By trust, 14-day horizon (fig. Sx)
+### Figure S8
 ```{r}
 
 # Relative WIS (tile)
 g_location_tile <- rank_trust %>%
-  dplyr::filter(id %in% plot_50trusts$id,
+  dplyr::filter(id %in% top_admissions_50$id,
                 horizon == 14,
                 model != "snaive") %>%
   dplyr::left_join(mae_trust %>% dplyr::select(id, model, rank1_ae), by = c("id", "model")) %>%
@@ -1017,7 +919,7 @@ g_location_rank <- rank_trust %>%
 
 # MAE
 g_location_mae0 <- mae_trust %>%
-  dplyr::filter(id %in% plot_50trusts$id,
+  dplyr::filter(id %in% top_admissions_50$id,
                 horizon == 14,
                 model != "snaive") %>%
   ggplot(aes(y = reorder(id, ensemble_ae), x = av_aem)) +
@@ -1031,26 +933,26 @@ g_location_mae0 <- mae_trust %>%
   theme(legend.position = "top")
 
 g_location_mae0 <- g_location_mae0 +
-  geom_point(data = mae_trust %>% filter(horizon == 14, rank == 1, model != "snaive", id %in% plot_50trusts$id),
+  geom_point(data = mae_trust %>% filter(horizon == 14, rank == 1, model != "snaive", id %in% top_admissions_50$id),
              aes(col = model), size = 3, alpha = 0.4) +
-  geom_point(data = mae_trust %>% filter(horizon == 14, grepl("median_ensemble", model), id %in% plot_50trusts$id),
+  geom_point(data = mae_trust %>% filter(horizon == 14, grepl("median_ensemble", model), id %in% top_admissions_50$id),
              aes(col = model), size = 3) +
-  geom_point(data = mae_trust %>% filter(horizon == 14, model == "snaive", id %in% plot_50trusts$id),
+  geom_point(data = mae_trust %>% filter(horizon == 14, model == "snaive", id %in% top_admissions_50$id),
              col = "grey50", shape = 4, stroke = 1, size = 2)
 
+```
 
-#####
+```{r figure s8}
 
 guide_area() / (g_location_rwis + g_location_mae0) / (g_location_rank + plot_layout(guides = "keep")) +
   plot_layout(heights = c(0.2, 3, 1), guides = "collect")
 
-#####
-
 ```
 
-### rWIS tile, top 50 Trusts (fig. Sx)
+
 ```{r}
 
+# rWIS tile, top 50 Trusts - NOT CURRENTLY USED
 rank_trust %>%
   dplyr::filter(model != "snaive",
                 horizon == 7,
@@ -1066,15 +968,9 @@ rank_trust %>%
   theme_bw() +
   theme(legend.position = "right")
 
-```
-
-
-## By cluster
-```{r}
-
+# Eval by cluster - NOT CURRENTLY USED
 n_clusters <- 6
 
-# 
 pw_cluster <- scoringutils::pairwise_comparison(adm_scores %>%
                                                   dplyr::left_join(trust_cluster %>%
                                                                      dplyr::filter(k == n_clusters),
@@ -1095,167 +991,8 @@ rank_cluster <- pw_cluster %>%
 ```
 
 
-## Value of data
+## Value of perfect information
 
-### ARIMA regression model
-
-Also see "Overall - ARIMA regression" section.
-
-```{r}
-
-arima_models <- c("snaive", "arima_case7_observed_raw", "arima_case7_forecast_raw")
-
-# By horizon
-pw_arima_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% arima_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-
-rank_arima_horizon <- pw_arima_horizon %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-# By forecast date
-pw_arima_time <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% arima_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "forecast_from", "model"))
-
-rank_arima_time <- pw_arima_time %>%
-  dplyr::select(horizon, forecast_from, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon, forecast_from) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, forecast_from, rank) %>%
-  dplyr::select(horizon, forecast_from, model, scaled_rel_skill, rank)
-
-# By Trust
-pw_arima_trust <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% arima_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "id", "model"))
-
-rank_arima_trust <- pw_arima_trust %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon, id) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, id, rank) %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill, rank)
-
-```
-
-### Convolution model
-```{r}
-
-convolution_models <- c("snaive", "convolution_observed", "convolution_rt")
-
-# By horizon
-pw_convolution_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% convolution_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-
-rank_convolution_horizon <- pw_convolution_horizon %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-# By forecast date
-pw_convolution_time <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% convolution_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "forecast_from", "model"))
-
-rank_convolution_time <- pw_convolution_time %>%
-  dplyr::select(horizon, forecast_from, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon, forecast_from) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, forecast_from, rank) %>%
-  dplyr::select(horizon, forecast_from, model, scaled_rel_skill, rank)
-
-# By Trust
-pw_convolution_trust <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% convolution_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "id", "model"))
-
-rank_convolution_trust <- pw_convolution_trust %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon, id) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, id, rank) %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill, rank)
-
-```
-
-### Median ensemble
-```{r}
-
-ensemble_models <- c("snaive", "median_ensemble_observed", "median_ensemble_forecast")
-
-# By horizon
-pw_ensemble_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% ensemble_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "model"))
-rank_ensemble_horizon <- pw_ensemble_horizon %>%
-  dplyr::select(horizon, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, rank) %>%
-  dplyr::select(horizon, model, scaled_rel_skill, rank)
-
-
-# By Trust
-pw_ensemble_trust <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% ensemble_models),
-                                                baseline = "snaive",
-                                                by = c("horizon", "model", "forecast_from", "id"),
-                                                summarise_by = c("horizon", "id", "model"))
-
-rank_ensemble_trust <- pw_ensemble_trust %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon, id) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, id, rank) %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill, rank)
-
-rank_ensemble_trust %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
-  tidyr::pivot_wider(id_cols = c(horizon, id), names_from = model, values_from = scaled_rel_skill) %>%
-  ggplot(aes(x = median_ensemble_forecast, y = median_ensemble_observed)) +
-  geom_abline(slope = 1, intercept = 0, lty = 2, col = "grey50", lwd = 0.6) +
-  geom_point() +
-  geom_rug() +
-  facet_wrap(. ~ horizon) +
-  scale_x_continuous(limits = c(0, NA)) +
-  scale_y_continuous(limits = c(0, NA)) +
-  labs(x = "rWIS ensemble model, with forecast cases", y = "rWIS ensemble model, with observed cases") +
-  theme_bw()
-
-```
-
-
-### Value of perfect information (fig. Sx)
 ```{r}
 
 # By horizon
@@ -1321,6 +1058,78 @@ rank_obs_all <- pw_obs_all %>%
 
 ```
 
+```{r}
+
+# ARIMA REGRESSION MODEL
+arima_models <- c("snaive", "arima_case7_observed_raw", "arima_case7_forecast_raw")
+
+## By forecast date
+pw_arima_time <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                  dplyr::filter(model %in% arima_models),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "forecast_from", "model"))
+
+rank_arima_time <- pw_arima_time %>%
+  dplyr::select(horizon, forecast_from, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, forecast_from) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, forecast_from, rank) %>%
+  dplyr::select(horizon, forecast_from, model, scaled_rel_skill, rank)
+
+## By Trust
+pw_arima_trust <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                  dplyr::filter(model %in% arima_models),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "id", "model"))
+
+rank_arima_trust <- pw_arima_trust %>%
+  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, id) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, id, rank) %>%
+  dplyr::select(horizon, id, model, scaled_rel_skill, rank)
+
+
+# CONVOLUTION MODEL
+convolution_models <- c("snaive", "convolution_observed", "convolution_rt")
+
+## By forecast date
+pw_convolution_time <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                  dplyr::filter(model %in% convolution_models),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "forecast_from", "model"))
+
+rank_convolution_time <- pw_convolution_time %>%
+  dplyr::select(horizon, forecast_from, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, forecast_from) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, forecast_from, rank) %>%
+  dplyr::select(horizon, forecast_from, model, scaled_rel_skill, rank)
+
+## By Trust
+pw_convolution_trust <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                  dplyr::filter(model %in% convolution_models),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "id", "model"))
+
+rank_convolution_trust <- pw_convolution_trust %>%
+  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, id) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, id, rank) %>%
+  dplyr::select(horizon, id, model, scaled_rel_skill, rank)
+
+```
+
+### In-text values
 ```{r value of data text values}
 
 # outperforming baseline, all scenarios
@@ -1331,7 +1140,7 @@ rank_obs_all %>%
                    p = n()/4644)
 
 # outperforming baseline by date
-rank_time %>%
+rank_obs_time %>%
   dplyr::filter(scaled_rel_skill < 1) %>%
   dplyr::group_by(horizon, model) %>%
   dplyr::summarise(n = n())
@@ -1342,17 +1151,16 @@ rank_obs_trust %>%
   dplyr::group_by(horizon, model) %>%
   dplyr::summarise(n = n())
 
-rank_trust %>%
+rank_obs_trust %>%
   dplyr::group_by(horizon, model) %>%
   dplyr::summarise(med_rwis = median(scaled_rel_skill),
                    iq1_rwis = quantile(scaled_rel_skill, 0.25),
                    iq3_rwis = quantile(scaled_rel_skill, 0.75)) %>%
   dplyr::mutate(iqr = iq3_rwis - iq1_rwis)
 
-
-
 ```
 
+### Figure S9
 ```{r}
 
 # Calibration
@@ -1499,7 +1307,9 @@ g_value_trust14 <- ggplot() +
   theme_bw() +
   theme(legend.position = "none")
 
-#####
+```
+
+```{r figure s9}
 
 guide_area() /
   (g_value_calibration | (g_value_horizon | g_value_rwisrank) + plot_layout(guides = "keep")) /
@@ -1507,11 +1317,9 @@ guide_area() /
   (g_value_time14 | g_value_trust14) +
   plot_layout(heights = c(0.2, 1, 1.5, 1.5), guides = "collect")
 
-#####
-
 ```
 
-### Comparison by Trust
+### Figure S10
 ```{r}
 
 g_value_arima_trust <- rank_arima_trust %>%
@@ -1586,13 +1394,125 @@ g_value_convolution_time <- rank_convolution_time %>%
        lty = "Type") +
   theme_bw()
 
-#####
+```
+
+```{r figure s10}
 
 (g_value_arima_trust | g_value_arima_time) /
   (g_value_convolution_trust | g_value_convolution_time) +
   plot_layout(heights = c(1, 2), guides = "collect")
 
-#####
+```
+
+
+## Supplementary Information
+
+### Table S1
+```{r}
+
+# ARIMA regression, observed cases
+pw_arima_obs <- scoringutils::pairwise_comparison(scores = adm_scores %>%
+                                                  dplyr::filter(model == "snaive" |
+                                                                  (grepl("arima_case", model) & grepl("observed", model))),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "model"))
+rank_arima_obs <- pw_arima_obs %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
+
+
+# ARIMA regression, forecast cases
+pw_arima_fct <- scoringutils::pairwise_comparison(scores = adm_scores %>%
+                                                  dplyr::filter(model == "snaive" |
+                                                                  (grepl("arima_case", model) & grepl("forecast", model))),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "model"))
+rank_arima_fct <- pw_arima_fct %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
+
+```
+
+```{r table s1}
+
+rank_arima_obs %>%
+  dplyr::select(horizon, model, rwis = scaled_rel_skill) %>%
+  dplyr::mutate(data = "observed",
+                model = stringr::str_remove(model, "_observed_raw")) %>%
+  dplyr::bind_rows(rank_arima_fct %>%
+                     dplyr::select(horizon, model, rwis = scaled_rel_skill) %>%
+                     dplyr::mutate(data = "forecast",
+                                   model = stringr::str_remove(model, "_forecast_raw"))) %>%
+  dplyr::mutate(horizon = paste0("h_", horizon)) %>%
+  dplyr::filter(model != "snaive") %>%
+  tidyr::pivot_wider(id_cols = -c(horizon, rwis), names_from = horizon, values_from = rwis) %>%
+  dplyr::select(data, model, h_7, h_14)
+
+```
+
+
+### Table S2
+```{r}
+
+# Observed cases
+pw_ensemble_obs <- scoringutils::pairwise_comparison(scores = adm_scores %>%
+                                                  dplyr::filter(model %in% c("snaive",
+                                                                             "mean_ensemble_observed",
+                                                                             "median_ensemble_observed")),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "model"))
+rank_ensemble_obs <- pw_ensemble_obs %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
+
+
+# Forecast cases
+pw_ensemble_fct <- scoringutils::pairwise_comparison(scores = adm_scores %>%
+                                                  dplyr::filter(model %in% c("snaive",
+                                                                             "mean_ensemble_forecast",
+                                                                             "median_ensemble_forecast")),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "model"))
+rank_ensemble_fct <- pw_ensemble_fct %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
+
+```
+
+```{r table s2}
+
+rank_ensemble_obs %>%
+  dplyr::select(horizon, model, rwis = scaled_rel_skill) %>%
+  dplyr::mutate(data = "observed",
+                model = stringr::str_remove(model, "_observed")) %>%
+  dplyr::bind_rows(rank_ensemble_fct %>%
+                     dplyr::select(horizon, model, rwis = scaled_rel_skill) %>%
+                     dplyr::mutate(data = "forecast",
+                                   model = stringr::str_remove(model, "_forecast"))) %>%
+  dplyr::mutate(horizon = paste0("h_", horizon)) %>%
+  dplyr::filter(model != "snaive") %>%
+  tidyr::pivot_wider(id_cols = -c(horizon, rwis), names_from = horizon, values_from = rwis) %>%
+  dplyr::select(data, model, h_7, h_14)
 
 ```
 
