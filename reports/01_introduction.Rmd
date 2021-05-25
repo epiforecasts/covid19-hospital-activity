@@ -5,7 +5,7 @@ date: "25/03/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
                       fig.width = 16, fig.height = 9)
@@ -283,13 +283,13 @@ g_trust_locations <- covid19.nhs.data::england_utla_shape %>%
 ```
 
 ### In-text values
-```{r}
+```{r, echo = TRUE}
 
 # Trust mapping summary, no threshold
 summary(trust_mapping$n)
 
 # Trust mapping summary, 10% threshold
-summary(trust_mapping$n10)
+summary(trust_mapping$n_10)
 
 # Bed capacity summary
 summary(trust_size$total_bed)
