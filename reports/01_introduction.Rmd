@@ -14,8 +14,8 @@ library(tidyverse)
 library(patchwork)
 library(covid19.nhs.data)
 
-source(here::here("R", "load_data.R"))
-source(here::here("R", "plot_forecasts.R"))
+source(here::here("R", "load_data_fns.R"))
+source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
 ```
@@ -49,30 +49,10 @@ dat_weekly <- dat %>%
 
 ```
 
-```{r, include = FALSE}
-
-utla_cases <- load_case_data()
-
-utla_cases %>%
-  dplyr::left_join(utla_names, by = c("id" = "geo_code")) %>%
-  dplyr::mutate(cases_trend = (stl(ts(cases, freq = 7), s.window = 7)$time.series)[,2]) %>%
-  dplyr::filter(date >= as.Date("2021-03-01"),
-                date < as.Date("2021-04-17"),
-                id %in% c("E10000003", "E06000055", "E10000012", "E10000029", "E10000020", "E10000015", "E06000056")) %>%
-  ggplot(aes(x = date, y = cases, col = geo_name)) +
-  geom_vline(xintercept = as.Date("2021-04-11"), lty = 2) +
-  geom_line(alpha = 0.4) +
-  geom_line(aes(y = cases_trend), lwd = 0.8) +
-  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-  scale_color_brewer(palette = "Set2") +
-  theme_bw()
-
-```
-
 
 ```{r forecast data}
 
-forecast_dir <- here::here("forecasts", "summary")
+forecast_dir <- here::here("data", "out", "admissions_forecast", "summary")
 forecast_adm_files <- list.files(forecast_dir)[which(grepl("admissions", list.files(forecast_dir)))]
 
 forecast_adm <- purrr::map_df(.x = forecast_adm_files, .f = ~ {
