@@ -114,7 +114,18 @@ tb_obs <- tibble::tibble(model = obs_models, label = main_model_labels)
 
 ```
 
-# Output
+# Outputs
+
+* Figure 2 (Overall forecasting accuracy of main forecasting models)
+* Figure 3 (Forecasting accuracy by forecast date - 7-day horizon)
+* Figure 4 (Forecasting accuracy by location (Trust) - 7-day horizon)
+* Figure S6 (Relative contributions of overprediction, sharpness and underprediction to the WIS)
+* Figure S7 (Forecasting accuracy by forecast date - 14-day horizon)
+* Figure S8 (Forecasting accuracy by location (Trust) - 14-day horizon)
+* Figure S9 (Value of using observed, vs. forecast, future confirmed Covid-19 cases for forecasting Trust-level hospital admissions)
+* Figure S10 (Value of using observed, vs. forecast, future confirmed Covid-19 cases on forecasting accuracy by Trust and forecast date)
+* Table S1 (Relative WIS of all ARIMA regression models with confirmed Covid-19 cases lagged by d days)
+* Table S2 (Relative WIS of all ensemble models)
 
 
 ## Overall forecasting accuracy
