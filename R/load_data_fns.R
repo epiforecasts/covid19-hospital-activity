@@ -72,9 +72,9 @@ load_case_data <- function(){
 
 # Load combined data (by Trust) -------------------------------------------
 
-load_combined_data <- function(){
+load_combined_data <- function(add_private = FALSE){
   
-  adm <- load_hospital_data()
+  adm <- load_hospital_data(add_private = add_private)
   case <- load_case_data()
   
   case_trust <- case %>%
