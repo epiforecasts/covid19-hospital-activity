@@ -38,7 +38,7 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
   
   if(add_private){
     
-    out_private <- readRDS(file = here::here("current_forecasts", "admissions_in", "hospitalisations_trusts.rds")) %>%
+    out_private <- readRDS(file = here::here("data", "private", "hospitalisations_trusts.rds")) %>%
       dplyr::select(id = org_code, date, all_adm = hospitalisations) %>%
       dplyr::filter(date > max(out$date)) %>%
       dplyr::mutate(all_adm = ifelse(is.na(all_adm), 0, all_adm)) %>%
