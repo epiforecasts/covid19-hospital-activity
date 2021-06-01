@@ -3,7 +3,7 @@ library(tidyverse)
 library(ggrepel)
 library(gganimate)
 
-source("R/load_data.R")
+source("R/load_data_fns.R")
 source("R/forecast_fns.R")
 
 # Output: scatter plot of admissions vs. prob of increase for historical forecasts
