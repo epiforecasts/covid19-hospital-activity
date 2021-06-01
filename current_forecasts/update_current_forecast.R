@@ -9,7 +9,7 @@ source(here::here("R", "utils.R"))
 
 # Forecast date -----------------------------------------------------------
 
-today_date <- as.Date("2021-05-16")
+today_date <- as.Date("2021-05-23")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
 
@@ -54,7 +54,9 @@ case_forecast_trust <- case_forecast_utla %>%
 
 combined_trust <- obs %>%
   dplyr::bind_rows(case_forecast_trust) %>%
-  dplyr::filter(id != "RPY")
+  dplyr::filter(id != "RPY") %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(cases_lag7 = lag(cases, 7))
 
 #
 case_forecast_trust_samples <- epinow_samples(df = case_forecast_utla) %>%
@@ -90,10 +92,10 @@ combined_trust <- combined_trust %>%
 # Update all forecasts ----------------------------------------------------
 
 ## Baseline forecast
-baseline_out <- full_snaive(data = combined_trust, yvar = "all_adm",
-                            horizon = 14, samples = 1000,
-                            train_from = forecast_date - 42,
-                            forecast_from = forecast_date)
+baseline_out <- forecast_baseline(data = combined_trust, yvar = "all_adm",
+                                  horizon = 14, samples = 1000,
+                                  train_from = forecast_date - 42,
+                                  forecast_from = forecast_date)
 baseline_summary <- baseline_out$summary
 
 
@@ -154,9 +156,9 @@ convolution_summary_long <- forecast_summary(samples = convolution_samples,
                                              quantiles = seq(0.01, 0.99, 0.01))
 
 # Case-hospitalisation ratio
-convolution_chr <- summarised_secondary_posteriors(convolution_forecast_rt, params = c("frac_obs")) %>%
+convolution_chr <- convolution_forecast_rt$summarised_posterior %>%
   dplyr::rename(id = region) %>%
-  dplyr::select(-variable, -contains("_95"))
+  dplyr::select(-contains("_95"))
 # TEMP: fix for column names
 setnames(convolution_chr, 
          old = paste0("lower_", seq(10, 90, 10)),
