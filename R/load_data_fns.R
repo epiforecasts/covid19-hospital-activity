@@ -59,10 +59,10 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
 
 load_case_data <- function(){
   
-  raw_case <- covidregionaldata::get_regional_data("UK", include_level_2_regions = TRUE) %>%
-    dplyr::filter(grepl("E", utla_code)) %>%
-    dplyr::mutate(utla_code = ifelse(utla_code == "E10000002", "E06000060", utla_code)) %>%
-    dplyr::group_by(id = utla_code, date) %>%
+  raw_case <- covidregionaldata::get_regional_data(country = "UK", level = "2") %>%
+    dplyr::filter(grepl("E", local_authority_code)) %>%
+    dplyr::mutate(local_authority_code = ifelse(local_authority_code == "E10000002", "E06000060", local_authority_code)) %>%
+    dplyr::group_by(id = local_authority_code, date) %>%
     dplyr::summarise(cases = sum(cases_new, na.rm = TRUE)) %>%
     dplyr::ungroup()
   
