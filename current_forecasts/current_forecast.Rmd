@@ -15,14 +15,36 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(ggrepel)
 library(patchwork)
+library(covidregionaldata)
 source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-05-23")
+forecast_date <- as.Date("2021-05-30")
 utla_names <- c("Bolton",
                 "Blackburn with Darwen",
                 "Bedford")
+
+exclude_utlas <- c("Cheshire West and Chester",
+                   "Wirral",
+                   "Stockport",
+                   "Bracknell Forest",
+                   "Cheshire East")
+
+```
+
+```{r new variables, include = FALSE}
+
+exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
+  covid19.nhs.data::get_names() %>%
+  dplyr::filter(geo_name %in% exclude_utlas,
+                p_geo > 0.2) %>%
+  dplyr::group_by(trust_code, trust_name) %>%
+  dplyr::summarise(n = n(),
+                   utla_names = paste(geo_name, collapse = ", ")) %>%
+  dplyr::mutate(label = ifelse(n == 1,
+                               paste0(trust_name, " (UTLA: ", utla_names, ")" ),
+                               paste0(trust_name, " (UTLAs: ", utla_names, ")" )))
 
 ```
 
@@ -31,7 +53,8 @@ utla_names <- c("Bolton",
 admissions <- load_hospital_data(keep_data = c("all_adm"), add_private = TRUE) %>%
   dplyr::rename(adm = all_adm) %>%
   dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
-  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40))
+  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40)) %>%
+  dplyr::filter(!id %in% exclude_trusts$trust_code)
 
 plot_trusts_observed <- admissions %>%
   dplyr::filter(date > forecast_date - 28,
@@ -65,7 +88,9 @@ The forecasting model is an unweighted ensemble of three individual models:
 2. regression + 7-day-lagged cases (cases mapped from UTLA to Trust using Trust-UTLA mapping in `covid19.nhs.data`)
 3. convolution from cases to admissions (scaled; cases mapped to Trusts as above)
 
-All models are trained on the last 6 weeks of data (from `r format.Date(forecast_date - 42, format = "%d %B")`) and forecasts are made for the following 14 days. 
+All models are trained on the last 6 weeks of data (from `r format.Date(forecast_date - 42, format = "%d %B")`) and forecasts are made for the following 14 days.
+
+**Note: The following Trusts/UTLAs have been temporarily excluded from this report due issues with the underlying case forecasts in one or more associated UTLAs:** `r paste0(exclude_trusts$label, collapse = ", ")`.
 
 
 # Current forecast
@@ -82,7 +107,8 @@ current_forecast <- readRDS(file = here::here("current_forecasts",
                 median = lower_0, lower_90, lower_50, upper_50, upper_90) %>%
   dplyr::filter(horizon <= 14) %>%
   dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
-  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40))
+  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40)) %>%
+  dplyr::filter(!id %in% exclude_trusts$trust_code)
 
 forecast_point <- current_forecast %>%
   dplyr::filter(model == "mean_ensemble",
@@ -114,7 +140,8 @@ forecast_prob <- current_forecast_long %>%
   dplyr::ungroup() %>%
   dplyr::select(id, horizon, p_increase) %>%
   unique() %>%
-  tidyr::pivot_wider(id_cols = -c(horizon, p_increase), names_from = horizon, values_from = p_increase)
+  tidyr::pivot_wider(id_cols = -c(horizon, p_increase), names_from = horizon, values_from = p_increase) %>%
+  dplyr::filter(!id %in% exclude_trusts$trust_code)
 
 current_forecast_tb <- forecast_point %>%
   dplyr::left_join(forecast_prob, by = "id") %>%
