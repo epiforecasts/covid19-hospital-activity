@@ -9,9 +9,28 @@ source(here::here("R", "utils.R"))
 
 # Forecast date -----------------------------------------------------------
 
-today_date <- as.Date("2021-05-23")
+today_date <- as.Date("2021-05-30")
 forecast_date <- lubridate::floor_date(today_date, unit = "week", week_start = 7)
 
+
+
+# Check UTLA-level case forecasts -----------------------------------------
+
+# Visually check current_case_forecast.pdf for flagged UTLAs
+
+source("current_forecasts/current_case_forecast.R")
+
+flag_trusts <- covid19.nhs.data::trust_utla_mapping %>%
+  covid19.nhs.data::get_names() %>%
+  dplyr::filter(geo_name %in% flag_utlas$id_name,
+                p_geo > 0.2) %>%
+  dplyr::group_by(trust_code, trust_name) %>%
+  dplyr::summarise(n = n(),
+                   utla_names = paste(geo_name, collapse = ", ")) %>%
+  dplyr::mutate(label = ifelse(n == 1,
+                               paste0(trust_name, " (UTLA: ", utla_names, ")" ),
+                               paste0(trust_name, " (UTLAs: ", utla_names, ")" ))) %>%
+  dplyr::ungroup()
 
 # Load raw observed data --------------------------------------------------
 
@@ -170,18 +189,27 @@ saveRDS(convolution_chr, file = here::here("current_forecasts",
 
 
 
-# Mean ensemble -----------------------------------------------------------
 
-## Summary
+# Ensemble ----------------------------------------------------------------
+
+# Combined model summaries
 models_summary <- baseline_summary %>%
   dplyr::bind_rows(tsensemble_summary) %>%
   dplyr::bind_rows(arimareg_summary) %>%
   dplyr::bind_rows(convolution_summary)
-ensemble_summary <- ensemble_forecast(model_forecasts = models_summary,
-                                      models = setdiff(unique(models_summary$model), "snaive"))
-
+# Make ensemble; TEMP: drop convolution model from flagged Trusts
+ensemble_summary <- ensemble_forecast(model_forecasts = models_summary %>% dplyr::filter(!id %in% flag_trusts$trust_code),
+                                      models = setdiff(unique(models_summary$model), "snaive")) %>%
+  dplyr::mutate(ensemble_models = paste(setdiff(unique(models_summary$model), "snaive"),
+                                        collapse = ", "))
+ensemble_summary_flag <- ensemble_forecast(model_forecasts = models_summary %>% dplyr::filter(id %in% flag_trusts$trust_code),
+                                           models = setdiff(unique(models_summary$model), c("snaive", "convolution_rt"))) %>%
+  dplyr::mutate(ensemble_models = paste(setdiff(unique(models_summary$model), c("snaive", "convolution_rt")),
+                                        collapse = ", "))
+# Add ensemble to models summary
 forecast_out <- models_summary %>%
-  dplyr::bind_rows(ensemble_summary)
+  dplyr::bind_rows(ensemble_summary) %>%
+  dplyr::bind_rows(ensemble_summary_flag)
 saveRDS(object = forecast_out, file = here::here("current_forecasts",
                                                  "admissions_trust",
                                                  paste0("admissions_", forecast_date, ".rds")))
@@ -189,15 +217,24 @@ saveRDS(object = forecast_out, file = here::here("current_forecasts",
                                                  "admissions_trust",
                                                  "admissions_latest.rds"))
 
-## Long summary
+# As above, but for long summary 
 models_summary_long <- tsensemble_summary_long %>%
   dplyr::bind_rows(arimareg_summary_long) %>%
   dplyr::bind_rows(convolution_summary_long)
-ensemble_summary_long <- ensemble_forecast(model_forecasts = models_summary_long,
-                                      models = unique(models_summary_long$model))
-
-saveRDS(object = ensemble_summary_long, file = here::here("current_forecasts",
-                                                          "admissions_trust",
-                                                          paste0("admissions_long_", forecast_date, ".rds")))
+#
+ensemble_summary_long <- ensemble_forecast(model_forecasts = models_summary_long %>% dplyr::filter(!id %in% flag_trusts$trust_code),
+                                           models = unique(models_summary_long$model)) %>%
+  dplyr::mutate(ensemble_models = paste(setdiff(unique(models_summary$model), c("snaive")),
+                                        collapse = ", "))
+ensemble_summary_long_flag <- ensemble_forecast(model_forecasts = models_summary_long %>% dplyr::filter(id %in% flag_trusts$trust_code),
+                                                models = setdiff(unique(models_summary_long$model), c("snaive", "convolution_rt"))) %>%
+  dplyr::mutate(ensemble_models = paste(setdiff(unique(models_summary_long$model), c("snaive", "convolution_rt")),
+                                        collapse = ", "))
+#
+saveRDS(object = ensemble_summary_long %>%
+          dplyr::bind_rows(ensemble_summary_long_flag),
+        file = here::here("current_forecasts",
+                          "admissions_trust",
+                          paste0("admissions_long_", forecast_date, ".rds")))
   
 
