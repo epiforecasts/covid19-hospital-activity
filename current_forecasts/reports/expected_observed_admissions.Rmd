@@ -1,0 +1,187 @@
+---
+title: "Trust-level Covid-19 hospital admissions forecasts"
+author: "Sophie Meakin, Sam Abbott, Seb Funk"
+date: "`r format.Date(Sys.Date(), format = '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+library(ggrepel)
+library(patchwork)
+library(covidregionaldata)
+source(here::here("R", "load_data_fns.R"))
+source(here::here("R", "plot_fns.R"))
+source(here::here("R", "utils.R"))
+
+forecast_date <- as.Date("2021-05-30")
+
+exclude_utlas <- c("Cheshire West and Chester",
+                   "Wirral",
+                   "Stockport",
+                   "Bracknell Forest",
+                   "Cheshire East")
+
+```
+
+```{r new variables, include = FALSE}
+
+exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
+  covid19.nhs.data::get_names() %>%
+  dplyr::filter(geo_name %in% exclude_utlas,
+                p_geo > 0.2) %>%
+  dplyr::group_by(trust_code, trust_name) %>%
+  dplyr::summarise(n = n(),
+                   utla_names = paste(geo_name, collapse = ", ")) %>%
+  dplyr::mutate(label = ifelse(n == 1,
+                               paste0(trust_name, " (UTLA: ", utla_names, ")" ),
+                               paste0(trust_name, " (UTLAs: ", utla_names, ")" )))
+
+```
+
+```{r observed, include = FALSE}
+
+admissions <- load_hospital_data(keep_data = c("all_adm"), add_private = TRUE) %>%
+  dplyr::rename(adm = all_adm) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 30)) %>%
+  dplyr::filter(!id %in% exclude_trusts$trust_code)
+
+```
+
+```{r load forecasts, include = FALSE}
+
+current_forecast <- readRDS(file = here::here("current_forecasts",
+                                              "admissions_trust",
+                                              paste0("admissions_", forecast_date, ".rds"))) %>%
+  dplyr::select(-quantile) %>%
+  tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label) %>%
+  dplyr::select(forecast_from, model, id, date = date_horizon, horizon,
+                median = lower_0, lower_90, lower_50, upper_50, upper_90) %>%
+  dplyr::filter(horizon <= 14,
+                model == "convolution_rt") %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 30)) %>%
+  dplyr::filter(!id %in% exclude_trusts$trust_code)
+
+current_forecast_long <- readRDS(file = here::here("current_forecasts",
+                                                   "admissions_trust",
+                                                   paste0("admissions_long_", forecast_date, ".rds")))
+
+```
+
+```{r new vars}
+
+vis_trusts <- admissions %>%
+  dplyr::filter(date <= forecast_date,
+                date > forecast_date - 7) %>%
+  dplyr::group_by(nhs_region, id, trust_name) %>%
+  dplyr::summarise(adm = sum(adm, na.rm = TRUE),
+                   .groups = "drop") %>%
+  dplyr::filter(adm > 1)
+
+```
+
+# Summary
+
+The current forecast date is **`r format.Date(forecast_date, format = "%d %B")`**, showing data until **`r format.Date(max(admissions$date, na.rm = TRUE), format = "%d %B")`**.
+
+The forecasting model is a convolution from cases to admissions (scaled; cases mapped to Trusts as above).
+
+All models are trained on the last 6 weeks of data (from `r format.Date(forecast_date - 42, format = "%d %B")`) and forecasts are made for the following 14 days.
+
+**Note: The following Trusts/UTLAs have been temporarily excluded from this report due issues with the underlying case forecasts in one or more associated UTLAs:** `r paste0(exclude_trusts$label, collapse = ", ")`.
+
+
+# Current forecast
+
+```{r current forecasts}
+
+plot_forecast_ribbons(observed = admissions %>%
+                        dplyr::filter(date > forecast_date - 14,
+                                      date <= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+                      forecast = current_forecast %>% filter(date <= forecast_date + 7),
+                     trusts = unique(vis_trusts$id),
+                     models = "convolution_rt",
+                     facet_models = FALSE) +
+  scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
+  labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
+       subtitle = "Top 25 Trusts with most admissions in last 28 days") +
+  theme(legend.position = "none", strip.text.x = element_text(size = 6)) +
+  ## Adding current observed data
+  geom_point(data = admissions %>%
+                        dplyr::filter(id %in% unique(vis_trusts$id),
+                                      date > forecast_date) %>%
+                        dplyr::rename(observed = adm),
+            aes(x = date, y = observed))
+
+```
+
+# Exceedance
+
+```{r}
+
+exceedance <- current_forecast_long %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(model == "convolution_rt",
+                quantile_label != "upper_0") %>%
+  dplyr::left_join(admissions, by = c("id", "date_horizon" = "date")) %>%
+  dplyr::mutate(adm = round(adm)) %>% 
+  dplyr::group_by(forecast_from, id, horizon) %>%
+  dplyr::filter(value >= adm) %>%
+  dplyr::group_by(forecast_from, id, trust_name, horizon) %>%
+  dplyr::filter(quantile == min(quantile)) %>%
+  dplyr::mutate(prob = quantile - 0.01) %>%
+  dplyr::group_by(nhs_region, id, trust_name) %>%
+  dplyr::summarise(n = n(),
+                   plot_adm = mean(adm),
+                   plot_prob = median(prob),
+                   lwr_prob = quantile(prob, 0.25),
+                   upr_prob = quantile(prob, 0.75)) %>%
+  dplyr::mutate(trust_name = ifelse(plot_adm > 2, trust_name, NA))
+
+```
+
+## 7-day exceedence
+
+```{r 7-day exceedence}
+
+exceedance %>%
+  dplyr::filter(plot_adm > 0) %>%
+  ggplot(aes(x = plot_prob, y = plot_adm, fill = plot_prob)) +
+  geom_segment(aes(yend = plot_adm, x = lwr_prob, xend = upr_prob), col = "grey20") +
+  geom_point(size = 3, shape = 21, stroke = 0.5, col = "grey20") +
+  geom_text_repel(aes(label = trust_name), col = "grey20", size = 3) +
+  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  scale_y_continuous(limits = c(0, NA)) +
+  scale_fill_fermenter(palette = "RdYlBu", breaks = c(0, 0.05, 0.25, 0.75, 0.95, 1), limits = c(0, 1)) +
+  facet_wrap(. ~ nhs_region) +
+  labs(x = "7-day average probability forecast exceeded", y = "Current admissions (7-day average)",
+       fill = "Probability") +
+  theme_bw()
+
+exceedance %>%
+  dplyr::filter(plot_adm > 1) %>%
+  dplyr::select(-trust_name) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  ggplot(aes(y = reorder(trust_name, plot_prob), x = plot_prob, fill = plot_prob)) +
+  geom_errorbar(aes(xmin = lwr_prob, xmax = upr_prob), width = 0) +
+  geom_point(aes(size = plot_adm), shape = 21, col = "grey20") +
+  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  scale_fill_fermenter(palette = "RdYlBu", breaks = c(0, 0.05, 0.25, 0.75, 0.95, 1), limits = c(0, 1)) +
+  labs(y = "", x = "7-day average probability forecast exceeded",
+       size = "Av. admissions",
+       fill = "Probability") +
+  theme_bw()
+
+```
+
+## 14-day exceedence
