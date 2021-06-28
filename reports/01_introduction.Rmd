@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
 library(tidyverse)
 library(patchwork)
 library(covid19.nhs.data)
+library(covidregionaldata)
 
 source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
@@ -130,7 +131,8 @@ g_summary_top5 <- dat %>%
   ggplot(aes(x = date, y = adm)) +
   geom_line() +
   facet_wrap(. ~ facet_label, ncol = 1, scales = "free_y") +
-  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2, col = "grey50") +
+  geom_vline(xintercept = as.Date("2021-01-31"), lty = 2, col = "grey50") +
+  geom_vline(xintercept = as.Date("2020-10-04"), lty = 2, col = "grey50") +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b") +
   labs(x = "Date", y = "Admissions",
        title = "C") +
@@ -144,7 +146,8 @@ g_summary_nat <- dat %>%
   dplyr::summarise(adm = sum(adm, na.rm = TRUE)) %>%
   ggplot(aes(x = date, y = adm)) +
   geom_line() +
-  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2, col = "grey50") +
+  geom_vline(xintercept = as.Date("2021-01-31"), lty = 2, col = "grey50") +
+  geom_vline(xintercept = as.Date("2020-10-04"), lty = 2, col = "grey50") +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b",
                limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
   labs(x = "", y = "Admissions",
@@ -160,7 +163,8 @@ g_summary_trust <- dat_weekly %>%
   dplyr::mutate(adm_std = adm/sd(adm, na.rm = TRUE)) %>%
   ggplot(aes(x = week_ending, y = reorder(id, total_adm))) +
   geom_tile(aes(fill = adm)) +
-  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2) +
+  geom_vline(xintercept = as.Date("2021-01-31"), lty = 2) +
+  geom_vline(xintercept = as.Date("2020-10-04"), lty = 2) +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b",
                limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
   scale_fill_fermenter(n.breaks = 9) +
@@ -191,7 +195,8 @@ g_regional <- dat %>%
   ggplot(aes(x = date, y = adm_trend, col = nhs_region)) +
   geom_line() +
   geom_line(aes(y = adm), alpha = 0.4) +
-  geom_vline(xintercept = as.Date("2021-02-01"), lty = 2) +
+  geom_vline(xintercept = as.Date("2021-01-31"), lty = 2) +
+  geom_vline(xintercept = as.Date("2020-10-04"), lty = 2) +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
   scale_color_brewer(palette = "Set2") +
@@ -212,7 +217,7 @@ g_regional
 ```{r}
 
 # Additional prep
-n_clusters <- 6
+n_clusters <- 5
 cluster_dat <- dat_weekly %>%
   dplyr::left_join(trust_cluster_weekly, by = "id") %>%
   dplyr::mutate(cluster = as.factor(cluster)) %>%
@@ -242,14 +247,18 @@ g_trust_capacity <- trust_size %>%
 
 # Trust admissions by cluster
 g_trust_admissions <- cluster_dat %>%
+  dplyr::mutate(facet = paste0("Cluster ", cluster)) %>%
+  dplyr::bind_rows(cluster_dat %>%
+                     dplyr::mutate(facet = "All")) %>%
+  dplyr::group_by(week_ending, facet, cluster) %>%
+  dplyr::mutate(median_adm = mean(adm)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(adm = ifelse(facet == "All", NA, adm)) %>%
   ggplot(aes(x = week_ending, y = adm)) +
   geom_line(aes(group = id), col = "lightgrey", alpha = 0.4) +
-  geom_line(data = cluster_dat %>%
-              dplyr::group_by(week_ending, cluster) %>%
-              dplyr::summarise(adm = median(adm),
-                               adm_std = median(adm_std)),
-            aes(col = cluster), lwd = 0.8) +
-  facet_wrap(. ~ paste0("Cluster ", cluster)) +
+  geom_line(aes(y = median_adm, col = cluster), lwd = 0.8) +
+  geom_vline(xintercept = as.Date("2021-01-31"), lty = 2, col = "grey50") +
+  facet_wrap(. ~ facet, scales = "free_y") +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 8)], date_labels = "%d %b",
                limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
   scale_color_brewer(palette = "Set2", na.value = "grey50") +
