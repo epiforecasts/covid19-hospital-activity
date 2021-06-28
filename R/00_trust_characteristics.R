@@ -95,7 +95,7 @@ trust_cluster_daily <- purrr::map_df(.x = 3:10, .f = ~ {
   dplyr::bind_rows()
 
 saveRDS(object = trust_cluster_daily,
-        file = here::here("data", "out", "trust_cluster_daily.rds"))
+        file = here::here("data", "out", "trust_characteristics", "trust_cluster_daily.rds"))
 
 # Weekly data
 dat_weekly_in <- weekly_data %>%
@@ -112,7 +112,7 @@ trust_cluster_weekly <- purrr::map_df(.x = 3:10, .f = ~ {
   dplyr::bind_rows()
 
 saveRDS(object = trust_cluster_weekly,
-        file = here::here("data", "out", "trust_cluster_weekly.rds"))
+        file = here::here("data", "out", "trust_characteristics", "trust_cluster_weekly.rds"))
 
 
 
