@@ -72,15 +72,15 @@ plot_trusts_observed <- admissions %>%
 
 The current forecast date is **`r format.Date(forecast_date, format = "%d %B")`**, showing data until **`r format.Date(max(admissions$date, na.rm = TRUE), format = "%d %B")`**.
 
-The forecasting model is an unweighted ensemble of three individual models:
+**`r ifelse(length(exclude_trusts$label)>0, "The following Trusts/UTLAs have been temporarily excluded from this report due issues with the underlying case forecasts in one or more associated UTLAs:", "")`** `r paste0(exclude_trusts$label, collapse = ", ")`
+
+The main forecasting model is an unweighted ensemble of three individual models:
 
 1. unweighted time series ensemble model (autoregressive ARIMA, ETS and naive models)
 2. regression + 7-day-lagged cases (cases mapped from UTLA to Trust using Trust-UTLA mapping in `covid19.nhs.data`)
 3. convolution from cases to admissions (scaled; cases mapped to Trusts as above)
 
 All models are trained on the last 6 weeks of data (from `r format.Date(forecast_date - 42, format = "%d %B")`) and forecasts are made for the following 14 days.
-
-**Note: The following Trusts/UTLAs have been temporarily excluded from this report due issues with the underlying case forecasts in one or more associated UTLAs:** `r paste0(exclude_trusts$label, collapse = ", ")`.
 
 
 ```{r load forecasts}
@@ -178,6 +178,18 @@ scatter_data <- current_forecast_tb %>%
 
 return_region_plots <- function(region = "North West"){
   
+  tb_summary <- DT::datatable(data = current_forecast_tb %>%
+                                dplyr::filter(nhs_region == region) %>%
+                dplyr::select(`NHS region` = nhs_region,
+                              ID = id,
+                              Name = trust_name,
+                              `Current 7-day average` = observed,
+                              `One-week ahead forecast` = forecast_7,
+                              `Two-weeks ahead forecast` = forecast_14,
+                              `14-day probability of increase` = p_14),
+              rownames = FALSE,
+              )
+  
   g_current <- plot_forecast_ribbons(observed = admissions %>%
                         dplyr::filter(date > forecast_date - 21,
                                       date <= forecast_date) %>%
@@ -200,9 +212,33 @@ return_region_plots <- function(region = "North West"){
                         dplyr::rename(observed = adm),
             aes(x = date, y = observed))
   
+  g_current_conv <- plot_forecast_ribbons(observed = admissions %>%
+                          dplyr::filter(date > forecast_date - 21,
+                                        date <= forecast_date) %>%
+                          dplyr::rename(observed = adm),
+                        forecast = current_forecast,
+                       trusts = unique(current_forecast_tb$id[which(current_forecast_tb$nhs_region == region & current_forecast_tb$observed >= 0.7)]),
+                       models = "convolution_rt",
+                       facet_models = FALSE) +
+    scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
+    scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
+    scale_color_brewer(palette = "Set1") +
+    scale_fill_brewer(palette = "Set1") +
+    labs(title = region,
+         subtitle = "Case-convolution model",
+         caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
+    theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
+    ## Adding current observed data
+    geom_line(data = admissions %>%
+                          dplyr::filter(nhs_region == region,
+                                        id %in% unique(current_forecast_tb$id[which(current_forecast_tb$nhs_region == region & current_forecast_tb$observed >= 0.7)]),
+                                        date >= forecast_date) %>%
+                          dplyr::rename(observed = adm),
+              aes(x = date, y = observed))
+  
   g_scatter <- scatter_data %>%
     ggplot(aes(x = p_14, y = observed)) +
-    geom_point(size = 2, col = "grey80") +
+    geom_point(size = 3, col = "grey90") +
     geom_text_repel(data = scatter_data %>%
                       dplyr::filter(nhs_region == region),
                     aes(label = label),
@@ -252,7 +288,9 @@ return_region_plots <- function(region = "North West"){
          subtitle = "14-day ahead forecasts, ensemble model") +
     theme(legend.position = "none")
   
-  return(list(current_forecast = g_current,
+  return(list(table_summary = tb_summary,
+              current_forecast = g_current,
+              current_forecast_convolution = g_current_conv,
               scatter = g_scatter,
               past_7days = g_past7,
               past_14days = g_past14))
@@ -261,11 +299,29 @@ return_region_plots <- function(region = "North West"){
 
 ```
 
-# Current forecast
+# Current forecast {.tabset}
 
-## Overall {.tabset}
+## Overall {.tabset .tabset-pills}
 
-### Current forecast, ribbon {.tabset .tabset-pills}
+### Summary, table
+
+```{r overall}
+
+# Table
+DT::datatable(data = current_forecast_tb %>%
+                dplyr::select(`NHS region` = nhs_region,
+                              ID = id,
+                              Name = trust_name,
+                              `Current 7-day average` = observed,
+                              `One-week ahead forecast` = forecast_7,
+                              `Two-weeks ahead forecast` = forecast_14,
+                              `14-day probability of increase` = p_14),
+              rownames = FALSE,
+              )
+
+```
+
+### Current forecast, ribbon {.active}
 
 ```{r}
 
@@ -351,7 +407,7 @@ scatter_data %>%
 
 ```
 
-### Forecast increase, maps {.tabset .tabset-pills}
+### Forecast increase, maps
 
 ```{r}
 
@@ -415,101 +471,91 @@ covid19.nhs.data::england_utla_shape %>%
 ```
 
 
-### Summary, table {.tabset .tabset-pills}
 
-```{r overall}
+## By NHS region {.tabset .tabset-pills}
 
-# Table
-DT::datatable(data = current_forecast_tb %>%
-                dplyr::select(`NHS region` = nhs_region,
-                              ID = id,
-                              Name = trust_name,
-                              `Current 7-day average` = observed,
-                              `One-week ahead forecast` = forecast_7,
-                              `Two-weeks ahead forecast` = forecast_14,
-                              `14-day probability of increase` = p_14),
-              rownames = FALSE,
-              )
+Note: for clarity, we only show forecasts for Trusts which have admitted five or more patients in the last 7 days.
 
-```
-
-
-
-## By NHS region {.tabset}
-
-### East of England {.tabset .tabset-pills}
+### East of England
 
 ```{r}
 
 plots <- return_region_plots(region = "East of England")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
 
-### London {.tabset .tabset-pills}
+### London
 
 ```{r}
 
 plots <- return_region_plots(region = "London")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
 
-### Midlands {.tabset .tabset-pills}
+### Midlands
 
 ```{r}
 
 plots <- return_region_plots(region = "Midlands")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
 
-### North East and Yorkshire {.tabset .tabset-pills}
+### North East and Yorkshire
 
 ```{r}
 
 plots <- return_region_plots(region = "North East and Yorkshire")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
 
-### North West {.tabset .tabset-pills}
+### North West
 
 ```{r}
 
 plots <- return_region_plots(region = "North West")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
 
-### South East {.tabset .tabset-pills}
+### South East
 
 ```{r}
 
 plots <- return_region_plots(region = "South East")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
 
-### South West {.tabset .tabset-pills}
+### South West
 
 ```{r}
 
 plots <- return_region_plots(region = "South West")
 
 plots$current_forecast
+plots$current_forecast_convolution
 plots$scatter
 
 ```
