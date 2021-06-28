@@ -106,7 +106,7 @@ return_clusters <- function(df, k = 6, exclude_ids = NULL){
     tidyr::pivot_wider(id_cols = date, names_from = id) %>%
     dplyr::select(-date)
   
-  mat_out <- cor(mat_in, use = "pairwise.complete.obs", method = "kendall")
+  mat_out <- cor(mat_in, use = "pairwise.complete.obs", method = "pearson")
   
   # Using 1-correlation as distance, construct tree
   c_dist <- as.dist(1 - mat_out)
