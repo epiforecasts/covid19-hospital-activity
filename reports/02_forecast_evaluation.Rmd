@@ -30,7 +30,14 @@ observed <- load_hospital_data(keep_data = "all_adm")
 score_dir <- here::here("data", "out", "evaluation")
 
 adm_scores <- readRDS(file = here::here(score_dir, "full_scoring.rds")) %>%
-  dplyr::filter(horizon %in% c(7, 14))
+  dplyr::filter(horizon %in% c(7, 14)) %>%
+  dplyr::mutate(date = forecast_from + horizon) %>%
+  dplyr::left_join(observed %>%
+                     dplyr::select(-nhs_region) %>%
+                     dplyr::rename(observed = all_adm),
+                   by = c("id", "date")) %>%
+  dplyr::mutate(mre = abs(aem)/observed,
+                wis_norm = interval_score/(observed + 1))
 
 wis_overall <- readRDS(file = here::here(score_dir, "wis_overall.rds"))
 wis_horizon <- readRDS(file = here::here(score_dir, "wis_horizon.rds"))
@@ -51,27 +58,6 @@ forecast_summary <- purrr::map_df(.x = summary_files, .f = ~{
   dplyr::mutate(range = round(abs(1 - 2 * quantile) * 100),
                 boundary = stringr::str_sub(quantile_label, 1, 5)) %>%
   dplyr::select(forecast_from, model, id, horizon, date = date_horizon, range, boundary, prediction)
-
-```
-
-```{r empirical coverage}
-
-emp_coverage_dat <- forecast_summary %>%
-  dplyr::left_join(observed %>% dplyr::select(id, date, true_value = all_adm), by = c("id", "date")) %>%
-  dplyr::filter(horizon %in% 1:14,
-                !is.na(true_value)) %>%
-  dplyr::mutate(range = paste0(boundary, "_", range)) %>%
-  dplyr::select(-boundary) %>%
-  tidyr::pivot_wider(id_cols = c(forecast_from, id, true_value, model, horizon, date),
-                     names_from = range,
-                     values_from = prediction) %>%
-  dplyr::group_by(model, horizon) %>%
-  dplyr::summarise(empirical50 = length(true_value[which(true_value > lower_50 & true_value < upper_50)])/n(),
-                   empirical90 = length(true_value[which(true_value > lower_90 & true_value < upper_90)])/n()) %>%
-  dplyr::filter(model %in% c(main_models, obs_models, "mean_ensemble_forecast", "mean_ensemble_observed")) %>%
-  tidyr::pivot_longer(cols = contains("empirical")) %>%
-  dplyr::mutate(truth = ifelse(name == "empirical50", 0.5, 0.9),
-                name = ifelse(name == "empirical50", "50% prediction interval", "90% prediction interval"))
 
 ```
 
@@ -111,6 +97,27 @@ obs_models <- c("snaive",
                 "convolution_observed",
                 "median_ensemble_observed")
 tb_obs <- tibble::tibble(model = obs_models, label = main_model_labels)
+
+```
+
+```{r empirical coverage}
+
+emp_coverage_dat <- forecast_summary %>%
+  dplyr::left_join(observed %>% dplyr::select(id, date, true_value = all_adm), by = c("id", "date")) %>%
+  dplyr::filter(horizon %in% 1:14,
+                !is.na(true_value)) %>%
+  dplyr::mutate(range = paste0(boundary, "_", range)) %>%
+  dplyr::select(-boundary) %>%
+  tidyr::pivot_wider(id_cols = c(forecast_from, id, true_value, model, horizon, date),
+                     names_from = range,
+                     values_from = prediction) %>%
+  dplyr::group_by(model, horizon) %>%
+  dplyr::summarise(empirical50 = length(true_value[which(true_value > lower_50 & true_value < upper_50)])/n(),
+                   empirical90 = length(true_value[which(true_value > lower_90 & true_value < upper_90)])/n()) %>%
+  dplyr::filter(model %in% c(main_models, obs_models, "mean_ensemble_forecast", "mean_ensemble_observed")) %>%
+  tidyr::pivot_longer(cols = contains("empirical")) %>%
+  dplyr::mutate(truth = ifelse(name == "empirical50", 0.5, 0.9),
+                name = ifelse(name == "empirical50", "50% prediction interval", "90% prediction interval"))
 
 ```
 
@@ -255,8 +262,8 @@ g_rwis_horizon14 <- rank_horizon %>%
   geom_vline(xintercept = 0, lty = 2) +
   facet_wrap(. ~ horizon, scales = "free_x") +
   scale_x_continuous(limits = c(-0.25, NA),
-                     breaks = seq(-1, 2, 0.4),
-                     labels = seq(-1, 2, 0.4) + 1) +
+                     breaks = seq(-1, 2, 0.2),
+                     labels = seq(-1, 2, 0.2) + 1) +
   scale_fill_distiller(palette = "RdBu", na.value = "grey80",
                        limits = c(-0.4, 0.4)) +
   labs(x = "Relative WIS", y = "",
@@ -314,11 +321,13 @@ rank_all %>%
   dplyr::summarise(n = n(),
                    p = n()/4664)
 
-# rWIS and MAE
+# rWIS and MAE, MRE
 adm_scores %>%
-  dplyr::filter(model %in% main_models) %>%
+  dplyr::filter(model %in% main_models,
+                observed != 0) %>%
   dplyr::group_by(model) %>%
-  dplyr::summarise(mean_ae = round(mean(aem, na.rm = TRUE), 2)) %>%
+  dplyr::summarise(mae = round(mean(aem, na.rm = TRUE), 2),
+                   mre = round(mean(mre, na.rm = TRUE), 2)) %>%
   dplyr::left_join(rank_overall, by = c("model")) %>%
   dplyr::arrange(rank) %>%
   kableExtra::kbl() %>%
@@ -326,9 +335,11 @@ adm_scores %>%
 
 # rWIS and MAE by horizon
 adm_scores %>%
-  dplyr::filter(model %in% main_models) %>%
+  dplyr::filter(model %in% main_models,
+                observed != 0) %>%
   dplyr::group_by(horizon, model) %>%
-  dplyr::summarise(mean_ae = round(mean(aem, na.rm = TRUE), 2)) %>%
+  dplyr::summarise(mae = round(mean(aem, na.rm = TRUE), 2),
+                   mre = round(mean(mre, na.rm = TRUE), 2)) %>%
   dplyr::left_join(rank_horizon, by = c("model", "horizon")) %>%
   dplyr::arrange(horizon, rank) %>%
   kableExtra::kbl() %>%
@@ -341,15 +352,14 @@ adm_scores %>%
 
 g_wiscontribution_horizon <- wis_horizon %>%
   dplyr::filter(horizon != 1,
-                model %in% main_models,
-                model != "snaive") %>%
-  dplyr::mutate(model = ordered(model, levels = main_models)) %>%
+                model %in% main_models) %>%
+  dplyr::mutate(model = ordered(model, levels = rev(main_models))) %>%
   dplyr::select(horizon, model, interval_score, sharpness, underprediction, overprediction) %>%
   tidyr::pivot_longer(cols = c(sharpness, underprediction, overprediction)) %>%
   dplyr::mutate(horizon = ifelse(horizon == 1, "1 day", paste0(horizon, " days")),
                 horizon = ordered(horizon, c("1 day", "7 days", "14 days"))) %>%
   dplyr::mutate(value_norm = value/interval_score) %>%
-  ggplot(aes(y = model, x = value, fill = name)) +
+  ggplot(aes(y = model, x = value_norm, fill = name)) +
   geom_col() +
   facet_wrap(. ~ horizon) +
   scale_fill_brewer(palette = "Set1") +
@@ -368,12 +378,12 @@ g_wiscontribution_time <- wis_time %>%
                    by = c("forecast_from", "model")) %>%
   dplyr::mutate(label = ifelse(rank == 1 & name == "overprediction", "*", NA),
                 model = ordered(model, levels = main_models)) %>%
-  ggplot(aes(x = forecast_from, y = value, fill = name)) +
+  dplyr::filter(horizon == 7) %>%
+  ggplot(aes(x = forecast_from, y = value/interval_score, fill = name)) +
   geom_col() +
   facet_grid(model ~ .) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 2)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-09-28"), as.Date("2021-02-07"))) +
-  scale_y_continuous(breaks = seq(0, 50, 5)) +
   scale_fill_brewer(palette = "Set1") +
   labs(x = "Forecast date", y = "WIS contribution",
        title = "B",
@@ -402,7 +412,7 @@ pw_time <- scoringutils::pairwise_comparison(adm_scores %>%
                                              summarise_by = c("forecast_from", "horizon", "model"))
 
 rank_time <- pw_time %>%
-  dplyr::select(forecast_from, horizon, model, scaled_rel_skill) %>%
+  dplyr::select(forecast_from, horizon, model, scaled_rel_skill, relative_skill) %>%
   unique() %>%
   dplyr::group_by(forecast_from, horizon) %>%
   dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
@@ -411,9 +421,13 @@ rank_time <- pw_time %>%
 
 # MAE
 mae_time <- adm_scores %>%
-  dplyr::filter(model %in% main_models) %>%
+  dplyr::filter(model %in% main_models,
+                observed > 5) %>%
   dplyr::group_by(forecast_from, horizon, model) %>%
-  dplyr::summarise(av_aem = mean(aem, na.rm = TRUE)) %>%
+  dplyr::summarise(n = n(),
+                   av_aem = round(mean(aem, na.rm = TRUE), 2),
+                   mre = round(mean(mre, na.rm = TRUE), 2),
+                   wis_norm = mean(wis_norm, na.rm = TRUE)) %>%
   dplyr::left_join(rank_time, by = c("forecast_from", "horizon", "model")) %>%
   dplyr::mutate(model = ordered(model, main_models))
 
@@ -433,9 +447,9 @@ rank_time %>%
 rank_time %>%
   dplyr::filter(horizon == 7) %>%
   dplyr::group_by(model) %>%
-  dplyr::summarise(med_rwis = median(scaled_rel_skill),
-                   iq1_rwis = quantile(scaled_rel_skill, 0.25),
-                   iq3_rwis = quantile(scaled_rel_skill, 0.75)) %>%
+  dplyr::summarise(med_rwis = median(relative_skill),
+                   iq1_rwis = quantile(relative_skill, 0.25),
+                   iq3_rwis = quantile(relative_skill, 0.75)) %>%
   dplyr::mutate(iqr = iq3_rwis - iq1_rwis)
 
 # first-ranked model by date
@@ -478,13 +492,18 @@ g_time_obs <- observed %>%
   dplyr::summarise(all_adm = sum(all_adm, na.rm = TRUE)/7) %>%
   dplyr::group_by(week) %>%
   dplyr::mutate(median_adm = median(all_adm, na.rm = TRUE),
-                   mean_adm = mean(all_adm, na.rm = TRUE)) %>%
+                lwr_adm = quantile(all_adm, 0.25, na.rm = TRUE),
+                upr_adm = quantile(all_adm, 0.75, na.rm = TRUE)) %>%
   ggplot() +
+  # geom_errorbar(aes(x = week, y = median_adm, ymin = lwr_adm, ymax = upr_adm), 
+  #               width = 0, lwd = 4, alpha = 0.4, col = "grey50") +
+  # geom_point(aes(x = week, y = all_adm, group = id), alpha = 0.1) +
+  # geom_line(aes(x = week, y = median_adm), lwd = 0.8) +
   geom_boxplot(aes(x = week, y = all_adm, group = week)) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 2)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
-  scale_y_continuous(limits = c(0, 80)) +
-  labs(x = "Week", y = "Admissions",
+  scale_y_continuous(limits = c(0, 60)) +
+  labs(x = "Target week", y = "Admissions",
        title = "C") +
   theme_bw()
 
@@ -507,9 +526,31 @@ g_time_rank <- g_time_rank +
             lwd = 0.6, col = "grey70") +
   geom_point(data = rank_time %>% dplyr::filter(horizon == 7, model == "snaive"),
              size = 3, col = "grey70")
-  
+
 # Relative skill value ts
 g_time_rwis <- rank_time %>%
+  dplyr::filter(horizon == 7) %>%
+  dplyr::filter(model != "snaive") %>%
+  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
+  geom_bump(lwd = 0.6) +
+  geom_point(size = 2) +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 2)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
+  scale_y_continuous() +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "", y = "Relative WIS",
+       title = "A",
+       col = "Model") +
+  theme_bw() +
+  theme(legend.position = "top")
+g_time_rwis <- g_time_rwis +
+  geom_bump(data = rank_time %>% dplyr::filter(horizon == 7, model == "snaive"),
+            lwd = 0.6, col = "grey70") +
+  geom_point(data = rank_time %>% dplyr::filter(horizon == 7, model == "snaive"),
+             size = 2, col = "grey70")
+  
+# Scaled skill value ts (vs. baseline)
+g_time_swis <- rank_time %>%
   dplyr::filter(horizon == 7) %>%
   dplyr::filter(model != "snaive") %>%
   ggplot(aes(x = forecast_from, y = scaled_rel_skill, col = model)) +
@@ -520,8 +561,8 @@ g_time_rwis <- rank_time %>%
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
   scale_y_continuous() +
   scale_color_brewer(palette = "Set2") +
-  labs(x = "", y = "Relative WIS",
-       title = "A",
+  labs(x = "", y = "Scaled WIS",
+       title = "",
        col = "Model") +
   theme_bw() +
   theme(legend.position = "top")
@@ -556,7 +597,7 @@ g_time_mae <- g_time_mae +
 
 ```{r figure 3}
 
-guide_area() / g_time_rwis / g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
+guide_area() / g_time_rwis / g_time_swis /g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1, 1))
 
 ```
 
@@ -582,42 +623,16 @@ g_time_obs <- observed %>%
   theme_bw()
 
 # Relative skill value ts
-g_time_rwis0 <- rank_time %>%
-  dplyr::filter(horizon == 14) %>%
-  dplyr::filter(model != "snaive") %>%
-  ggplot(aes(x = forecast_from, y = scaled_rel_skill, col = model)) +
-  geom_hline(yintercept = 1, lty = 2, lwd = 0.6, col = "grey50") +
-  geom_point(size = 2, alpha = 0) +
-  geom_point(data = rank_time %>%
-               dplyr::filter(horizon == 14) %>%
-               dplyr::filter(model != "snaive",
-                             model != "convolution_rt"),
-             size = 2) +
-  geom_bump(data = rank_time %>%
-               dplyr::filter(horizon == 14) %>%
-               dplyr::filter(model != "snaive",
-                             model != "convolution_rt"),
-            lwd = 0.6) +
-  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
-               limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
-  scale_y_continuous(limits = c(0, 2)) +
-  scale_color_brewer(palette = "Set2") +
-  labs(x = "", y = "Relative WIS",
-       title = "B",
-       col = "Model") +
-  theme_bw() +
-  theme(legend.position = "none")
-
 g_time_rwis1 <- rank_time %>%
   dplyr::filter(horizon == 14) %>%
   dplyr::filter(model != "snaive") %>%
-  ggplot(aes(x = forecast_from, y = scaled_rel_skill, col = model)) +
+  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
   geom_hline(yintercept = 1, lty = 2, lwd = 0.6, col = "grey50") +
   geom_bump(lwd = 0.6) +
   geom_point(size = 2) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
-  scale_y_continuous() +
+  scale_y_continuous(trans = "log2") +
   scale_color_brewer(palette = "Set2") +
   labs(x = "", y = "Relative WIS",
        title = "A",
@@ -655,7 +670,7 @@ g_time_mae <- g_time_mae +
 
 ```{r figure s7}
 
-guide_area() / g_time_rwis1 / g_time_rwis0 / g_time_mae / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
+guide_area() / g_time_rwis1 / g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
 
 ```
 
@@ -694,7 +709,7 @@ pw_trust <- scoringutils::pairwise_comparison(adm_scores %>%
                                               summarise_by = c("id", "horizon", "model"))
 # Ranking
 rank_trust <- pw_trust %>%
-  dplyr::select(horizon, id, model, scaled_rel_skill) %>%
+  dplyr::select(horizon, id, model, scaled_rel_skill, relative_skill) %>%
   unique() %>%
   dplyr::group_by(horizon, id) %>%
   dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
@@ -783,6 +798,36 @@ g_location_tile <- rank_trust %>%
 
 # Distribution of rWIS
 rwis_lines <- rank_trust %>%
+  dplyr::filter(horizon == 7) %>%
+  dplyr::mutate(model = ordered(model, main_models)) %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(q1 = quantile(relative_skill, 0.25),
+                   q2 = quantile(relative_skill, 0.5),
+                   q3 = quantile(relative_skill, 0.75)) %>%
+  dplyr::mutate(iqr = q3 - q1)
+rwis_hist <- rank_trust %>%
+  dplyr::filter(horizon == 7,) %>%
+  dplyr::mutate(model = ordered(model, main_models),
+                rank = as.character(rank))
+
+g_location_rwis <- ggplot() +
+  geom_vline(xintercept = 1, lty = 2, lwd = 0.8, col = "lightgrey") +
+  geom_rect(data = rwis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_histogram(data = rwis_hist, aes(x = relative_skill), binwidth = 0.03) +
+  geom_vline(data = rwis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
+  # scale_x_continuous(trans = "log2") +
+  scale_y_continuous(breaks = integer_breaks()) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  facet_grid(rows = vars(model)) +
+  labs(x = "Relative WIS", y = "Number of Trusts",
+       title = "A") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+
+# Distribution of sWIS (vs. baseline)
+swis_lines <- rank_trust %>%
   dplyr::filter(model != "snaive",
                 horizon == 7) %>%
   dplyr::mutate(model = ordered(model, main_models)) %>%
@@ -791,17 +836,19 @@ rwis_lines <- rank_trust %>%
                    q2 = quantile(scaled_rel_skill, 0.5),
                    q3 = quantile(scaled_rel_skill, 0.75)) %>%
   dplyr::mutate(iqr = q3 - q1)
-rwis_hist <- rank_trust %>%
+swis_hist <- rank_trust %>%
   dplyr::filter(model != "snaive",
                 horizon == 7,) %>%
   dplyr::mutate(model = ordered(model, main_models),
                 rank = as.character(rank))
 
-g_location_rwis <- ggplot() +
+g_location_swis <- ggplot() +
   geom_vline(xintercept = 1, lty = 2, lwd = 0.8, col = "lightgrey") +
-  geom_rect(data = rwis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
-  geom_histogram(data = rwis_hist, aes(x = scaled_rel_skill), binwidth = 0.02) +
-  geom_vline(data = rwis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
+  geom_rect(data = swis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_histogram(data = swis_hist, aes(x = scaled_rel_skill), binwidth = 0.03) +
+  geom_vline(data = swis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(breaks = integer_breaks()) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   facet_grid(rows = vars(model)) +
@@ -899,9 +946,9 @@ rwis_hist <- rank_trust %>%
 g_location_rwis <- ggplot() +
   geom_vline(xintercept = 1, lty = 2, lwd = 0.8, col = "lightgrey") +
   geom_rect(data = rwis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
-  geom_histogram(data = rwis_hist, aes(x = scaled_rel_skill), binwidth = 0.04) +
+  geom_histogram(data = rwis_hist, aes(x = scaled_rel_skill), binwidth = 0.05) +
   geom_vline(data = rwis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
-  scale_x_continuous(limits = c(0, 5)) +
+  scale_x_continuous(limits = c(NA, 8), trans = "log2") +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   facet_grid(rows = vars(model)) +
@@ -918,7 +965,7 @@ g_location_rank <- rank_trust %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/sum(n),
                 rank = as.character(rank),
-                model = ordered(model, main_models)) %>%
+                model = ordered(model, rev(main_models))) %>%
   ggplot(aes(y = model, x = p, fill = rank)) +
   geom_col() +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
@@ -1002,13 +1049,155 @@ rank_cluster <- pw_cluster %>%
 ```
 
 
+## By cluster
+
+```{r}
+
+# Add cluster information
+trust_cluster <- readRDS(file = here::here("data",
+                                           "out",
+                                           "trust_characteristics",
+                                           "trust_cluster_weekly.rds"))
+n_clusters <- 5
+
+adm_scores_cluster <- adm_scores %>%
+  dplyr::left_join(trust_cluster %>%
+                     dplyr::filter(k == n_clusters),
+                   by = "id") %>%
+  dplyr::filter(!is.na(cluster))
+
+# BY CLUSTER
+pw_cluster <- scoringutils::pairwise_comparison(adm_scores_cluster %>%
+                                                  dplyr::filter(model %in% main_models),
+                                                  baseline = "snaive",
+                                                  by = c("horizon", "model", "forecast_from", "cluster", "id"),
+                                                  summarise_by = c("cluster", "horizon", "model"))
+rank_cluster <- pw_cluster %>%
+  dplyr::select(horizon, cluster, model, scaled_rel_skill, relative_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, cluster) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, cluster, rank) %>%
+  dplyr::ungroup()
+
+# BY CLUSTER AND FORECAST DATE
+pw_cluster_time <- scoringutils::pairwise_comparison(adm_scores_cluster %>%
+                                                  dplyr::filter(model %in% main_models),
+                                                  baseline = "snaive",
+                                                  by = c("horizon", "model", "forecast_from", "cluster", "id"),
+                                                  summarise_by = c("cluster", "forecast_from", "horizon", "model"))
+rank_cluster_time <- pw_cluster_time %>%
+  dplyr::select(horizon, cluster, forecast_from, model, scaled_rel_skill, relative_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, cluster, forecast_from) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, cluster, forecast_from, rank) %>%
+  dplyr::ungroup()
+
+```
+
+### In-text values
+
+```{r}
+
+rank_cluster_time %>%
+  dplyr::filter(horizon == 7,
+                cluster == 5,
+                model == "convolution_rt")
+
+rank_cluster_time %>%
+  dplyr::filter(horizon == 7,
+                model == "snaive",
+                rank == 5) %>%
+  dplyr::group_by(horizon, cluster) %>%
+  dplyr::summarise(n = n())
+
+```
+
+```{r}
+
+# Relative WIS values by cluster/model
+g_cluster_rwis <- rank_cluster_time %>%
+  dplyr::filter(horizon == 7,
+                !model %in% c("snaive")) %>%
+  dplyr::mutate(model = ordered(model, main_models)) %>%
+  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
+  geom_point() +
+  geom_bump() +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
+  scale_y_continuous(limits = c(NA, 2.2)) +
+  scale_color_brewer(palette = "Set2") +
+  facet_wrap(. ~ paste0("Cluster ", cluster), ncol = 1) +
+  labs(x = "Forecast date", y = "Relative WIS",
+       title = "B",
+       col = "Model") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+g_cluster_rwis <- g_cluster_rwis +
+  geom_point(data = rank_cluster_time %>%
+               dplyr::filter(horizon == 7,
+                             model == "snaive"), col = "lightgrey") +
+  geom_bump(data = rank_cluster_time %>%
+               dplyr::filter(horizon == 7,
+                             model == "snaive"), col = "lightgrey")
+
+# Relative WIS values by cluster/model
+g_cluster_swis <- rank_cluster_time %>%
+  dplyr::filter(horizon == 7,
+                !model %in% c("snaive")) %>%
+  dplyr::mutate(model = ordered(model, main_models)) %>%
+  ggplot(aes(x = forecast_from, y = scaled_rel_skill, col = model)) +
+  geom_point() +
+  geom_bump() +
+  geom_hline(yintercept = 1, lty = 2, col = "grey50") +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
+  scale_y_continuous(trans = "log2", limits = c(NA, 4)) +
+  scale_color_brewer(palette = "Set2") +
+  facet_wrap(. ~ paste0("Cluster ", cluster), ncol = 1) +
+  labs(x = "Forecast date", y = "Scaled WIS",
+       title = "C",
+       col = "Model") +
+  theme_bw() +
+  theme(legend.position = "top")
+
+g_cluster_rank <- rank_all %>%
+  dplyr::left_join(trust_cluster %>%
+                     dplyr::filter(k == n_clusters),
+                   by = "id") %>%
+  dplyr::filter(!is.na(cluster),
+                k == 5) %>%
+  dplyr::group_by(horizon, cluster, model, rank) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::mutate(p = n/sum(n),
+                rank = as.character(rank),
+                model = ordered(model, rev(main_models))) %>%
+  dplyr::filter(horizon == 7) %>%
+  ggplot(aes(y = model, x = p, fill = rank)) +
+  geom_col() +
+  facet_wrap(. ~ paste0("Cluster ", cluster), ncol = 1) +
+  scale_fill_brewer(palette = "Blues", direction = -1) +
+  labs(x = "Proportion of Trusts", y  = "",
+       title = "A",
+       fill = "Rank") +
+  theme_bw()
+
+guide_area() / ((g_cluster_rank + plot_layout(guides = "keep")) |
+                  g_cluster_rwis | g_cluster_swis) +
+  plot_layout(heights = c(0.1, 1), widths = c(2, 1, 1), guides = "collect")
+  
+```
+
+
 ## Value of perfect information
 
 ```{r}
 
 # By horizon
 pw_obs_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::filter(model %in% obs_models),
+                                                      dplyr::filter(model %in% c(obs_models, "mean_ensemble_observed")),
                                                 baseline = "snaive",
                                                 by = c("horizon", "model", "forecast_from", "id"),
                                                 summarise_by = c("horizon", "model"))
@@ -1074,6 +1263,21 @@ rank_obs_all <- pw_obs_all %>%
 # ARIMA REGRESSION MODEL
 arima_models <- c("snaive", "arima_case7_observed_raw", "arima_case7_forecast_raw")
 
+## By horizon
+pw_arima_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                  dplyr::filter(model %in% arima_models),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "model"))
+
+rank_arima_horizon <- pw_arima_horizon %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
+
 ## By forecast date
 pw_arima_time <- scoringutils::pairwise_comparison(adm_scores %>%
                                                   dplyr::filter(model %in% arima_models),
@@ -1107,6 +1311,21 @@ rank_arima_trust <- pw_arima_trust %>%
 
 # CONVOLUTION MODEL
 convolution_models <- c("snaive", "convolution_observed", "convolution_rt")
+
+## By horizon
+pw_convolution_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                  dplyr::filter(model %in% convolution_models),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "model"))
+
+rank_convolution_horizon <- pw_convolution_horizon %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
 
 ## By forecast date
 pw_convolution_time <- scoringutils::pairwise_comparison(adm_scores %>%
@@ -1203,7 +1422,7 @@ g_value_calibration <- emp_coverage_dat %>%
 # rWIS by horizon
 g_value_horizon <- rank_obs_horizon %>%
   dplyr::filter(model != "snaive") %>%
-  dplyr::mutate(model = ordered(model, obs_models)) %>%
+  dplyr::mutate(model = ordered(model, rev(obs_models))) %>%
   ggplot(aes(y = model, x = scaled_rel_skill - 1)) +
   geom_col() +
   geom_vline(xintercept = 0, lty = 2) +
@@ -1219,7 +1438,7 @@ g_value_rwisrank <- rank_obs_all %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/sum(n),
                 rank = as.character(rank),
-                model = ordered(model, obs_models)) %>%
+                model = ordered(model, rev(obs_models))) %>%
   ggplot(aes(y = model, x = p, fill = rank)) +
   geom_col() +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
@@ -1292,7 +1511,7 @@ g_value_trust7 <- ggplot() +
                  aes(x = scaled_rel_skill), binwidth = 0.04) +
   geom_vline(data = rwis_lines_o %>% filter(horizon == 7),
              aes(col = model, xintercept = q2), lwd = 0.8) +
-  scale_x_continuous(limits = c(0.35, 1.7), breaks = seq(0.2, 2, 0.2)) +
+  scale_x_continuous(limits = c(0.4, 2), trans = "log2") +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   facet_grid(rows = vars(model)) +
@@ -1309,7 +1528,7 @@ g_value_trust14 <- ggplot() +
                  aes(x = scaled_rel_skill), binwidth = 0.04) +
   geom_vline(data = rwis_lines_o %>% filter(horizon == 14),
              aes(col = model, xintercept = q2), lwd = 0.8) +
-  scale_x_continuous(limits = c(0.35, 1.7), breaks = seq(0.2, 2, 0.2)) +
+  scale_x_continuous(limits = c(0.4, 2), trans = "log2") +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   facet_grid(rows = vars(model)) +
@@ -1412,6 +1631,139 @@ g_value_convolution_time <- rank_convolution_time %>%
 (g_value_arima_trust | g_value_arima_time) /
   (g_value_convolution_trust | g_value_convolution_time) +
   plot_layout(heights = c(1, 2), guides = "collect")
+
+```
+
+## Excluding outliers
+
+```{r}
+
+# OUTLIERS
+outliers_999 <- adm_scores %>%
+  dplyr::filter(model %in% main_models,
+                model != "median_ensemble_forecast",
+                interval_score >= quantile(interval_score, 0.999)) %>%
+  dplyr::select(forecast_from, id, model, horizon, interval_score) %>%
+  dplyr::arrange(horizon, -interval_score)
+
+outliers_999 %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(n = n())
+
+outliers_999 %>%
+  dplyr::group_by(forecast_from) %>%
+  dplyr::summarise(n = n())
+
+# By horizon
+pw_outl_horizon <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                      dplyr::filter(model %in% main_models,
+                                                                    interval_score < quantile(interval_score, 0.999)),
+                                                      baseline = "snaive",
+                                                      by = c("horizon", "model", "forecast_from", "id"),
+                                                      summarise_by = c("horizon", "model"))
+rank_horizon999 <- pw_outl_horizon %>%
+  dplyr::select(horizon, model, scaled_rel_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, rank) %>%
+  dplyr::select(horizon, model, scaled_rel_skill, rank)
+
+# By forecast date
+pw_outl_time <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                      dplyr::filter(model %in% main_models,
+                                                                    interval_score < quantile(interval_score, 0.999)),
+                                                baseline = "snaive",
+                                                by = c("horizon", "model", "forecast_from", "id"),
+                                                summarise_by = c("horizon", "forecast_from", "model"))
+rank_outl_time <- pw_outl_time %>%
+  dplyr::select(horizon, forecast_from, model, scaled_rel_skill, relative_skill) %>%
+  unique() %>%
+  dplyr::group_by(horizon, forecast_from) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(horizon, forecast_from, rank)
+
+```
+
+```{r}
+
+rank_horizon999 %>%
+  dplyr::rename(forecast_99.9 = scaled_rel_skill) %>%
+  dplyr::left_join(rank_horizon %>%
+                     dplyr::rename(forecast = scaled_rel_skill),
+                   by = c("horizon", "model")) %>%
+  dplyr::left_join(rank_obs_horizon %>%
+                     dplyr::rename(observed = scaled_rel_skill) %>%
+                     dplyr::mutate(model = case_when(grepl("arima", model) ~ "arima_case7_forecast_raw",
+                                                     grepl("conv", model) ~ "convolution_rt",
+                                                     TRUE ~ paste0(model))),
+                   by = c("horizon", "model")) %>%
+  dplyr::select(horizon, model, forecast, forecast_99.9, observed) %>%
+  dplyr::filter(!grepl("median_ensemble", model),
+                model != "snaive") %>%
+  dplyr::mutate(model = ordered(model, main_models)) %>%
+  dplyr::arrange(horizon, model)
+
+g_outtime_rwis7 <- rank_outl_time %>%
+  dplyr::filter(horizon == 7, model != "snaive") %>%
+  dplyr::mutate(model = ordered(model, main_models)) %>%
+  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
+  geom_bump(lwd = 0.6) +
+  geom_point(size = 3) +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "Forecast date", y = "Relative WIS",
+       col = "Model") +
+  theme_bw() +
+  theme(legend.position = "top")
+#
+g_outtime_rwis7 <- g_outtime_rwis7 +
+  geom_bump(data = rank_outl_time %>% dplyr::filter(horizon == 7, model == "snaive"),
+            lwd = 0.6, col = "grey70") +
+  geom_point(data = rank_outl_time %>% dplyr::filter(horizon == 7, model == "snaive"),
+             size = 3, col = "grey70")
+
+
+g_outtime_rwis14 <- rank_outl_time %>%
+  dplyr::filter(horizon == 14, model != "snaive") %>%
+  dplyr::mutate(model = ordered(model, main_models)) %>%
+  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
+  geom_bump(lwd = 0.6) +
+  geom_point(size = 3) +
+  scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
+               limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "Forecast date", y = "Relative WIS",
+       col = "Model") +
+  theme_bw() +
+  theme(legend.position = "top")
+#
+g_outtime_rwis14 <- g_outtime_rwis14 +
+  geom_bump(data = rank_outl_time %>% dplyr::filter(horizon == 14, model == "snaive"),
+            lwd = 0.6, col = "grey70") +
+  geom_point(data = rank_outl_time %>% dplyr::filter(horizon == 14, model == "snaive"),
+             size = 3, col = "grey70")
+
+rank_time %>%
+  dplyr::left_join(rank_outl_time, by = c("forecast_from", "horizon", "model")) %>%
+  dplyr::filter(model != "snaive") %>%
+  dplyr::mutate(model = ordered(model, main_models),
+                label = ifelse(scaled_rel_skill.y < 0.9*scaled_rel_skill.x,
+                               paste0(forecast_from),
+                               NA)) %>%
+  ggplot(aes(x = scaled_rel_skill.x, y = scaled_rel_skill.y, col = model)) +
+  geom_point(size = 2) +
+  geom_text_repel(aes(label = label)) +
+  geom_abline(slope = 1, intercept = 0, lty = 2, col = "grey50") +
+  facet_wrap(. ~ horizon) +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(trans = "log2") +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "Scaled WIS, all forecasts", y = "Scaled WIS, outliers excluded",
+       col = "Model") +
+  theme_bw()
+  
 
 ```
 
