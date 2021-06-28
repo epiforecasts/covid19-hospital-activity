@@ -194,7 +194,7 @@ plot_forecast_ribbons <- function(observed, forecast,
     geom_ribbon(data = forecast_plt,
                 aes(x = date, y = median, fill = model, ymin = lower_50, ymax = upper_50),
                 alpha = 0.4) +
-    facet_wrap(as.formula(paste("~", trust_facet_var)), scales = "free_y") +
+    facet_wrap(as.formula(paste("~", trust_facet_var)), scales = "free_y", ncol = 5, nrow = 5) +
     scale_y_continuous(limits = c(0, NA)) +
     scale_color_brewer(palette = "Set2") +
     scale_fill_brewer(palette = "Set2") +
