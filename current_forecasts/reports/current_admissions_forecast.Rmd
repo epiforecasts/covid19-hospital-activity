@@ -20,7 +20,7 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-06-06")
+forecast_date <- as.Date("2021-06-20")
 utla_names <- c("Blackburn with Darwen",
                 "Manchester",
                 "Birmingham",

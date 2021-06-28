@@ -10,7 +10,7 @@ source(here::here("R", "utils.R"))
 
 # Forecast date -----------------------------------------------------------
 
-forecast_date <- as.Date("2021-06-06")
+forecast_date <- as.Date("2021-06-20")
 
 # Check UTLA-level case forecasts -----------------------------------------
 
@@ -100,10 +100,10 @@ drop_trusts <- combined_trust %>%
   dplyr::filter(is.na(total_adm) | total_adm == 0 | is.na(total_case) | total_case == 0) %>%
   dplyr::pull(id)
 
-message(paste0(c("Dropping the following Trusts for missing data or no recent activity:", drop_trusts), collapse = " "))
+message(paste0(c("Dropping the following Trusts for missing data or no recent activity:", c("RBS", drop_trusts)), collapse = " "))
 
 combined_trust <- combined_trust %>%
-  filter(!id %in% c("RBS", drop_trusts))
+  filter(!id %in% drop_trusts)
 
 
 # Update all forecasts ----------------------------------------------------
