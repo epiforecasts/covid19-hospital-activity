@@ -10,7 +10,8 @@ output:
 
 ```{r setup, include=FALSE}
 
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      fig.width = 14, fig.height = 9)
 
 library(tidyverse)
 library(ggrepel)
@@ -21,17 +22,13 @@ source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
 forecast_date <- as.Date("2021-06-20")
-utla_names <- c("Blackburn with Darwen",
-                "Manchester",
-                "Birmingham",
-                "Gloucestershire")
-
-flag_utlas <- readRDS(file = here::here("current_forecasts", "data", "flag_utla.rds"))
-exclude_utlas <- flag_utlas$id_name
 
 ```
 
 ```{r new variables, include = FALSE}
+
+flag_utlas <- readRDS(file = here::here("current_forecasts", "data", "flag_utla.rds"))
+exclude_utlas <- flag_utlas$id_name
 
 exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
   covid19.nhs.data::get_names() %>%
@@ -68,11 +65,6 @@ plot_trusts_observed <- admissions %>%
                 date <= forecast_date) %>%
   dplyr::group_by(nhs_region, id) %>%
   dplyr::summarise(observed = mean(adm, na.rm = TRUE))
- 
- focus_trust <- covid19.nhs.data::get_names(covid19.nhs.data::trust_utla_mapping) %>%
-  dplyr::filter(geo_name %in% utla_names,
-                p_geo > 0.2) %>%
-  dplyr::arrange(geo_name)
 
 ```
 
@@ -91,11 +83,9 @@ All models are trained on the last 6 weeks of data (from `r format.Date(forecast
 **Note: The following Trusts/UTLAs have been temporarily excluded from this report due issues with the underlying case forecasts in one or more associated UTLAs:** `r paste0(exclude_trusts$label, collapse = ", ")`.
 
 
-# Current ensemble forecast
-
 ```{r load forecasts}
 
-# Load forecast summary
+# Current forecast summary
 current_forecast <- readRDS(file = here::here("current_forecasts",
                                               "data",
                                               "admissions_trust",
@@ -109,6 +99,33 @@ current_forecast <- readRDS(file = here::here("current_forecasts",
   dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40)) %>%
   dplyr::filter(!id %in% exclude_trusts$trust_code)
 
+# Current forecast samples
+current_forecast_long <- readRDS(file = here::here("current_forecasts",
+                                                   "data",
+                                              "admissions_trust",
+                                              paste0("admissions_long_", forecast_date, ".rds")))
+
+# All past forecasts
+file_dir <- here::here("current_forecasts", "data", "admissions_trust")
+file_names <- list.files(file_dir)[which(!grepl("latest", list.files(file_dir)) &
+                                           !grepl("long", list.files(file_dir)) &
+                                           !grepl(forecast_date, list.files(file_dir)))]
+all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
+  
+  out <- readRDS(file = here::here(file_dir, .x))
+  return(out)
+  
+}) %>%
+  dplyr::bind_rows() %>%
+  dplyr::select(-quantile) %>%
+  tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label) %>%
+  dplyr::select(forecast_from, model, id, date = date_horizon, horizon,
+                median = lower_0, lower_90, lower_50, upper_50, upper_90) %>%
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40))
+
+
+# 7- and 14-day median forecast + current 7-day average
 forecast_point <- current_forecast %>%
   dplyr::filter(model == "mean_ensemble",
                 horizon %in% c(7, 14)) %>%
@@ -119,13 +136,7 @@ forecast_point <- current_forecast %>%
   dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
   dplyr::select(nhs_region, id, trust_name, observed, forecast_7, forecast_14)
 
-
-# Load forecast samples
-current_forecast_long <- readRDS(file = here::here("current_forecasts",
-                                                   "data",
-                                              "admissions_trust",
-                                              paste0("admissions_long_", forecast_date, ".rds")))
-
+# 7- and 14-day probability of increase
 forecast_prob <- current_forecast_long %>%
   dplyr::filter(model == "mean_ensemble",
                 horizon %in% c(7, 14)) %>%
@@ -143,6 +154,7 @@ forecast_prob <- current_forecast_long %>%
   tidyr::pivot_wider(id_cols = -c(horizon, p_increase), names_from = horizon, values_from = p_increase) %>%
   dplyr::filter(!id %in% exclude_trusts$trust_code)
 
+# Current forecast summary table
 current_forecast_tb <- forecast_point %>%
   dplyr::left_join(forecast_prob, by = "id") %>%
   dplyr::select(nhs_region, id, trust_name, observed, forecast_7, p_7, forecast_14, p_14) %>%
@@ -150,22 +162,115 @@ current_forecast_tb <- forecast_point %>%
                 p_7 = round(p_7, 2),
                 p_14 = round(p_14, 2))
 
-plot_trusts_forecast <- current_forecast_tb %>%
-  # dplyr::filter(forecast_7 - observed >= 0) %>%
-  dplyr::arrange(-(forecast_7 - observed)) %>%
+# Data for scatter plot
+scatter_data <- current_forecast_tb %>%
   dplyr::ungroup() %>%
-  dplyr::slice_head(n = 25) %>%
-  dplyr::pull(id)
+  dplyr::mutate(change = forecast_14 - observed,
+                label = ifelse(observed >= 1 & (observed > quantile(observed, 0.9, na.rm = TRUE) |
+                                 p_14 > quantile(p_14, 0.9, na.rm = TRUE) |
+                                 p_14 == 0.99),
+                               trust_name, NA),
+                label = stringr::str_wrap(label, width = 25))
 
 ```
 
+```{r include = FALSE}
 
-## By recent observed admissions
+return_region_plots <- function(region = "North West"){
+  
+  g_current <- plot_forecast_ribbons(observed = admissions %>%
+                        dplyr::filter(date > forecast_date - 21,
+                                      date <= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+                      forecast = current_forecast,
+                     trusts = unique(current_forecast_tb$id[which(current_forecast_tb$nhs_region == region & current_forecast_tb$observed >= 0.7)]),
+                     models = "mean_ensemble",
+                     facet_models = FALSE) +
+  scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
+  labs(title = region,
+       subtitle = "Ensemble model",
+       caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
+  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
+  ## Adding current observed data
+  geom_line(data = admissions %>%
+                        dplyr::filter(nhs_region == region,
+                                      id %in% unique(current_forecast_tb$id[which(current_forecast_tb$nhs_region == region & current_forecast_tb$observed >= 0.7)]),
+                                      date >= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+            aes(x = date, y = observed))
+  
+  g_scatter <- scatter_data %>%
+    ggplot(aes(x = p_14, y = observed)) +
+    geom_point(size = 2, col = "grey80") +
+    geom_text_repel(data = scatter_data %>%
+                      dplyr::filter(nhs_region == region),
+                    aes(label = label),
+                    size = 3, col = "grey20",
+                    point.padding = 0.2, min.segment.length = 0.1) +
+    scale_x_continuous(limits = c(0, 1)) +
+    scale_y_continuous(limits = c(0, NA), breaks = seq(0, 20, 2)) +
+    scale_color_fermenter(n.breaks = 7, palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
+    labs(x = "Probability of increase (14 days ahead)", y = "Current admissions (7-day average)",
+         title = region,
+         subtitle = "Ensemble model",
+         caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
+         col = "Forecast\nchange") +
+    theme_bw()
+  g_scatter <- g_scatter +
+    geom_point(data = scatter_data %>%
+                 dplyr::filter(nhs_region == region),
+               aes(col = change), size = 3)
+  
+  g_past7 <- plot_forecast_bars(observed = admissions %>%
+                         dplyr::filter(date >= forecast_date - 84) %>%
+                         dplyr::rename(observed = adm),
+                     forecast = all_forecasts,
+                     h = 7,
+                     trusts = unique(admissions$id[which(admissions$nhs_region == region)]),
+                     models = "mean_ensemble",
+                     facet_models = FALSE) +
+    scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
+                 breaks = "2 weeks", date_labels = "%d %b") +
+    scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
+    labs(title = region,
+         subtitle = "7-day ahead forecasts, ensemble model") +
+    theme(legend.position = "none")
 
-```{r plot current ensemble forecasts (top observed), fig.width=14, fig.height=7}
+  g_past14 <- plot_forecast_bars(observed = admissions %>%
+                         dplyr::filter(date >= forecast_date - 84) %>%
+                         dplyr::rename(observed = adm),
+                     forecast = all_forecasts,
+                     h = 14,
+                     trusts = unique(admissions$id[which(admissions$nhs_region == region)]),
+                     models = "mean_ensemble",
+                     facet_models = FALSE) +
+    scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
+                 breaks = "2 weeks", date_labels = "%d %b") +
+    scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
+    labs(title = region,
+         subtitle = "14-day ahead forecasts, ensemble model") +
+    theme(legend.position = "none")
+  
+  return(list(current_forecast = g_current,
+              scatter = g_scatter,
+              past_7days = g_past7,
+              past_14days = g_past14))
+  
+}
+
+```
+
+# Current forecast
+
+## Overall {.tabset}
+
+### Current forecast, ribbon {.tabset .tabset-pills}
+
+```{r}
 
 plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date > forecast_date - 14,
+                        dplyr::filter(date > forecast_date - 21,
                                       date <= forecast_date) %>%
                         dplyr::rename(observed = adm),
                       forecast = current_forecast,
@@ -174,9 +279,32 @@ plot_forecast_ribbons(observed = admissions %>%
                      facet_models = FALSE) +
   scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
   scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
+  labs(title = "Top 25 Trusts with most admissions in last 28 days",
        subtitle = "Ensemble model",
-       caption = "Top 25 Trusts with most admissions in last 28 days") +
+       caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
+  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
+  ## Adding current observed data
+  geom_line(data = admissions %>%
+                        dplyr::filter(id %in% plot_trusts_observed,
+                                      date >= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+            aes(x = date, y = observed))
+
+plot_forecast_ribbons(observed = admissions %>%
+                        dplyr::filter(date > forecast_date - 21,
+                                      date <= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+                      forecast = current_forecast,
+                     trusts = plot_trusts_observed,
+                     models = "convolution_rt",
+                     facet_models = FALSE) +
+  scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
+  scale_color_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Top 25 Trusts with most admissions in last 28 days",
+       subtitle = "Case-convolution model",
+       caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
   theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
   ## Adding current observed data
   geom_line(data = admissions %>%
@@ -187,62 +315,9 @@ plot_forecast_ribbons(observed = admissions %>%
 
 ```
 
+### Forecast increase, scatter
 
-## By forecast admissions
-
-```{r plot current ensemble forecasts (top forecast), fig.width=14, fig.height=7}
-
-plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date > forecast_date - 42,
-                                      date <= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-                     forecast = current_forecast,
-                     trusts = plot_trusts_forecast,
-                     models = "mean_ensemble",
-                     facet_models = FALSE) +
-  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
-       subtitle = "Ensemble model",
-       caption = "Top 25 Trusts with biggest forecast increase in admissions") +
-  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
-  ## Adding current observed data
-  geom_line(data = admissions %>%
-                        dplyr::filter(id %in% plot_trusts_forecast,
-                                      date >= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-            aes(x = date, y = observed))
-
-```
-
-
-
-```{r table current forecats}
-
-DT::datatable(data = current_forecast_tb %>%
-                dplyr::select(ID = id,
-                              Name = trust_name,
-                              `Current 7-day average` = observed,
-                              `One-week ahead forecast` = forecast_7,
-                              `Probability of increase (7 days)` = p_7,
-                              `Two-weeks ahead forecast` = forecast_14,
-                              `Probability of increase (14 days)` = p_14),
-              rownames = FALSE,
-              )
-
-```
-
-## Probability of increase (scatter)
-```{r admissions vs probability, fig.width=14, fig.height=7}
-
-scatter_data <- current_forecast_tb %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(change = forecast_14 - observed,
-                label = ifelse(observed > quantile(observed, 0.95, na.rm = TRUE) |
-                                 p_14 > quantile(p_14, 0.95, na.rm = TRUE) |
-                                 p_14 == 0.99,
-                               trust_name, NA),
-                label = stringr::str_wrap(label, width = 25))
+```{r}
 
 scatter_data %>%
   ggplot(aes(x = p_14, y = observed, col = change)) +
@@ -276,8 +351,9 @@ scatter_data %>%
 
 ```
 
-## Probability of increase (map)
-```{r map probability increase, fig.width=14, fig.height=7}
+### Forecast increase, maps {.tabset .tabset-pills}
+
+```{r}
 
 loc <- readRDS(file = here::here("data", "out", "trust_characteristics", "trust_locations.rds"))
 
@@ -339,214 +415,109 @@ covid19.nhs.data::england_utla_shape %>%
 ```
 
 
-# Current case-convolution forecast
+### Summary, table {.tabset .tabset-pills}
+
+```{r overall}
+
+# Table
+DT::datatable(data = current_forecast_tb %>%
+                dplyr::select(`NHS region` = nhs_region,
+                              ID = id,
+                              Name = trust_name,
+                              `Current 7-day average` = observed,
+                              `One-week ahead forecast` = forecast_7,
+                              `Two-weeks ahead forecast` = forecast_14,
+                              `14-day probability of increase` = p_14),
+              rownames = FALSE,
+              )
+
+```
+
+
+
+## By NHS region {.tabset}
+
+### East of England {.tabset .tabset-pills}
 
 ```{r}
 
-convolution_point <- current_forecast %>%
-  dplyr::filter(model == "convolution_rt",
-                horizon %in% c(7, 14)) %>%
-  dplyr::select(id, horizon, median) %>%
-  dplyr::mutate(horizon = paste0("forecast_", horizon)) %>%
-  tidyr::pivot_wider(id_cols = id, names_from = horizon, values_from = median) %>%
-  dplyr::left_join(trusts_observed7, by = "id") %>%
-  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
-  dplyr::select(nhs_region, id, trust_name, observed, forecast_7, forecast_14)
+plots <- return_region_plots(region = "East of England")
 
+plots$current_forecast
+plots$scatter
 
-convolution_prob <- current_forecast_long %>%
-  dplyr::filter(model == "convolution_rt",
-                horizon %in% c(7, 14)) %>%
-  dplyr::left_join(trusts_observed7, by = c("id")) %>%
-  dplyr::mutate(observed = round(observed)) %>%
-  dplyr::group_by(forecast_from, id, horizon) %>%
-  dplyr::filter(value > observed) %>%
-  dplyr::group_by(forecast_from, id, horizon) %>%
-  dplyr::filter(quantile == min(quantile)) %>%
-  dplyr::mutate(horizon = paste0("p_", horizon),
-                p_increase = 1-quantile) %>%
-  dplyr::ungroup() %>%
-  dplyr::select(id, horizon, p_increase) %>%
-  unique() %>%
-  tidyr::pivot_wider(id_cols = -c(horizon, p_increase), names_from = horizon, values_from = p_increase) %>%
-  dplyr::filter(!id %in% exclude_trusts$trust_code)
+```
 
-convolution_tb <- convolution_point %>%
-  dplyr::left_join(convolution_prob, by = "id") %>%
-  dplyr::select(nhs_region, id, trust_name, observed, forecast_7, p_7, forecast_14, p_14) %>%
-  dplyr::mutate(observed = round(observed, 1),
-                p_7 = round(p_7, 2),
-                p_14 = round(p_14, 2))
+### London {.tabset .tabset-pills}
+
+```{r}
+
+plots <- return_region_plots(region = "London")
+
+plots$current_forecast
+plots$scatter
+
+```
+
+### Midlands {.tabset .tabset-pills}
+
+```{r}
+
+plots <- return_region_plots(region = "Midlands")
+
+plots$current_forecast
+plots$scatter
+
+```
+
+### North East and Yorkshire {.tabset .tabset-pills}
+
+```{r}
+
+plots <- return_region_plots(region = "North East and Yorkshire")
+
+plots$current_forecast
+plots$scatter
+
+```
+
+### North West {.tabset .tabset-pills}
+
+```{r}
+
+plots <- return_region_plots(region = "North West")
+
+plots$current_forecast
+plots$scatter
+
+```
+
+### South East {.tabset .tabset-pills}
+
+```{r}
+
+plots <- return_region_plots(region = "South East")
+
+plots$current_forecast
+plots$scatter
+
+```
+
+### South West {.tabset .tabset-pills}
+
+```{r}
+
+plots <- return_region_plots(region = "South West")
+
+plots$current_forecast
+plots$scatter
 
 ```
 
 
-## By recent observed admissions
+# Past forecasts
 
-```{r plot current convolution forecasts (top observed), fig.width=14, fig.height=7}
-
-plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date > forecast_date - 14,
-                                      date <= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-                      forecast = current_forecast,
-                     trusts = plot_trusts_observed,
-                     models = "convolution_rt",
-                     facet_models = FALSE) +
-  scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
-  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  scale_color_brewer(palette = "Set1") +
-  scale_fill_brewer(palette = "Set1") +
-  labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
-       subtitle = "Case-convolution model",
-       caption = "Top 25 Trusts with most admissions in last 28 days") +
-  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
-  ## Adding current observed data
-  geom_line(data = admissions %>%
-                        dplyr::filter(id %in% plot_trusts_observed,
-                                      date >= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-            aes(x = date, y = observed))
-
-```
-
-
-## By forecast admissions
-
-```{r plot current convolution forecasts (top forecast), fig.width=14, fig.height=7}
-
-plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date > forecast_date - 42,
-                                      date <= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-                     forecast = current_forecast,
-                     trusts = plot_trusts_forecast,
-                     models = "convolution_rt",
-                     facet_models = FALSE) +
-  scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  scale_color_brewer(palette = "Set1") +
-  scale_fill_brewer(palette = "Set1") +
-  labs(title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
-       subtitle = "Case-convolution model",
-       caption = "Top 25 Trusts with biggest forecast increase in admissions") +
-  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
-  ## Adding current observed data
-  geom_line(data = admissions %>%
-                        dplyr::filter(id %in% plot_trusts_forecast,
-                                      date >= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-            aes(x = date, y = observed))
-
-```
-
-
-## Probability of increase (scatter)
-```{r admissions vs probability convolution, fig.width=14, fig.height=7}
-
-scatter_data <- convolution_tb %>%
-  dplyr::ungroup() %>%
-  dplyr::mutate(change = forecast_14 - observed,
-                label = ifelse(observed > quantile(observed, 0.95, na.rm = TRUE) |
-                                 p_14 > quantile(p_14, 0.95, na.rm = TRUE) |
-                                 p_14 == 0.99,
-                               trust_name, NA),
-                label = stringr::str_wrap(label, width = 25))
-
-scatter_data %>%
-  ggplot(aes(x = p_14, y = observed, col = change)) +
-  geom_point(size = 3) +
-  geom_text_repel(aes(label = label), size = 3, col = "grey20",
-                  point.padding = 0.2, min.segment.length = 0.1) +
-  scale_x_continuous(limits = c(0, 1)) +
-  scale_y_continuous(limits = c(0, NA), breaks = seq(0, 20, 2)) +
-  scale_color_fermenter(n.breaks = 7, palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
-  labs(x = "Probability of increase (14 days ahead)", y = "Current admissions (7-day average)",
-       title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
-       subtitle = "Case-convolution model",
-       col = "Forecast\nchange") +
-  theme_bw()
-
-# Facetted by NHS region
-scatter_data %>%
-  ggplot(aes(x = p_14, y = observed, col = change)) +
-  geom_point(size = 3) +
-  geom_text_repel(aes(label = label), size = 3, col = "grey20",
-                  point.padding = 0.2, min.segment.length = 0.1) +
-  facet_wrap(. ~ nhs_region) +
-  scale_x_continuous(limits = c(0, 1)) +
-  scale_y_continuous(limits = c(0, NA), breaks = seq(0, 20, 2)) +
-  scale_color_fermenter(n.breaks = 7, palette = "RdBu", limits = max(abs(scatter_data$change))*c(-1, 1)) +
-  labs(x = "Probability of increase (14 days ahead)", y = "Current admissions (7-day average)",
-       title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y")),
-       subtitle = "Case-convolution model",
-       col = "Forecast\nchange") +
-  theme_bw()
-
-```
-
-## Case-hospitalisation ratio
-
-```{r case-hosp ratio, fig.width=14, fig.height=7}
-
-convolution_chr <- readRDS(file = here::here("current_forecasts",
-                                             "data",
-                                           "chr",
-                                           paste0("chr_", forecast_date, ".rds")))
-
-trusts_observed7 %>%
-  dplyr::left_join(convolution_chr %>%
-                     dplyr::filter(grepl("frac_obs", variable)) %>%
-                     dplyr::select(id, median, lwr = lower_90, upr = upper_90), by = "id") %>%
-  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
-  dplyr::mutate(label = ifelse(observed > quantile(observed, 0.95) |
-                                 median > quantile(median, 0.95, na.rm = TRUE) |
-                                 id %in% focus_trust$trust_code,
-                               trust_name,
-                               NA),
-                label = stringr::str_wrap(label, width = 25)) %>%
-  ggplot() +
-  geom_point(aes(x = median, y = observed), size = 3, alpha = 0.5) +
-  geom_segment(aes(x = lwr, xend = upr, y = observed, yend = observed), lwd = 1, alpha = 0.5) +
-  geom_text_repel(aes(x = median, y = observed, label = label), size = 3, col = "grey20",
-                  point.padding = 0.2, min.segment.length = 0.1) +
-  facet_wrap(. ~ nhs_region) +
-  scale_x_continuous(limits = c(0, 0.3)) +
-  scale_y_continuous(limits = c(0, NA), breaks = seq(0, 20, 2)) +
-  labs(x = "Case-hospitalisation ratio",
-       y = "Current admissions (7-day average)",
-       title = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
-  theme_bw()
-
-```
-
-
-# Past ensemble forecasts
-
-```{r load past forecasts}
-
-file_dir <- here::here("current_forecasts", "data", "admissions_trust")
-file_names <- list.files(file_dir)[which(!grepl("latest", list.files(file_dir)) &
-                                           !grepl("long", list.files(file_dir)) &
-                                           !grepl(forecast_date, list.files(file_dir)))]
-
-all_forecasts <- purrr::map_df(.x = file_names, .f = ~ {
-  
-  out <- readRDS(file = here::here(file_dir, .x))
-  return(out)
-  
-}) %>%
-  dplyr::bind_rows() %>%
-  dplyr::select(-quantile) %>%
-  tidyr::pivot_wider(id_cols = -c(quantile_label, value), names_from = quantile_label) %>%
-  dplyr::select(forecast_from, model, id, date = date_horizon, horizon,
-                median = lower_0, lower_90, lower_50, upper_50, upper_90) %>%
-  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
-  dplyr::mutate(trust_name = stringr::str_wrap(trust_name, width = 40))
-
-```
-
-```{r plot past forecasts, fig.width=14, fig.height=7}
+```{r}
 
 plot_forecast_bars(observed = admissions %>%
                        dplyr::filter(date >= forecast_date - 84) %>%
@@ -559,7 +530,8 @@ plot_forecast_bars(observed = admissions %>%
   scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
   scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
-  labs(subtitle = "Top 25 Trusts with most admissions in last 28 days") +
+  labs(title = "Top 25 Trusts with most admissions in last 28 days",
+       subtitle = "Past 7-day ahead forecasts, ensemble model") +
   theme(legend.position = "none")
 
 plot_forecast_bars(observed = admissions %>%
@@ -573,83 +545,8 @@ plot_forecast_bars(observed = admissions %>%
   scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
   scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
-  labs(subtitle = "Top 25 Trusts with most admissions in last 28 days") +
+    labs(title = "Top 25 Trusts with most admissions in last 28 days",
+       subtitle = "Past 14-day ahead forecasts, ensemble model") +
   theme(legend.position = "none")
 
 ```
-
-
-# Areas of interest
-
-```{r load data 2, include = FALSE}
-
-dat <- load_combined_data() %>%
-  dplyr::filter(date >= as.Date("2021-02-01"),
-                date < max(date)) %>%
-  dplyr::rename(adm = all_adm, occ = bed_occ) %>%
-  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
-  tidyr::pivot_longer(cols = c(cases, adm, occ)) %>%
-  dplyr::filter(name != "occ") %>%
-  dplyr::mutate(id = trust_name,
-                name = ifelse(name == "cases", "Cases", "Admissions")) %>%
-  dplyr::select(-trust_name, -nhs_region) %>%
-  na.omit()
-
-```
-
-Below is more detailed information about potential Trusts of interest, defined as Trusts where more than 20% of patients are admitted from one of the following UTLAs: **`r paste0(utla_names, collapse = ", ")`**.
-
-```{r area of interest, fig.width=14, fig.height=7}
-
-for(use_id in unique(focus_trust$trust_code)){
-  
-  trust_name <- focus_trust %>%
-    dplyr::filter(trust_code == use_id) %>%
-    dplyr::pull(trust_name) %>%
-    unique()
-  
-  utla_names <- focus_trust %>%
-    dplyr::filter(trust_code == use_id) %>%
-    dplyr::pull(geo_name) %>%
-    unique()
-  
-  plot_title <- paste0(trust_name,
-                       " (UTLA: ",
-                       paste0(utla_names, collapse = ", "),
-                       ")")
-  
-  g_observed <- plot_observed(observed = dat, trusts = trust_name,
-                              plot_vars = c("Cases", "Admissions"), plot_raw = TRUE) +
-     annotate("rect", xmin = forecast_date - 42, xmax = forecast_date, ymin = -Inf, ymax = Inf, alpha = 0.2) +
-    scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-    labs(title = plot_title,
-         subtitle = "Trust-level cases (estimated) and hospital admissions (observed)") +
-    theme(legend.position = "bottom")
-
-  g_forecast <- plot_forecast_ribbons(observed = admissions %>%
-                                        dplyr::filter(date > forecast_date - 42,
-                                                      date <= forecast_date) %>%
-                                        dplyr::rename(observed = adm),
-                                      forecast = current_forecast,
-                                      trusts = use_id,
-                                      models = c("ts_ensemble", "regression_arima", "convolution_rt", "mean_ensemble"),
-                                      facet_models = TRUE) +
-    scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
-    scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-    labs(subtitle = paste0("Hospital admissions forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
-    theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
-    geom_line(data = admissions %>%
-                        dplyr::filter(id %in% use_id,
-                                      date >= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-            aes(x = date, y = observed))
-
-  g_out <- g_observed | g_forecast
-  
-  print(g_out)
-  
-}
-
-```
-
-
