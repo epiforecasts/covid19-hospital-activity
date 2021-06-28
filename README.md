@@ -37,6 +37,7 @@ Figures and any in-text values are made by running the following reports:
 
 We continue to make Trust-level forecasts of hospital admissions. This work is contained in the folder [current_forecasts/](https://github.com/epiforecasts/covid19-hospital-activity/tree/main/current_forecasts):
 
+* **[README.md](https://github.com/epiforecasts/covid19-hospital-activity/tree/main/current_forecasts/README.md): Full instructions to update the current forecasts.**
 * [update_current_forecast.R](https://github.com/epiforecasts/covid19-hospital-activity/tree/main/current_forecasts/update_current_forecast.R): Runs the full forecast pipeline for the current forecasts; need to manually update the forecast date and to have added the relevant UTLA case forecasts to [cases_utla/](https://github.com/epiforecasts/covid19-hospital-activity/tree/main/current_forecasts/cases_utla).
 * [current_forecast.Rmd](https://github.com/epiforecasts/covid19-hospital-activity/blob/main/current_forecasts/current_forecast.Rmd): report summarising forecasts for a given forecast date.
 * [admissions_trust/](https://github.com/epiforecasts/covid19-hospital-activity/tree/main/current_forecasts/admissions_trust): quantile forecasts of Trust-level hospital admissions labelled by forecast date. Standard version (e.g. admissions_2021-03-14.rds) contains quantiles 0.05, 0.25, 0.5, 0.75 and 0.95; the long version (e.g. admissions_long_2021-03-14.rds) contains all quantiles 0.01 through 0.99 (inclusive).
