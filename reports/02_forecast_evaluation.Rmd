@@ -225,7 +225,7 @@ g_rwis_overall <- rank_overall %>%
   scale_x_continuous(limits = c(-0.25, NA), breaks = x_breaks, labels = x_breaks + 1) +
   scale_fill_distiller(palette = "RdBu", na.value = "grey80",
                        limits = c(-0.4, 0.4)) +
-  labs(x = "Relative WIS", y = "",
+  labs(x = "Scaled WIS", y = "",
        title = "A") +
   theme_bw() +
   theme(legend.position = "none")
@@ -235,7 +235,7 @@ g_rwis_horizon7 <- rank_horizon %>%
                 model != "snaive") %>%
   dplyr::left_join(tb_main, by = "model") %>%
   dplyr::group_by(horizon) %>%
-  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
+  dplyr::mutate(label = ordered(label, rev(main_model_labels))) %>%
   ggplot(aes(y = label, x = scaled_rel_skill - 1)) +
   geom_col(fill = "grey50") +
   geom_vline(xintercept = 0, lty = 2) +
@@ -245,9 +245,9 @@ g_rwis_horizon7 <- rank_horizon %>%
                      labels = seq(-1, 2, 0.1) + 1) +
   scale_fill_distiller(palette = "RdBu", na.value = "grey80",
                        limits = c(-0.4, 0.4)) +
-  labs(x = "Relative WIS", y = "",
+  labs(x = "Scaled WIS", y = "",
        title = "B",
-       fill = "Relative WIS") +
+       fill = "Scaled WIS") +
   theme_bw() +
   theme(legend.position = "none")
 
@@ -256,18 +256,18 @@ g_rwis_horizon14 <- rank_horizon %>%
                 model != "snaive") %>%
   dplyr::left_join(tb_main, by = "model") %>%
   dplyr::group_by(horizon) %>%
-  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
+  dplyr::mutate(label = ordered(label, rev(main_model_labels))) %>%
   ggplot(aes(y = label, x = scaled_rel_skill - 1)) +
   geom_col(fill = "grey50") +
   geom_vline(xintercept = 0, lty = 2) +
   facet_wrap(. ~ horizon, scales = "free_x") +
   scale_x_continuous(limits = c(-0.25, NA),
-                     breaks = seq(-1, 2, 0.2),
-                     labels = seq(-1, 2, 0.2) + 1) +
+                     breaks = seq(-1, 2, 0.4),
+                     labels = seq(-1, 2, 0.4) + 1) +
   scale_fill_distiller(palette = "RdBu", na.value = "grey80",
                        limits = c(-0.4, 0.4)) +
-  labs(x = "Relative WIS", y = "",
-       fill = "Relative WIS") +
+  labs(x = "Scaled WIS", y = "",
+       fill = "Scaled WIS") +
   theme_bw() +
   theme(legend.position = "none")
 
@@ -277,7 +277,7 @@ g_individual_rank <- rank_all %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/sum(n),
                 rank = as.character(rank),
-                label = ordered(label, main_model_labels)) %>%
+                label = ordered(label, rev(main_model_labels))) %>%
   ggplot(aes(y = label, x = p, fill = rank)) +
   geom_col() +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
@@ -510,7 +510,9 @@ g_time_obs <- observed %>%
 # Relative skill ranking ts
 g_time_rank <- rank_time %>%
   dplyr::filter(horizon == 7, model != "snaive") %>%
-  ggplot(aes(x = forecast_from, y = rank, col = model)) +
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
+  ggplot(aes(x = forecast_from, y = rank, col = label)) +
   geom_bump(lwd = 0.6) +
   geom_point(size = 3) +
   scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
@@ -531,7 +533,9 @@ g_time_rank <- g_time_rank +
 g_time_rwis <- rank_time %>%
   dplyr::filter(horizon == 7) %>%
   dplyr::filter(model != "snaive") %>%
-  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
+  ggplot(aes(x = forecast_from, y = relative_skill, col = label)) +
   geom_bump(lwd = 0.6) +
   geom_point(size = 2) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 2)], date_labels = "%d %b %y",
@@ -553,7 +557,9 @@ g_time_rwis <- g_time_rwis +
 g_time_swis <- rank_time %>%
   dplyr::filter(horizon == 7) %>%
   dplyr::filter(model != "snaive") %>%
-  ggplot(aes(x = forecast_from, y = scaled_rel_skill, col = model)) +
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
+  ggplot(aes(x = forecast_from, y = scaled_rel_skill, col = label)) +
   geom_hline(yintercept = 1, lty = 2, lwd = 0.6, col = "grey50") +
   geom_bump(lwd = 0.6) +
   geom_point(size = 2) +
@@ -597,7 +603,7 @@ g_time_mae <- g_time_mae +
 
 ```{r figure 3}
 
-guide_area() / g_time_rwis / g_time_swis /g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1, 1))
+guide_area() / g_time_rwis /g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
 
 ```
 
@@ -623,11 +629,12 @@ g_time_obs <- observed %>%
   theme_bw()
 
 # Relative skill value ts
-g_time_rwis1 <- rank_time %>%
+g_time14_rwis <- rank_time %>%
   dplyr::filter(horizon == 14) %>%
   dplyr::filter(model != "snaive") %>%
-  ggplot(aes(x = forecast_from, y = relative_skill, col = model)) +
-  geom_hline(yintercept = 1, lty = 2, lwd = 0.6, col = "grey50") +
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
+  ggplot(aes(x = forecast_from, y = relative_skill, col = label)) +
   geom_bump(lwd = 0.6) +
   geom_point(size = 2) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
@@ -639,6 +646,12 @@ g_time_rwis1 <- rank_time %>%
        col = "Model") +
   theme_bw() +
   theme(legend.position = "top")
+
+g_time14_rwis <- g_time14_rwis +
+  geom_bump(data = rank_time %>% dplyr::filter(horizon == 14, model == "snaive"),
+            lwd = 0.6, col = "grey70") +
+  geom_point(data = rank_time %>% dplyr::filter(horizon == 14, model == "snaive"),
+             size = 2, col = "grey70")
 
 # MAE ts
 g_time_mae <- mae_time %>%
@@ -670,7 +683,7 @@ g_time_mae <- g_time_mae +
 
 ```{r figure s7}
 
-guide_area() / g_time_rwis1 / g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
+guide_area() / g_time14_rwis / g_time_mae / g_time_obs / plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
 
 ```
 
@@ -739,20 +752,35 @@ rank_trust %>%
   dplyr::group_by(horizon, model) %>%
   dplyr::summarise(n = n())
 
-# % times ranking first
+# % times ranking first/second
 rank_trust %>%
-  dplyr::filter(rank %in% c(1,2)) %>%
+  dplyr::filter(rank %in% c(1, 2)) %>%
   dplyr::group_by(horizon, model) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::mutate(p = n/129)
+
+# convolution model
+rank_trust %>%
+  dplyr::filter(model == "convolution_rt") %>%
+  dplyr::group_by(horizon, model, rank) %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/129)
 
 # median/IQR rWIS
 rank_trust %>%
   dplyr::group_by(horizon, model) %>%
-  dplyr::summarise(med_rwis = median(scaled_rel_skill),
-                   iq1_rwis = quantile(scaled_rel_skill, 0.25),
-                   iq3_rwis = quantile(scaled_rel_skill, 0.75)) %>%
+  dplyr::summarise(med_rwis = median(relative_skill),
+                   iq1_rwis = quantile(relative_skill, 0.25),
+                   iq3_rwis = quantile(relative_skill, 0.75)) %>%
   dplyr::mutate(iqr = iq3_rwis - iq1_rwis)
+
+# median/IQR sWIS
+rank_trust %>%
+  dplyr::group_by(horizon, model) %>%
+  dplyr::summarise(med_swis = median(scaled_rel_skill),
+                   iq1_swis = quantile(scaled_rel_skill, 0.25),
+                   iq3_swis = quantile(scaled_rel_skill, 0.75)) %>%
+  dplyr::mutate(iqr = iq3_swis - iq1_swis)
 
 # median-ensemble biggest improvements
 rank_trust %>%
@@ -799,7 +827,8 @@ g_location_tile <- rank_trust %>%
 # Distribution of rWIS
 rwis_lines <- rank_trust %>%
   dplyr::filter(horizon == 7) %>%
-  dplyr::mutate(model = ordered(model, main_models)) %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(model = ordered(label, main_model_labels)) %>%
   dplyr::group_by(model) %>%
   dplyr::summarise(q1 = quantile(relative_skill, 0.25),
                    q2 = quantile(relative_skill, 0.5),
@@ -807,21 +836,54 @@ rwis_lines <- rank_trust %>%
   dplyr::mutate(iqr = q3 - q1)
 rwis_hist <- rank_trust %>%
   dplyr::filter(horizon == 7,) %>%
-  dplyr::mutate(model = ordered(model, main_models),
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(model = ordered(label, main_model_labels),
                 rank = as.character(rank))
 
 g_location_rwis <- ggplot() +
-  geom_vline(xintercept = 1, lty = 2, lwd = 0.8, col = "lightgrey") +
-  geom_rect(data = rwis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_rect(data = rwis_lines %>% filter(model != "Baseline"),
+            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_rect(data = rwis_lines %>% filter(model == "Baseline"),
+            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf), fill = "grey50", alpha = 0.2) +
   geom_histogram(data = rwis_hist, aes(x = relative_skill), binwidth = 0.03) +
-  geom_vline(data = rwis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
-  # scale_x_continuous(trans = "log2") +
-  scale_y_continuous(breaks = integer_breaks()) +
+  geom_vline(data = rwis_lines %>% filter(model != "Baseline"),
+             aes(col = model, xintercept = q2), lwd = 0.8) +
+  geom_vline(data = rwis_lines %>% filter(model == "Baseline"),
+             aes(xintercept = q2), col = "grey50", lwd = 0.8) +
+  scale_x_continuous(breaks = seq(0.2, 3, 0.4)) +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(NA, 32)) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   facet_grid(rows = vars(model)) +
   labs(x = "Relative WIS", y = "Number of Trusts",
        title = "A") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+g_location_scatter <- rank_trust %>%
+  dplyr::filter(horizon == 7,
+                model != "snaive") %>%
+  dplyr::select(id, model, rwis = relative_skill) %>%
+  dplyr::left_join(rank_trust %>%
+                     dplyr::filter(horizon == 7,
+                                   model == "snaive") %>%
+                     dplyr::select(id, baseline = relative_skill),
+                   by = "id") %>%
+  dplyr::left_join(tb_main) %>%
+  dplyr::mutate(model = ordered(label, main_model_labels)) %>%
+  ggplot() +
+  geom_rect(data = rwis_lines %>% filter(model != "Baseline"),
+            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_vline(data = rwis_lines %>% filter(model != "Baseline"),
+             aes(col = model, xintercept = q2), lwd = 0.8) +
+  geom_point(aes(x = rwis, y = baseline), size = 2, alpha = 0.2) +
+  geom_rug(aes(x = rwis, y = baseline)) +
+  geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.8) +
+  facet_wrap(. ~ model) +
+  # scale_x_continuous(trans = "log2", limits = c(NA, 8), breaks = c(0.5, 1, 2, 4, 8)) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Model rWIS", y = "Baseline rWIS") +
   theme_bw() +
   theme(legend.position = "none")
 
@@ -864,9 +926,10 @@ g_location_rank <- rank_trust %>%
   dplyr::group_by(model, rank) %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/sum(n),
-                rank = as.character(rank),
-                model = ordered(model, main_models)) %>%
-  ggplot(aes(y = model, x = p, fill = rank)) +
+                rank = as.character(rank)) %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, rev(main_model_labels))) %>%
+  ggplot(aes(y = label, x = p, fill = rank)) +
   geom_col() +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
   scale_fill_brewer(palette = "Greens", direction = -1) +
@@ -880,8 +943,10 @@ g_location_mae0 <- mae_trust %>%
   dplyr::filter(id %in% top_admissions_50$id,
                 horizon == 7,
                 model != "snaive") %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
   ggplot(aes(y = reorder(id, ensemble_ae), x = av_aem)) +
-  geom_point(aes(col = model), shape = 1, stroke = 1, size = 2, alpha = 0) +
+  geom_point(aes(col = label), shape = 1, stroke = 1, size = 2, alpha = 0) +
   scale_x_continuous(limits = c(0, NA), breaks = seq(0, 30, 4)) +
   scale_color_brewer(palette = "Set2") +
   labs(x = "Mean absolute error", y = "",
@@ -891,18 +956,25 @@ g_location_mae0 <- mae_trust %>%
   theme(legend.position = "top")
 
 g_location_mae0 <- g_location_mae0 +
-  geom_point(data = mae_trust %>% filter(horizon == 7, rank == 1, id %in% top_admissions_50$id),
-             aes(col = model), size = 3, alpha = 0.4) +
-  geom_point(data = mae_trust %>% filter(horizon == 7, grepl("median_ensemble", model), id %in% top_admissions_50$id),
-             aes(col = model), size = 3) +
-  geom_point(data = mae_trust %>% filter(horizon == 7, model == "snaive", id %in% top_admissions_50$id),
+  geom_point(data = mae_trust %>%
+               filter(horizon == 7, rank == 1, id %in% top_admissions_50$id) %>%
+               dplyr::left_join(tb_main, by = "model") %>%
+               dplyr::mutate(label = ordered(label, main_model_labels)),
+             aes(col = label), size = 3, alpha = 0.4) +
+  geom_point(data = mae_trust %>%
+               filter(horizon == 7, grepl("median_ensemble", model), id %in% top_admissions_50$id) %>%
+               dplyr::left_join(tb_main, by = "model") %>%
+               dplyr::mutate(label = ordered(label, main_model_labels)),
+             aes(col = label), size = 3) +
+  geom_point(data = mae_trust %>%
+               filter(horizon == 7, model == "snaive", id %in% top_admissions_50$id),
              col = "grey50", shape = 4, stroke = 1, size = 2)
 
 ```
 
 ```{r figure 4}
 
-guide_area() / (g_location_rwis + g_location_mae0) / (g_location_rank + plot_layout(guides = "keep")) +
+guide_area() / (g_location_scatter + g_location_mae0) / (g_location_rank + plot_layout(guides = "keep")) +
   plot_layout(heights = c(0.2, 3, 1), guides = "collect")
 
 ```
@@ -929,6 +1001,71 @@ g_location_tile <- rank_trust %>%
 
 # Distribution of rWIS
 rwis_lines <- rank_trust %>%
+  dplyr::filter(horizon == 14) %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(model = ordered(label, main_model_labels)) %>%
+  dplyr::group_by(model) %>%
+  dplyr::summarise(q1 = quantile(relative_skill, 0.25),
+                   q2 = quantile(relative_skill, 0.5),
+                   q3 = quantile(relative_skill, 0.75)) %>%
+  dplyr::mutate(iqr = q3 - q1)
+rwis_hist <- rank_trust %>%
+  dplyr::filter(horizon == 14,) %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(model = ordered(label, main_model_labels),
+                rank = as.character(rank))
+
+g_location_rwis <- ggplot() +
+  geom_rect(data = rwis_lines %>% filter(model != "Baseline"),
+            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_rect(data = rwis_lines %>% filter(model == "Baseline"),
+            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf), fill = "grey50", alpha = 0.2) +
+  geom_histogram(data = rwis_hist, aes(x = relative_skill), binwidth = 0.05) +
+  geom_vline(data = rwis_lines %>% filter(model != "Baseline"),
+             aes(col = model, xintercept = q2), lwd = 0.8) +
+  geom_vline(data = rwis_lines %>% filter(model == "Baseline"),
+             aes(xintercept = q2), col = "grey50", lwd = 0.8) +
+  scale_x_continuous(limits = c(NA, 8), breaks = c(0.25, 0.5, 1, 2, 4, 8), trans = "log2") +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(NA, 20)) +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  facet_grid(rows = vars(model)) +
+  labs(x = "Relative WIS", y = "Number of Trusts",
+       title = "A") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+g_location_scatter <- rank_trust %>%
+  dplyr::filter(horizon == 14,
+                model != "snaive") %>%
+  dplyr::select(id, model, rwis = relative_skill) %>%
+  dplyr::left_join(rank_trust %>%
+                     dplyr::filter(horizon == 14,
+                                   model == "snaive") %>%
+                     dplyr::select(id, baseline = relative_skill),
+                   by = "id") %>%
+  dplyr::left_join(tb_main) %>%
+  dplyr::mutate(model = ordered(label, main_model_labels)) %>%
+  ggplot() +
+  geom_rect(data = rwis_lines %>% filter(model != "Baseline"),
+            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_vline(data = rwis_lines %>% filter(model != "Baseline"),
+             aes(col = model, xintercept = q2), lwd = 0.8) +
+  geom_point(aes(x = rwis, y = baseline), size = 2, alpha = 0.2) +
+  geom_rug(aes(x = rwis, y = baseline)) +
+  geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.8) +
+  facet_wrap(. ~ model) +
+  scale_x_continuous(trans = "log2", limits = c(NA, 8), breaks = c(0.5, 1, 2, 4, 8)) +
+  scale_y_continuous(trans = "log2") +
+  scale_color_brewer(palette = "Set2") +
+  scale_fill_brewer(palette = "Set2") +
+  labs(x = "Model rWIS", y = "Baseline rWIS") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+
+# Distribution of sWIS (vs. baseline)
+swis_lines <- rank_trust %>%
   dplyr::filter(model != "snaive",
                 horizon == 14) %>%
   dplyr::mutate(model = ordered(model, main_models)) %>%
@@ -937,18 +1074,19 @@ rwis_lines <- rank_trust %>%
                    q2 = quantile(scaled_rel_skill, 0.5),
                    q3 = quantile(scaled_rel_skill, 0.75)) %>%
   dplyr::mutate(iqr = q3 - q1)
-rwis_hist <- rank_trust %>%
+swis_hist <- rank_trust %>%
   dplyr::filter(model != "snaive",
                 horizon == 14,) %>%
   dplyr::mutate(model = ordered(model, main_models),
                 rank = as.character(rank))
 
-g_location_rwis <- ggplot() +
+g_location_swis <- ggplot() +
   geom_vline(xintercept = 1, lty = 2, lwd = 0.8, col = "lightgrey") +
-  geom_rect(data = rwis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
-  geom_histogram(data = rwis_hist, aes(x = scaled_rel_skill), binwidth = 0.05) +
-  geom_vline(data = rwis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
-  scale_x_continuous(limits = c(NA, 8), trans = "log2") +
+  geom_rect(data = swis_lines, aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
+  geom_histogram(data = swis_hist, aes(x = scaled_rel_skill), binwidth = 0.03) +
+  geom_vline(data = swis_lines, aes(col = model, xintercept = q2), lwd = 0.8) +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(breaks = integer_breaks()) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   facet_grid(rows = vars(model)) +
@@ -964,9 +1102,10 @@ g_location_rank <- rank_trust %>%
   dplyr::group_by(model, rank) %>%
   dplyr::summarise(n = n()) %>%
   dplyr::mutate(p = n/sum(n),
-                rank = as.character(rank),
-                model = ordered(model, rev(main_models))) %>%
-  ggplot(aes(y = model, x = p, fill = rank)) +
+                rank = as.character(rank)) %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, rev(main_model_labels))) %>%
+  ggplot(aes(y = label, x = p, fill = rank)) +
   geom_col() +
   scale_x_continuous(breaks = seq(0, 1, 0.2)) +
   scale_fill_brewer(palette = "Greens", direction = -1) +
@@ -980,8 +1119,10 @@ g_location_mae0 <- mae_trust %>%
   dplyr::filter(id %in% top_admissions_50$id,
                 horizon == 14,
                 model != "snaive") %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::mutate(label = ordered(label, main_model_labels)) %>%
   ggplot(aes(y = reorder(id, ensemble_ae), x = av_aem)) +
-  geom_point(aes(col = model), shape = 1, stroke = 1, size = 2, alpha = 0) +
+  geom_point(aes(col = label), shape = 1, stroke = 1, size = 2, alpha = 0) +
   scale_x_continuous(limits = c(0, 25), breaks = seq(0, 300, 5)) +
   scale_color_brewer(palette = "Set2") +
   labs(x = "Mean absolute error", y = "",
@@ -991,18 +1132,26 @@ g_location_mae0 <- mae_trust %>%
   theme(legend.position = "top")
 
 g_location_mae0 <- g_location_mae0 +
-  geom_point(data = mae_trust %>% filter(horizon == 14, rank == 1, model != "snaive", id %in% top_admissions_50$id),
-             aes(col = model), size = 3, alpha = 0.4) +
-  geom_point(data = mae_trust %>% filter(horizon == 14, grepl("median_ensemble", model), id %in% top_admissions_50$id),
-             aes(col = model), size = 3) +
-  geom_point(data = mae_trust %>% filter(horizon == 14, model == "snaive", id %in% top_admissions_50$id),
+  geom_point(data = mae_trust %>%
+               filter(horizon == 14, rank == 1, id %in% top_admissions_50$id, model != "snaive") %>%
+               dplyr::left_join(tb_main, by = "model") %>%
+               dplyr::mutate(label = ordered(label, main_model_labels)),
+             aes(col = label), size = 3, alpha = 0.4) +
+  geom_point(data = mae_trust %>%
+               filter(horizon == 14, grepl("median_ensemble", model), id %in% top_admissions_50$id) %>%
+               dplyr::left_join(tb_main, by = "model") %>%
+               dplyr::mutate(label = ordered(label, main_model_labels)),
+             aes(col = label), size = 3) +
+  geom_point(data = mae_trust %>%
+               filter(horizon == 14, model == "snaive", id %in% top_admissions_50$id),
              col = "grey50", shape = 4, stroke = 1, size = 2)
+
 
 ```
 
 ```{r figure s8}
 
-guide_area() / (g_location_rwis + g_location_mae0) / (g_location_rank + plot_layout(guides = "keep")) +
+guide_area() / (g_location_scatter + g_location_mae0) / (g_location_rank + plot_layout(guides = "keep")) +
   plot_layout(heights = c(0.2, 3, 1), guides = "collect")
 
 ```
@@ -1383,10 +1532,10 @@ rank_obs_trust %>%
 
 rank_obs_trust %>%
   dplyr::group_by(horizon, model) %>%
-  dplyr::summarise(med_rwis = median(scaled_rel_skill),
-                   iq1_rwis = quantile(scaled_rel_skill, 0.25),
-                   iq3_rwis = quantile(scaled_rel_skill, 0.75)) %>%
-  dplyr::mutate(iqr = iq3_rwis - iq1_rwis)
+  dplyr::summarise(med_swis = median(scaled_rel_skill),
+                   iq1_swis = quantile(scaled_rel_skill, 0.25),
+                   iq3_swis = quantile(scaled_rel_skill, 0.75)) %>%
+  dplyr::mutate(iqr = iq3_swis - iq1_swis)
 
 ```
 
@@ -1563,10 +1712,12 @@ g_value_arima_trust <- rank_arima_trust %>%
   geom_point() +
   geom_rug() +
   facet_wrap(. ~ horizon) +
-  scale_x_continuous(limits = c(0, NA)) +
-  scale_y_continuous(limits = c(0, NA)) +
-  labs(x = "rWIS ARIMA regression, forecast cases",
-       y = "rWIS ARIMA regression, observed cases",
+  # scale_x_continuous(limits = c(0, NA)) +
+  # scale_y_continuous(limits = c(0, NA)) +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(trans = "log2") +
+  labs(x = "sWIS ARIMA regression, forecast cases",
+       y = "sWIS ARIMA regression,\nobserved cases",
        title = "A") +
   theme_bw()
 
@@ -1582,9 +1733,9 @@ g_value_arima_time <- rank_arima_time %>%
   facet_wrap(horizon ~ .) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
-  scale_y_continuous(limits = c(0.5, NA), breaks = seq(0, 2, 0.2)) +
+  scale_y_continuous(limits = c(0.5, NA), trans = "log2") +
   scale_color_brewer(palette = "Set2") +
-  labs(x = "Forecast date", y = "Relative WIS",
+  labs(x = "Forecast date", y = "Scaled WIS",
        title = "B",
        col = "Model") +
   theme_bw() +
@@ -1598,11 +1749,11 @@ g_value_convolution_trust <- rank_convolution_trust %>%
   geom_abline(slope = 1, intercept = 0, lty = 2, col = "grey50", lwd = 0.6) +
   geom_point() +
   geom_rug() +
-  facet_wrap(. ~ horizon, ncol = 1, scales = "free_x") +
-  scale_x_continuous(limits = c(0, NA)) +
-  scale_y_continuous(limits = c(0, NA)) +
-  labs(x = "rWIS convolution, forecast cases",
-       y = "rWIS convolution, observed cases",
+  facet_wrap(. ~ horizon, ncol = 1) +
+  scale_x_continuous(trans = "log2") +
+  scale_y_continuous(trans = "log2") +
+  labs(x = "sWIS convolution, forecast cases",
+       y = "sWIS convolution,\nobserved cases",
        title = "C") +
   theme_bw()
 
@@ -1617,9 +1768,9 @@ g_value_convolution_time <- rank_convolution_time %>%
   facet_wrap(horizon ~ ., ncol = 1, scales = "free_y") +
   scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-03"))) +
-  # scale_y_continuous(limits = c(0, NA)) +
+  scale_y_continuous(trans = "log2") +
   scale_color_brewer(palette = "Set2") +
-  labs(x = "Forecast date", y = "Relative WIS",
+  labs(x = "Forecast date", y = "Scaled WIS",
        title = "D",
        lty = "Type") +
   theme_bw()
