@@ -872,18 +872,15 @@ g_location_scatter <- rank_trust %>%
   dplyr::left_join(tb_main) %>%
   dplyr::mutate(model = ordered(label, main_model_labels)) %>%
   ggplot() +
-  geom_rect(data = rwis_lines %>% filter(model != "Baseline"),
-            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
-  geom_vline(data = rwis_lines %>% filter(model != "Baseline"),
-             aes(col = model, xintercept = q2), lwd = 0.8) +
-  geom_point(aes(x = rwis, y = baseline), size = 2, alpha = 0.2) +
-  geom_rug(aes(x = rwis, y = baseline)) +
-  geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.8) +
+  geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.8, col = "grey50") +
+  geom_point(aes(x = baseline, y = rwis, col = model), size = 2, alpha = 0.2) +
+  geom_rug(aes(x = baseline, y = rwis), alpha = 0.2) +
   facet_wrap(. ~ model) +
   # scale_x_continuous(trans = "log2", limits = c(NA, 8), breaks = c(0.5, 1, 2, 4, 8)) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "Model rWIS", y = "Baseline rWIS") +
+  labs(y = "Model rWIS", x = "Baseline rWIS",
+       title = "A") +
   theme_bw() +
   theme(legend.position = "none")
 
@@ -1047,19 +1044,15 @@ g_location_scatter <- rank_trust %>%
   dplyr::left_join(tb_main) %>%
   dplyr::mutate(model = ordered(label, main_model_labels)) %>%
   ggplot() +
-  geom_rect(data = rwis_lines %>% filter(model != "Baseline"),
-            aes(xmin = q1, xmax = q3, ymin = 0, ymax = Inf, fill = model), alpha = 0.2) +
-  geom_vline(data = rwis_lines %>% filter(model != "Baseline"),
-             aes(col = model, xintercept = q2), lwd = 0.8) +
-  geom_point(aes(x = rwis, y = baseline), size = 2, alpha = 0.2) +
-  geom_rug(aes(x = rwis, y = baseline)) +
-  geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.8) +
+  geom_abline(slope = 1, intercept = 0, lty = 2, lwd = 0.8, col = "grey50") +
+  geom_point(aes(x = baseline, y = rwis, col = model), size = 2, alpha = 0.2) +
+  geom_rug(aes(x = baseline, y = rwis), alpha = 0.2) +
   facet_wrap(. ~ model) +
-  scale_x_continuous(trans = "log2", limits = c(NA, 8), breaks = c(0.5, 1, 2, 4, 8)) +
-  scale_y_continuous(trans = "log2") +
+  scale_x_continuous(trans = "log2", limits = c(NA, 2)) +
+  scale_y_continuous(trans = "log2", limits = c(NA, 8), breaks = c(0.5, 1, 2, 4, 8)) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
-  labs(x = "Model rWIS", y = "Baseline rWIS") +
+  labs(x = "Baseline rWIS", y = "Model rWIS") +
   theme_bw() +
   theme(legend.position = "none")
 
