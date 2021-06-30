@@ -181,6 +181,25 @@ g_summary_trust <- dat_weekly %>%
 
 ```
 
+### In text values
+
+```{r}
+
+# National weekly admissions at the end of lockdown 3 (02 December 2020)
+dat %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(total_admissions = sum(adm, na.rm = TRUE)) %>% View()
+  dplyr::filter(date %in% c(as.Date("2020-12-02"),
+                            as.Date("2020-12-09"),
+                            as.Date("2020-12-16")))
+
+# National daily peak in admissions
+dat %>%
+  dplyr::group_by(date) %>%
+  dplyr::summarise(total_admissions = sum(adm, na.rm = TRUE)) %>%
+  dplyr::filter(total_admissions == max(total_admissions))
+
+```
 
 ## Figure S1
 ```{r}
