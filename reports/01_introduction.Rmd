@@ -1,7 +1,7 @@
 ---
 title: "Introduction"
 author: "Sophie Meakin"
-date: "25/03/2021"
+date: "01/07/2021"
 output: html_document
 ---
 
@@ -188,7 +188,7 @@ g_summary_trust <- dat_weekly %>%
 # National weekly admissions at the end of lockdown 3 (02 December 2020)
 dat %>%
   dplyr::group_by(date) %>%
-  dplyr::summarise(total_admissions = sum(adm, na.rm = TRUE)) %>% View()
+  dplyr::summarise(total_admissions = sum(adm, na.rm = TRUE)) %>%
   dplyr::filter(date %in% c(as.Date("2020-12-02"),
                             as.Date("2020-12-09"),
                             as.Date("2020-12-16")))

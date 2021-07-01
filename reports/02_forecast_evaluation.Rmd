@@ -1,7 +1,7 @@
 ---
 title: "Results - forecast evaluation"
 author: "Sophie Meakin"
-date: "11/03/2021"
+date: "01/07/2021"
 output: html_document
 ---
 
@@ -10,10 +10,12 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
                       fig.width = 16, fig.height = 9)
 
-library(covid19.nhs.data)
-library(scoringutils)
 library(tidyverse)
+library(covid19.nhs.data)
+library(covidregionaldata)
+library(scoringutils)
 library(ggbump)
+library(ggrepel)
 library(patchwork)
 
 source(here::here("R", "utils.R"))
@@ -180,6 +182,21 @@ rank_all <- pw_all %>%
   dplyr::group_by(horizon, forecast_from, id) %>%
   dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
   dplyr::arrange(horizon, forecast_from, id, rank)
+
+# By time (used in the WIS fig. S6)
+pw_time <- scoringutils::pairwise_comparison(adm_scores %>%
+                                                dplyr::filter(model %in% main_models),
+                                             baseline = "snaive",
+                                             by = c("horizon", "model", "forecast_from", "id"),
+                                             summarise_by = c("forecast_from", "horizon", "model"))
+
+rank_time <- pw_time %>%
+  dplyr::select(forecast_from, horizon, model, scaled_rel_skill, relative_skill) %>%
+  unique() %>%
+  dplyr::group_by(forecast_from, horizon) %>%
+  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
+  dplyr::arrange(forecast_from, horizon, rank) %>%
+  dplyr::mutate(model = ordered(model, main_models))
 
 ```
 
@@ -1150,47 +1167,6 @@ guide_area() / (g_location_scatter + g_location_mae0) / (g_location_rank + plot_
 ```
 
 
-```{r}
-
-# rWIS tile, top 50 Trusts - NOT CURRENTLY USED
-rank_trust %>%
-  dplyr::filter(model != "snaive",
-                horizon == 7,
-                !is.na(total_adm)) %>%
-  dplyr::mutate(model = ordered(model, main_models)) %>%
-  ggplot(aes(y = reorder(id, total_adm), x = model, fill = log2(scaled_rel_skill))) +
-  geom_tile() +
-  geom_text(aes(label = round(scaled_rel_skill, 2))) +
-  scale_fill_distiller(palette = "RdBu", na.value = "grey70",
-                       limits = c(-1.1, 1.1), breaks = seq(-1, 1, 1), labels = 2^seq(-1, 1, 1)) +
-  labs(x = "Model", y = "Trust",
-       fill = "Relative WIS") +
-  theme_bw() +
-  theme(legend.position = "right")
-
-# Eval by cluster - NOT CURRENTLY USED
-n_clusters <- 6
-
-pw_cluster <- scoringutils::pairwise_comparison(adm_scores %>%
-                                                  dplyr::left_join(trust_cluster %>%
-                                                                     dplyr::filter(k == n_clusters),
-                                                                   by = "id") %>%
-                                                  dplyr::filter(model %in% main_models,
-                                                                !is.na(cluster)),
-                                                  baseline = "snaive",
-                                                  by = c("horizon", "model", "forecast_from", "cluster", "id"),
-                                                  summarise_by = c("cluster", "horizon", "model"))
-rank_cluster <- pw_cluster %>%
-  dplyr::select(horizon, cluster, model, scaled_rel_skill) %>%
-  unique() %>%
-  dplyr::group_by(horizon, cluster) %>%
-  dplyr::mutate(rank = rank(scaled_rel_skill, ties.method = "min")) %>%
-  dplyr::arrange(horizon, cluster, rank) %>%
-  dplyr::ungroup()
-
-```
-
-
 ## By cluster
 
 ```{r}
@@ -1831,22 +1807,22 @@ rank_outl_time <- pw_outl_time %>%
 
 ```{r}
 
-rank_horizon999 %>%
-  dplyr::rename(forecast_99.9 = scaled_rel_skill) %>%
-  dplyr::left_join(rank_horizon %>%
-                     dplyr::rename(forecast = scaled_rel_skill),
-                   by = c("horizon", "model")) %>%
-  dplyr::left_join(rank_obs_horizon %>%
-                     dplyr::rename(observed = scaled_rel_skill) %>%
-                     dplyr::mutate(model = case_when(grepl("arima", model) ~ "arima_case7_forecast_raw",
-                                                     grepl("conv", model) ~ "convolution_rt",
-                                                     TRUE ~ paste0(model))),
-                   by = c("horizon", "model")) %>%
-  dplyr::select(horizon, model, forecast, forecast_99.9, observed) %>%
-  dplyr::filter(!grepl("median_ensemble", model),
-                model != "snaive") %>%
-  dplyr::mutate(model = ordered(model, main_models)) %>%
-  dplyr::arrange(horizon, model)
+# rank_horizon999 %>%
+#   dplyr::rename(forecast_99.9 = scaled_rel_skill) %>%
+#   dplyr::left_join(rank_horizon %>%
+#                      dplyr::rename(forecast = scaled_rel_skill),
+#                    by = c("horizon", "model")) %>%
+#   dplyr::left_join(rank_obs_horizon %>%
+#                      dplyr::rename(observed = scaled_rel_skill) %>%
+#                      dplyr::mutate(model = case_when(grepl("arima", model) ~ "arima_case7_forecast_raw",
+#                                                      grepl("conv", model) ~ "convolution_rt",
+#                                                      TRUE ~ paste0(model))),
+#                    by = c("horizon", "model")) %>%
+#   dplyr::select(horizon, model, forecast, forecast_99.9, observed) %>%
+#   dplyr::filter(!grepl("median_ensemble", model),
+#                 model != "snaive") %>%
+#   dplyr::mutate(model = ordered(model, main_models)) %>%
+#   dplyr::arrange(horizon, model)
 
 g_outtime_rwis7 <- rank_outl_time %>%
   dplyr::filter(horizon == 7, model != "snaive") %>%
