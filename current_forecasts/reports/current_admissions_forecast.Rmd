@@ -17,6 +17,8 @@ library(tidyverse)
 library(ggrepel)
 library(patchwork)
 library(covidregionaldata)
+library(covid19.nhs.data)
+
 source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
