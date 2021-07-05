@@ -31,3 +31,4 @@ Imports:
     PostcodesioR,
     purrr,
     scoringutils
+Additional_repositories: https://epiforecasts.r-universe.dev
