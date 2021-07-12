@@ -23,7 +23,7 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-06-20")
+forecast_date <- as.Date("2021-06-27")
 
 ```
 
@@ -566,21 +566,6 @@ plots$scatter
 # Past forecasts
 
 ```{r}
-
-plot_forecast_bars(observed = admissions %>%
-                       dplyr::filter(date >= forecast_date - 84) %>%
-                       dplyr::rename(observed = adm),
-                   forecast = all_forecasts,
-                   h = 7,
-                   trusts = plot_trusts_observed,
-                   models = "mean_ensemble",
-                   facet_models = FALSE) +
-  scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
-               breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
-  labs(title = "Top 25 Trusts with most admissions in last 28 days",
-       subtitle = "Past 7-day ahead forecasts, ensemble model") +
-  theme(legend.position = "none")
 
 plot_forecast_bars(observed = admissions %>%
                        dplyr::filter(date >= forecast_date - 84) %>%
