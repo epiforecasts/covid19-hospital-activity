@@ -56,22 +56,47 @@ saveRDS(object = flag_utlas,
 
 # Run time series case forecasts ------------------------------------------
 
-dat_in <- case_obs %>%
-  dplyr::filter(id %in% flag_utlas$id) %>%
-  dplyr::select(id, date, cases)
-
-case_tsensemble_samples <- timeseries_samples(data = dat_in, yvar = "cases",
-                                         horizon = 14, samples = 1000, models = "aez", 
-                                         train_from = forecast_date - 42,
-                                         forecast_from = forecast_date) %>%
-  dplyr::mutate(model = "ts_ensemble")
-case_tsensemble_summary <- forecast_summary(samples = case_tsensemble_samples)
+if(nrow(flag_utlas) > 0){
+  
+  dat_in <- case_obs %>%
+    dplyr::filter(id %in% flag_utlas$id) %>%
+    dplyr::select(id, date, cases)
+  
+  case_tsensemble_samples <- timeseries_samples(data = dat_in, yvar = "cases",
+                                                horizon = 14, samples = 1000, models = "aez", 
+                                                train_from = forecast_date - 42,
+                                                forecast_from = forecast_date) %>%
+    dplyr::mutate(model = "ts_ensemble")
+  case_tsensemble_summary <- forecast_summary(samples = case_tsensemble_samples)
+  
+  plot_case_forecast <- case_forecast %>%
+    dplyr::left_join(flag_utlas %>% select(id, flag), by = "id")
+  
+  plot_ts <- case_tsensemble_summary %>%
+    dplyr::ungroup() %>%
+    dplyr::select(id, date = date_horizon, name = quantile_label, value) %>%
+    tidyr::pivot_wider(id_cols = c(id, date)) %>%
+    dplyr::select(-upper_0) %>%
+    dplyr::rename(median = lower_0) %>%
+    dplyr::left_join(covid19.nhs.data::utla_names, by = c("id" = "geo_code")) %>%
+    dplyr::mutate(model = "Time series\nensemble") %>%
+    dplyr::bind_rows(plot_case_forecast %>%
+                       dplyr::filter(is.na(flag)) %>%
+                       dplyr::select(id, geo_name, date, median, lower_90, lower_50, upper_50, upper_90) %>%
+                       dplyr::mutate(model = "Rt"))
+  
+} else {
+  
+  plot_case_forecast <- case_forecast
+  
+  plot_ts <- plot_case_forecast %>%
+    dplyr::select(id, geo_name, date, median, lower_90, lower_50, upper_50, upper_90) %>%
+    dplyr::mutate(model = "Rt")
+  
+}
 
 
 # Vis current case forecast -----------------------------------------------
-
-plot_case_forecast <- case_forecast %>%
-  dplyr::left_join(flag_utlas %>% select(id, flag), by = "id")
 
 # Observed cases
 g <- case_obs %>%
@@ -88,19 +113,6 @@ g <- case_obs %>%
   theme(strip.text.x = element_text(size = 6))
 
 # Forecast cases (Rt or time series ensemble)
-plot_ts <- case_tsensemble_summary %>%
-  dplyr::ungroup() %>%
-  dplyr::select(id, date = date_horizon, name = quantile_label, value) %>%
-  tidyr::pivot_wider(id_cols = c(id, date)) %>%
-  dplyr::select(-upper_0) %>%
-  dplyr::rename(median = lower_0) %>%
-  dplyr::left_join(covid19.nhs.data::utla_names, by = c("id" = "geo_code")) %>%
-  dplyr::mutate(model = "Time series\nensemble") %>%
-  dplyr::bind_rows(plot_case_forecast %>%
-                     dplyr::filter(is.na(flag)) %>%
-                     dplyr::select(id, geo_name, date, median, lower_90, lower_50, upper_50, upper_90) %>%
-                     dplyr::mutate(model = "Rt"))
-
 g <- g +
   geom_line(data = plot_ts,
             aes(x = date, y = median, col = model)) +
