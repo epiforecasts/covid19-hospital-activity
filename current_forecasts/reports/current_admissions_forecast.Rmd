@@ -23,7 +23,7 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-06-27")
+forecast_date <- as.Date("2021-07-04")
 
 ```
 
@@ -31,6 +31,8 @@ forecast_date <- as.Date("2021-06-27")
 
 flag_utlas <- readRDS(file = here::here("current_forecasts", "data", "flag_utla.rds"))
 exclude_utlas <- flag_utlas$id_name
+
+manual_remove <- tibble::tibble(trust_code = c("R1H", "RF4", "RQX"), trust_name = NA, n = NA, utla_names = NA, label = NA)
 
 exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
   covid19.nhs.data::get_names() %>%
@@ -41,7 +43,8 @@ exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
                    utla_names = paste(geo_name, collapse = ", ")) %>%
   dplyr::mutate(label = ifelse(n == 1,
                                paste0(trust_name, " (UTLA: ", utla_names, ")" ),
-                               paste0(trust_name, " (UTLAs: ", utla_names, ")" )))
+                               paste0(trust_name, " (UTLAs: ", utla_names, ")" ))) %>%
+  dplyr::bind_rows(manual_remove)
 
 ```
 

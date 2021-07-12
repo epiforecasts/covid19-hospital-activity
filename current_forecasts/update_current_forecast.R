@@ -10,7 +10,7 @@ source(here::here("R", "utils.R"))
 
 # Forecast date -----------------------------------------------------------
 
-forecast_date <- as.Date("2021-06-20")
+forecast_date <- as.Date("2021-07-04")
 
 # Check UTLA-level case forecasts -----------------------------------------
 
