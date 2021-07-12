@@ -348,29 +348,6 @@ plot_forecast_ribbons(observed = admissions %>%
                         dplyr::rename(observed = adm),
             aes(x = date, y = observed))
 
-plot_forecast_ribbons(observed = admissions %>%
-                        dplyr::filter(date > forecast_date - 21,
-                                      date <= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-                      forecast = current_forecast,
-                     trusts = plot_trusts_observed,
-                     models = "convolution_rt",
-                     facet_models = FALSE) +
-  scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
-  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  scale_color_brewer(palette = "Set1") +
-  scale_fill_brewer(palette = "Set1") +
-  labs(title = "Top 25 Trusts with most admissions in last 28 days",
-       subtitle = "Case-convolution model",
-       caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
-  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
-  ## Adding current observed data
-  geom_line(data = admissions %>%
-                        dplyr::filter(id %in% plot_trusts_observed,
-                                      date >= forecast_date) %>%
-                        dplyr::rename(observed = adm),
-            aes(x = date, y = observed))
-
 ```
 
 ### Forecast increase, scatter
@@ -485,7 +462,6 @@ Note: for clarity, we only show forecasts for Trusts which have admitted five or
 plots <- return_region_plots(region = "East of England")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
@@ -497,7 +473,6 @@ plots$scatter
 plots <- return_region_plots(region = "London")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
@@ -509,7 +484,6 @@ plots$scatter
 plots <- return_region_plots(region = "Midlands")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
@@ -521,7 +495,6 @@ plots$scatter
 plots <- return_region_plots(region = "North East and Yorkshire")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
@@ -533,7 +506,6 @@ plots$scatter
 plots <- return_region_plots(region = "North West")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
@@ -545,7 +517,6 @@ plots$scatter
 plots <- return_region_plots(region = "South East")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
@@ -557,7 +528,6 @@ plots$scatter
 plots <- return_region_plots(region = "South West")
 
 plots$current_forecast
-plots$current_forecast_convolution
 plots$scatter
 
 ```
