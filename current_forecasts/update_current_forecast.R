@@ -10,7 +10,7 @@ source(here::here("R", "utils.R"))
 
 # Forecast date -----------------------------------------------------------
 
-forecast_date <- as.Date("2021-07-04")
+forecast_date <- as.Date("2021-07-18")
 
 # Check UTLA-level case forecasts -----------------------------------------
 
@@ -35,7 +35,8 @@ flag_trusts <- covid19.nhs.data::trust_utla_mapping %>%
 # Combined data
 raw_obs <- load_combined_data(add_private = TRUE)
 obs <- raw_obs %>%
-  dplyr::select(id, date, all_adm, cases) %>%
+  # dplyr::select(id, date, all_adm, cases) %>%
+  dplyr::select(-bed_occ) %>%
   dplyr::filter(date >= as.Date("2020-08-02"),
                 date <= forecast_date)
 
@@ -214,15 +215,60 @@ saveRDS(object = forecast_out, file = here::here("current_forecasts",
 models_summary_long <- tsensemble_summary_long %>%
   dplyr::bind_rows(arimareg_summary_long) %>%
   dplyr::bind_rows(convolution_summary_long)
-#
+
 ensemble_summary_long <- ensemble_forecast(model_forecasts = models_summary_long,
                                            models = unique(models_summary_long$model))
-#
+
 forecast_out_long <- models_summary_long %>%
   dplyr::bind_rows(ensemble_summary_long)
-#
 saveRDS(object = forecast_out_long,
         file = here::here("current_forecasts",
                           "data",
                           "admissions_trust",
                           paste0("admissions_long_", forecast_date, ".rds")))
+
+
+
+# Regional and national forecasts -----------------------------------------
+
+## Regional forecasts
+region_samples <- tsensemble_samples %>%
+  dplyr::bind_rows(arimareg_samples) %>%
+  dplyr::bind_rows(convolution_samples) %>%
+  dplyr::left_join(obs %>%
+                     filter(!is.na(nhs_region)) %>%
+                     select(nhs_region, id) %>%
+                     unique(),
+                   by = "id") %>%
+  dplyr::group_by(nhs_region, sample, horizon, forecast_from, model) %>% 
+  dplyr::summarise(value = sum(value, na.rm = TRUE)) %>%
+  dplyr::rename(id = nhs_region)
+
+region_summary <- forecast_summary(samples = region_samples)
+region_ensemble <- ensemble_forecast(model_forecasts = region_summary,
+                                     models = unique(region_summary$model))
+
+
+## National forecasts
+england_samples <- tsensemble_samples %>%
+  dplyr::bind_rows(arimareg_samples) %>%
+  dplyr::bind_rows(convolution_samples) %>%
+  dplyr::group_by(sample, horizon, forecast_from, model) %>% 
+  dplyr::summarise(value = sum(value, na.rm = TRUE)) %>%
+  dplyr::mutate(id = "England")
+
+england_summary <- forecast_summary(samples = england_samples)
+england_ensemble <- ensemble_forecast(model_forecasts = england_summary,
+                                     models = unique(england_summary$model))
+
+## Combine and save forecasts
+both_ensemble <- region_ensemble %>%
+  dplyr::bind_rows(region_summary) %>%
+  dplyr::bind_rows(england_ensemble) %>%
+  dplyr::bind_rows(england_summary)
+saveRDS(object = both_ensemble,
+        file = here::here("current_forecasts",
+                          "data",
+                          "admissions_region",
+                          paste0("admissions_", forecast_date, ".rds")))
+
