@@ -1,0 +1,1544 @@
+region,date,strat,type,median,mean,sd,lower_90,lower_50,lower_20,upper_20,upper_50,upper_90
+East of England,2021-03-07,,estimate,33.5,34.1,9,21,28,32,36,40,50
+East of England,2021-03-08,,estimate,40,40.2,10.1,25,33,37,42,46,58
+East of England,2021-03-09,,estimate,41,41.4,10.5,25,34,38,43,48,59
+East of England,2021-03-10,,estimate,42,42.5,10.6,26,35,39,44.4,49,61
+East of England,2021-03-11,,estimate,39,39.7,10.3,24,33,36,42,46,58
+East of England,2021-03-12,,estimate,39,39.2,9.8,24,32,36,41,45,56
+East of England,2021-03-13,,estimate,34,35.1,9.5,21,29,32,37,41,51
+East of England,2021-03-14,,estimate,33,33.1,8.7,20,27,30,35,39,48
+East of England,2021-03-15,,estimate,35,35.2,9.1,22,29,32,37,41,51
+East of England,2021-03-16,,estimate,32,33.1,8.9,20,27,30,35,39,49
+East of England,2021-03-17,,estimate,32,32,8.3,20,26,29,34,37,47
+East of England,2021-03-18,,estimate,28,28.5,7.6,17,23,26,30,33,42
+East of England,2021-03-19,,estimate,27,27.5,7.5,16,22,25,29,32,41
+East of England,2021-03-20,,estimate,24,24.2,6.8,14,19,22,26,29,36
+East of England,2021-03-21,,estimate,22,22.9,6.7,13,18,21,24,27,35
+East of England,2021-03-22,,estimate,24,24.4,6.9,14,20,22,26,29,37
+East of England,2021-03-23,,estimate,22,22.9,6.7,13,18,21,24,27,35
+East of England,2021-03-24,,estimate,22,22.2,6.5,12,18,20,23,26,34
+East of England,2021-03-25,,estimate,20,20.2,6,11,16,18,21,24,30
+East of England,2021-03-26,,estimate,19,19.7,6,11,15,18,21,23,30
+East of England,2021-03-27,,estimate,17,17.8,5.5,10,14,16,19,21,27
+East of England,2021-03-28,,estimate,17,17.1,5.4,9,13,15,18,20,26
+East of England,2021-03-29,,estimate,18,18.5,5.7,10,15,17,20,22,28
+East of England,2021-03-30,,estimate,18,18,5.7,10,14,16,19,21,28
+East of England,2021-03-31,,estimate,17,17.9,5.6,10,14,16,19,21,28
+East of England,2021-04-01,,estimate,16,16.5,5.3,9,13,15,17,20,26
+East of England,2021-04-02,,estimate,16,16.5,5.3,9,13,15,17,20,26
+East of England,2021-04-03,,estimate,15,15.4,5.1,8,12,14,16,19,24
+East of England,2021-04-04,,estimate,15,15.2,5,8,12,14,16,18,24
+East of England,2021-04-05,,estimate,17,17,5.3,9,13,15,18,20,26
+East of England,2021-04-06,,estimate,16,16.6,5.2,9,13,15,18,20,26
+East of England,2021-04-07,,estimate,17,17.3,5.4,9,13,16,18,21,27
+East of England,2021-04-08,,estimate,16,16.1,5.2,8,12,14,17,19,25
+East of England,2021-04-09,,estimate,16,16.5,5.2,9,13,15,17,20,26
+East of England,2021-04-10,,estimate,15,15.4,4.9,8,12,14,16,18,24
+East of England,2021-04-11,,estimate,15,15.5,4.9,8,12,14,16,19,24
+East of England,2021-04-12,,estimate,17,17.1,5.3,9,13,15,18,20,26
+East of England,2021-04-13,,estimate,16,16.9,5.4,9,13,15,18,20,26
+East of England,2021-04-14,,estimate,17,17.2,5.4,9,13,16,18,20,27
+East of England,2021-04-15,,estimate,16,16,5.2,8,12,14,17,19,25
+East of England,2021-04-16,,estimate,16,16,5.1,8,12,14,17,19,25
+East of England,2021-04-17,,estimate,14,14.8,4.9,7,11,13,16,18,23
+East of England,2021-04-18,,estimate,14,14.3,4.8,7,11,13,15,17,23
+East of England,2021-04-19,,estimate,15,15.7,5,8,12,14,17,19,25
+East of England,2021-04-20,,estimate,15,15,4.8,8,12,14,16,18,23
+East of England,2021-04-21,,estimate,15,15,4.9,8,12,14,16,18,23
+East of England,2021-04-22,,estimate,13,13.6,4.6,7,10,12,15,17,22
+East of England,2021-04-23,,estimate,13,13.4,4.5,7,10,12,14,16,21
+East of England,2021-04-24,,estimate,12,11.9,4.1,6,9,11,13,15,19
+East of England,2021-04-25,,estimate,11,11.4,4.1,5,8,10,12,14,19
+East of England,2021-04-26,,estimate,12,12.2,4.2,6,9,11,13,15,20
+East of England,2021-04-27,,estimate,11,11.6,4.1,5,9,10,12,14,19
+East of England,2021-04-28,,estimate,11,11.3,4.1,5,8,10,12,14,19
+East of England,2021-04-29,,estimate,10,10.1,3.9,4,7,9,11,12,17
+East of England,2021-04-30,,estimate,9,9.8,3.6,4,7,9,10,12,16
+East of England,2021-05-01,,estimate,8,8.7,3.4,4,6,8,9,11,15
+East of England,2021-05-02,,estimate,8,8.4,3.4,3,6,7,9,10,14
+East of England,2021-05-03,,estimate,9,8.9,3.5,4,6,8,10,11,15
+East of England,2021-05-04,,estimate,8,8.5,3.3,3,6,7,9,10,14
+East of England,2021-05-05,,estimate,8,8.3,3.3,3,6,7,9,10,14
+East of England,2021-05-06,,estimate,7,7.4,3,3,5,6,8,9,13
+East of England,2021-05-07,,estimate,7,7.3,3.2,3,5,6,8,9,13
+East of England,2021-05-08,,estimate,6,6.6,3,2,4,6,7,8,12
+East of England,2021-05-09,,estimate,6,6.3,2.9,2,4,5,7,8,11
+East of England,2021-05-10,,estimate,6,6.8,2.9,3,5,6,7,9,12
+East of England,2021-05-11,,estimate,6,6.5,2.9,2,4,6,7,8,12
+East of England,2021-05-12,,estimate,6,6.5,2.9,2,4,5,7,8,12
+East of England,2021-05-13,,estimate,6,5.9,2.7,2,4,5,6,8,11
+East of England,2021-05-14,,estimate,6,5.9,2.7,2,4,5,6,8,11
+East of England,2021-05-15,,estimate,5,5.3,2.6,2,3,4,6,7,10
+East of England,2021-05-16,,estimate,5,5.2,2.5,2,3,4,6,7,10
+East of England,2021-05-17,,estimate,6,5.8,2.7,2,4,5,6,8,11
+East of England,2021-05-18,,estimate,5,5.6,2.7,2,4,5,6,7,10
+East of England,2021-05-19,,estimate,5,5.8,2.7,2,4,5,6,7,11
+East of England,2021-05-20,,estimate,5,5.3,2.6,2,3,4,6,7,10
+East of England,2021-05-21,,estimate,5,5.4,2.6,2,4,5,6,7,10
+East of England,2021-05-22,,estimate,5,5.1,2.5,1,3,4,5,7,9
+East of England,2021-05-23,,estimate,5,5.1,2.5,1.9,3,4,5,7,10
+East of England,2021-05-24,,estimate,5,5.8,2.7,2,4,5,6,7,11
+East of England,2021-05-25,,estimate,5,5.7,2.7,2,4,5,6,7,10
+East of England,2021-05-26,,estimate,6,6.1,2.8,2,4,5,7,8,11
+East of England,2021-05-27,,estimate,6,5.8,2.7,2,4,5,6,7,11
+East of England,2021-05-28,,estimate,6,6,2.8,2,4,5,7,8,11
+East of England,2021-05-29,,estimate,5,5.7,2.6,2,4,5,6,7,10
+East of England,2021-05-30,,estimate,6,5.8,2.8,2,4,5,6,8,11
+East of England,2021-05-31,,estimate,7,6.7,2.9,2,5,6,7,9,12
+East of England,2021-06-01,,estimate,7,6.9,3.1,2,5,6,7,9,12
+East of England,2021-06-02,,estimate,7,7.2,3.1,3,5,6,8,9,13
+East of England,2021-06-03,,estimate,7,7,3.1,3,5,6,7,9,13
+East of England,2021-06-04,,estimate,7,7.4,3.1,3,5,6,8,9,13
+East of England,2021-06-05,,estimate,7,7.1,3.1,3,5,6,8,9,13
+East of England,2021-06-06,,estimate,7,7.3,3.1,3,5,6,8,9,13
+East of England,2021-06-07,,estimate,8,8.4,3.4,3,6,7,9,10,14
+East of England,2021-06-08,,estimate,8,8.6,3.4,3,6,7,9,11,15
+East of England,2021-06-09,,estimate,9,9,3.6,4,7,8,10,11,15
+East of England,2021-06-10,,estimate,8,8.7,3.4,4,6,8,9,11,15
+East of England,2021-06-11,,estimate,9,9.1,3.6,4,7,8,10,11,15
+East of England,2021-06-12,,estimate,8,8.7,3.5,4,6,8,9,11,15
+East of England,2021-06-13,,estimate,9,8.9,3.5,4,6,8,10,11,15
+East of England,2021-06-14,,estimate,10,10.2,3.9,4,7,9,11,13,17
+East of England,2021-06-15,,estimate,10,10.2,3.8,5,7,9,11,12,17
+East of England,2021-06-16,,estimate,10,10.6,3.9,5,8,9,11,13,18
+East of England,2021-06-17,,estimate based on partial data,10,10.1,3.8,4,7,9,11,12,17
+East of England,2021-06-18,,estimate based on partial data,10,10.4,3.9,5,8,9,11,13,17
+East of England,2021-06-19,,estimate based on partial data,10,9.8,3.7,4,7,9,10,12,16
+East of England,2021-06-20,,estimate based on partial data,10,9.8,3.6,4,7,9,10,12,16
+East of England,2021-06-21,,estimate based on partial data,11,11,4,5,8,10,12,14,18
+East of England,2021-06-22,,estimate based on partial data,11,11.1,4.1,5,8,10,12,14,18
+East of England,2021-06-23,,estimate based on partial data,11,11.3,4.1,5,8,10,12,14,18
+East of England,2021-06-24,,estimate based on partial data,10,10.6,4,5,8,9,11,13,18
+East of England,2021-06-25,,estimate based on partial data,10,10.8,4.1,5,8,9,12,13,18
+East of England,2021-06-26,,estimate based on partial data,10,10,4,4,7,9,11,12,17
+East of England,2021-06-27,,estimate based on partial data,10,10,4.2,4,7,9,11,12.2,18
+East of England,2021-06-28,,forecast,11,11.2,4.6,5,8,10,12,14,19
+East of England,2021-06-29,,forecast,10,11.2,4.9,4,8,9,12,14,20
+East of England,2021-06-30,,forecast,11,11.2,5.2,4,8,9,12,14,21
+East of England,2021-07-01,,forecast,10,10.7,5.2,4,7,9,11,13,20
+East of England,2021-07-02,,forecast,10,10.8,5.6,3,7,9,11,14,21
+East of England,2021-07-03,,forecast,9,10.2,5.8,3,6,8,10,13,21
+East of England,2021-07-04,,forecast,9,10.3,6.4,3,6,8,10,13,22
+East of England,2021-07-05,,forecast,10,11.7,8,3,6,9,12,15,26
+East of England,2021-07-06,,forecast,10,11.8,9.1,3,6,8,11,15,27
+East of England,2021-07-07,,forecast,10,12.2,9.8,3,6,8,12,15,29
+East of England,2021-07-08,,forecast,9,11.8,11,2,5,8,11,15,29
+East of England,2021-07-09,,forecast,9,12.3,13.5,2,5,7,11,15,32
+East of England,2021-07-10,,forecast,8,11.7,14.4,2,5,7,10,14,31
+East of England,2021-07-11,,forecast,8,12.3,16,1,5,7,10,15,34
+East of England,2021-07-12,,forecast,9,14.2,20.7,2,5,7,11,16,42
+England,2021-03-07,,estimate,398,399.8,36,343,376,390,408,423,462
+England,2021-03-08,,estimate,443,443.2,36.9,385,418,433,452,467,506
+England,2021-03-09,,estimate,430,430.2,36,372,406,421,439,454,489
+England,2021-03-10,,estimate,442,442.6,37,382,418,432,452,468,504
+England,2021-03-11,,estimate,402,402.4,34.3,348,379,393,410,424,460
+England,2021-03-12,,estimate,362,363,31.1,313,342,355,370,383,415
+England,2021-03-13,,estimate,347,347.3,29.6,299,328,340,355,367,396
+England,2021-03-14,,estimate,353,354,30.3,305,333,346,361,374,405
+England,2021-03-15,,estimate,368,369.2,30.7,321,348,360,375,389,421
+England,2021-03-16,,estimate,340,340.8,28.7,296,321,332,347,359,390
+England,2021-03-17,,estimate,339,340,29.3,293,320,332,346.4,360,389
+England,2021-03-18,,estimate,303,303.7,27,260,285,296,309,321,349
+England,2021-03-19,,estimate,271,271.6,24.2,233,255,265,277,287,312
+England,2021-03-20,,estimate,259,259.2,23.7,221,244,253,264,274,300
+England,2021-03-21,,estimate,264,264.7,24.3,226,249,258,270,280.2,306
+England,2021-03-22,,estimate,276,276.6,24.6,237,260,270,282,293,319
+England,2021-03-23,,estimate,256,257,23.4,220,241,251,262,272,297
+England,2021-03-24,,estimate,256,257.2,23.5,220,241,251,262,272,297
+England,2021-03-25,,estimate,230,231,21.9,197,216,225,236,245,268
+England,2021-03-26,,estimate,208,208.5,20,177,195,202,213,221,243
+England,2021-03-27,,estimate,200,200.2,19.6,168,187,195,204,213,234
+England,2021-03-28,,estimate,206,206.1,20.1,174,193,201,211,219,240
+England,2021-03-29,,estimate,216,216.5,20.4,183,203,212,221,229,250
+England,2021-03-30,,estimate,202,202.7,19.8,171,189,197,207,216,235
+England,2021-03-31,,estimate,203,204.1,19.9,173,191,199,208,217,238
+England,2021-04-01,,estimate,184,184.4,18,155,172,180,188,196.2,214
+England,2021-04-02,,estimate,166,167,17,140,155,162,170,178,197
+England,2021-04-03,,estimate,161,161,16.5,134,149,157,165,172,189
+England,2021-04-04,,estimate,165,165.3,17.2,138,154,161,169,177,194
+England,2021-04-05,,estimate,175,175.7,17.6,148,164,170,180,187,206
+England,2021-04-06,,estimate,165,165.2,16.9,138,154,161,169,176,194
+England,2021-04-07,,estimate,166,166.5,17.1,139,155,161,170,178,195
+England,2021-04-08,,estimate,151,150.9,16,125,140,146,155,161,178
+England,2021-04-09,,estimate,137,137.1,15.1,113,127,133,141,147,162
+England,2021-04-10,,estimate,132,132.8,14.6,110,123,129,136,142,157
+England,2021-04-11,,estimate,137,137.5,15.2,113,127,133,140,147,163
+England,2021-04-12,,estimate,145,145.5,15.4,120,135,142,149,155,171
+England,2021-04-13,,estimate,136,135.9,14.8,112,126,132,139,146,161
+England,2021-04-14,,estimate,138,137.9,15,114,127,134,142,148,163
+England,2021-04-15,,estimate,124.5,124.8,14,102,115,121,128,134,148
+England,2021-04-16,,estimate,113,113.6,13,93,105,110,117,122,136
+England,2021-04-17,,estimate,109,109.5,12.7,89,101,106,112,118,131
+England,2021-04-18,,estimate,113,113,13.2,92,104,110,116,122,135
+England,2021-04-19,,estimate,119,119.4,13.5,97.9,110,116,122,128,143
+England,2021-04-20,,estimate,111.5,111.8,12.9,91,103,108,115,120,134
+England,2021-04-21,,estimate,113,113.5,13.2,92,104,110,116,122,136
+England,2021-04-22,,estimate,102,102.6,12.4,83,94,99,105,111,124
+England,2021-04-23,,estimate,93,93.1,11.6,74,85,90,96,101,113
+England,2021-04-24,,estimate,90,90.1,11.4,72,82,87,93,97,110
+England,2021-04-25,,estimate,93,93.2,11.6,74,85,90,96,101,113
+England,2021-04-26,,estimate,99,98.9,11.9,80,91,96,102,107,119
+England,2021-04-27,,estimate,93,93,11.4,74,85,90,96,100,111
+England,2021-04-28,,estimate,94,94.5,11.6,76,87,91,97,102,114
+England,2021-04-29,,estimate,86,86.2,11.1,68.9,79,83,89,94,105
+England,2021-04-30,,estimate,78,78.5,10.6,62,71,76,81,86,96
+England,2021-05-01,,estimate,77,76.6,10.3,60,70,74,79,83,94
+England,2021-05-02,,estimate,79,79.7,10.5,63,72,77,82,87,97
+England,2021-05-03,,estimate,85,85.3,11.2,67,78,82,88,93,104
+England,2021-05-04,,estimate,81,81,10.5,64,74,78,83,88,99
+England,2021-05-05,,estimate,83,83,10.6,66,76,80,85,90,101
+England,2021-05-06,,estimate,76,76.1,10.2,60,69,73,78,83,93
+England,2021-05-07,,estimate,70,70,9.6,55,64,67,72,76,86
+England,2021-05-08,,estimate,69,69.1,9.6,54,62,66,71,75,85
+England,2021-05-09,,estimate,72,72.5,10,56,66,70,74,79,90
+England,2021-05-10,,estimate,79,78.7,10.3,62,72,76,81,86,96
+England,2021-05-11,,estimate,75,75.2,10,59,68,72,77,81,92
+England,2021-05-12,,estimate,78,78,10.3,61,71,75,80,85,96
+England,2021-05-13,,estimate,72,72.6,10,57,66,70,75,79,89
+England,2021-05-14,,estimate,67,67.5,9.6,52.9,61,65,70,74,84
+England,2021-05-15,,estimate,67,67,9.4,52,61,65,69,73,83
+England,2021-05-16,,estimate,72,71.6,10.1,55,65,69,74,78,88
+England,2021-05-17,,estimate,78,78,10.5,61,71,75,80,85,96
+England,2021-05-18,,estimate,75,75.6,10.3,59,69,73,78,82.2,93
+England,2021-05-19,,estimate,79,79.4,10.6,62,72,76,82,86,98
+England,2021-05-20,,estimate,74,74.4,10.1,59,67,72,77,81,91
+England,2021-05-21,,estimate,70,70.1,9.9,54,63,67,72,76,87
+England,2021-05-22,,estimate,70,70.2,9.9,54.9,63,67,73,77,87
+England,2021-05-23,,estimate,76,75.9,10.3,60,69,73,78,83,93
+England,2021-05-24,,estimate,83,83.5,10.9,66,76,80,86,91,102
+England,2021-05-25,,estimate,81,81.7,10.7,65,74,79,84,89,100
+England,2021-05-26,,estimate,86,86.7,11.1,69,79,83,89,94,105
+England,2021-05-27,,estimate,82,82.3,10.6,65,75,79,85,89,100
+England,2021-05-28,,estimate,79,78.9,10.5,62,72,76,81,86,97
+England,2021-05-29,,estimate,80,80.3,10.5,63,73,77,83,87,98
+England,2021-05-30,,estimate,87,87.9,11.2,70,80,85,90,95,107
+England,2021-05-31,,estimate,98,98.7,12.2,79,90,95,102,107,119
+England,2021-06-01,,estimate,97,98.1,12.1,79,90,95,101,106,119
+England,2021-06-02,,estimate,106,106.2,12.7,87,98,103,109,114,128
+England,2021-06-03,,estimate,102,102.1,12.4,83,94,99,105,111,123
+England,2021-06-04,,estimate,99,99.5,12.4,79,91,96,102,107,120
+England,2021-06-05,,estimate,102,102.6,12.2,83,94,99,105,111,124
+England,2021-06-06,,estimate,113,113.7,13.1,93,105,110,117,122,136
+England,2021-06-07,,estimate,129,129.2,14.3,106,120,125,132,138,154
+England,2021-06-08,,estimate,130,129.9,14.5,107,120,126,133,139,154
+England,2021-06-09,,estimate,140,140.7,15.2,116,130,136,144,151,166
+England,2021-06-10,,estimate,136,136.1,15.1,112,126,132,140,146,162
+England,2021-06-11,,estimate,132,132.3,14.7,109,122,128,136,142,157
+England,2021-06-12,,estimate,136,136,15.2,112,126,132,139,146,162
+England,2021-06-13,,estimate,150,150.3,16,125,140,146,154,161,178
+England,2021-06-14,,estimate,168,168.1,17.2,141,156,163,172,179,198
+England,2021-06-15,,estimate,167,167.1,17.3,139,155,162,171,179,196
+England,2021-06-16,,estimate,179,179.3,18.4,151,167,174,183,191,211
+England,2021-06-17,,estimate based on partial data,170,170.7,17.6,142,159,166,174,182,200
+England,2021-06-18,,estimate based on partial data,164,164.1,17.2,136,153,159,168,175,193
+England,2021-06-19,,estimate based on partial data,166,166.6,16.8,140,155,162,170,178,195
+England,2021-06-20,,estimate based on partial data,180,180.7,18,152,168,176,185,192,211
+England,2021-06-21,,estimate based on partial data,201,200.9,19.5,169,188,196,206,214,233
+England,2021-06-22,,estimate based on partial data,197,197.7,19.1,166,185,193,202,210,229
+England,2021-06-23,,estimate based on partial data,209,210.3,20.6,177,196,204,214,224,246
+England,2021-06-24,,estimate based on partial data,199,199.8,20,167,186,194,204,213,234
+England,2021-06-25,,estimate based on partial data,189,190,19.5,159,177,185,195,203,223
+England,2021-06-26,,estimate based on partial data,192,192.9,20,161,179,187,197,206,227
+England,2021-06-27,,estimate based on partial data,208,209.1,21.9,174,194,203,214,223,247
+England,2021-06-28,,forecast,232,232.8,26,192,215,226,238,249,278
+England,2021-06-29,,forecast,228,229.7,27.6,187,211,222,235,247,277
+England,2021-06-30,,forecast,242,244.4,33.8,194,221,234,250,265,302
+England,2021-07-01,,forecast,229,232.7,36.2,181,208,221,237,253,295
+England,2021-07-02,,forecast,220,223.6,40.1,169,197,211,228,243,291
+England,2021-07-03,,forecast,221,227.9,47,169,198,212,231,249,309
+England,2021-07-04,,forecast,240,248.2,58.8,179,212,228,252,273,341
+England,2021-07-05,,forecast,265,277.6,77.3,191,231,251,279,306,398
+England,2021-07-06,,forecast,261,276.3,86.8,184,226,247,276,306,410
+England,2021-07-07,,forecast,276,295.6,107.4,189,237,260,293,328,458
+England,2021-07-08,,forecast,261,283.9,119.3,173,222,246,279,317,449
+England,2021-07-09,,forecast,248,273.8,130.3,161,208,232,268,304,454
+England,2021-07-10,,forecast,252,281.1,157.5,157,206.8,234,271,312,478.1
+England,2021-07-11,,forecast,273,309.7,198.2,166,223.8,252,295,342,544
+England,2021-07-12,,forecast,302,350.1,259.9,176,244,278,329,384,638
+London,2021-03-07,,estimate,43,43.9,8.7,30,38,41,46,49,59
+London,2021-03-08,,estimate,41,41.5,8.3,29,36,39,43,47,56
+London,2021-03-09,,estimate,45,45.1,8.9,31,39,42,47,51,60
+London,2021-03-10,,estimate,41,41.8,8.3,29,36,39,43,47,56
+London,2021-03-11,,estimate,41,41.7,8.2,29,36,39,43,47,56
+London,2021-03-12,,estimate,37,37.3,7.7,25,32,35,39,42,51
+London,2021-03-13,,estimate,36,36.9,7.7,25,32,35,38,42,50
+London,2021-03-14,,estimate,41,41.3,8.2,29,36,39,43,47,55
+London,2021-03-15,,estimate,37,37.1,7.5,25,32,35,39,42,50
+London,2021-03-16,,estimate,39,39.1,7.8,27,34,37,41,44,53
+London,2021-03-17,,estimate,35,35,7.2,24,30,33,36,40,47
+London,2021-03-18,,estimate,34,34.5,7.2,23,30,32,36,39,47
+London,2021-03-19,,estimate,30,30.2,6.5,20,26,28,31,34,41
+London,2021-03-20,,estimate,30,30.2,6.5,20,26,28,31,34,41
+London,2021-03-21,,estimate,34,33.8,7.1,23,29,32,35,38,46
+London,2021-03-22,,estimate,30,30.4,6.6,20,26,29,32,35,42
+London,2021-03-23,,estimate,32,32.1,6.9,21,27,30,34,36.2,44
+London,2021-03-24,,estimate,28,28.8,6.5,19,24,27,30,33,40
+London,2021-03-25,,estimate,28,28.4,6.3,19,24,27,30,32,39
+London,2021-03-26,,estimate,25,25.2,5.9,16,21,24,26.4,29,35
+London,2021-03-27,,estimate,25,25,6,16,21,23,26,29,35
+London,2021-03-28,,estimate,28,28.4,6.2,19,24,27,30,32,39
+London,2021-03-29,,estimate,25,25.7,5.9,16,22,24,27,29,36
+London,2021-03-30,,estimate,26,27,6.1,17.9,23,25,28,31,38
+London,2021-03-31,,estimate,24,24.3,5.6,15,20,23,25,28,34
+London,2021-04-01,,estimate,24,23.9,5.7,15,20,22,25,27,34
+London,2021-04-02,,estimate,21,21.2,5.2,13,18,20,22,25,30
+London,2021-04-03,,estimate,21,21.2,5.4,13,17,20,22,25,31
+London,2021-04-04,,estimate,24,23.9,5.5,15,20,22,25,28,33
+London,2021-04-05,,estimate,21,21.5,5.2,13,18,20,23,25,31
+London,2021-04-06,,estimate,23,22.9,5.6,14,19,21,24,26,33
+London,2021-04-07,,estimate,20,20.6,5.2,13,17,19,22,24,30
+London,2021-04-08,,estimate,20,20.1,5.2,12,16,19,21,24,29
+London,2021-04-09,,estimate,18,17.9,4.7,11,15,16,19,21,26
+London,2021-04-10,,estimate,17,17.7,4.8,10,14,16,19,21,26
+London,2021-04-11,,estimate,20,19.9,5.1,12,16,18,21,23,29
+London,2021-04-12,,estimate,18,18,4.8,10,15,17,19,21,26
+London,2021-04-13,,estimate,19,19,4.9,11,16,17,20,22,27
+London,2021-04-14,,estimate,17,17,4.7,10,14,16,18,20,25
+London,2021-04-15,,estimate,17,16.9,4.6,10,14,15,18,20,25
+London,2021-04-16,,estimate,15,14.9,4.3,8,12,14,16,18,22
+London,2021-04-17,,estimate,14,14.8,4.3,8,12,13,16,18,22
+London,2021-04-18,,estimate,17,16.9,4.7,10,14,15,18,20,25
+London,2021-04-19,,estimate,15,15.1,4.3,9,12,14,16,18,23
+London,2021-04-20,,estimate,16,16,4.4,9,13,15,17,19,23
+London,2021-04-21,,estimate,14,14.5,4.2,8,12,13,15,17,22
+London,2021-04-22,,estimate,14,14.4,4.2,8,11,13,15,17,22
+London,2021-04-23,,estimate,13,12.8,3.9,7,10,12,14,15,20
+London,2021-04-24,,estimate,13,12.9,3.9,7,10,12,14,15,20
+London,2021-04-25,,estimate,14,14.5,4.1,8,12,13,15,17,21
+London,2021-04-26,,estimate,13,13.3,4,7,11,12,14,16,20
+London,2021-04-27,,estimate,14,14.2,4.2,8,11,13,15,17,21
+London,2021-04-28,,estimate,13,12.8,3.9,7,10,12,14,15,20
+London,2021-04-29,,estimate,12,12.7,3.9,7,10,12,13,15,20
+London,2021-04-30,,estimate,11,11.5,3.7,6,9,10,12,14,18
+London,2021-05-01,,estimate,11,11.5,3.6,6,9,10,12,14,18
+London,2021-05-02,,estimate,13,13.3,4,7,11,12,14,16,20
+London,2021-05-03,,estimate,12,12.2,3.9,6,10,11,13,15,19
+London,2021-05-04,,estimate,13,13.2,4,7,10,12,14,16,20
+London,2021-05-05,,estimate,12,12.3,3.8,7,10,11,13,15,19
+London,2021-05-06,,estimate,12,12.3,3.8,7,10,11,13,15,19
+London,2021-05-07,,estimate,11,11.1,3.6,6,9,10,12,13,17
+London,2021-05-08,,estimate,11,11.4,3.7,6,9,10,12,14,18
+London,2021-05-09,,estimate,13,13.2,4,7,10,12,14,16,20
+London,2021-05-10,,estimate,12,12.3,3.8,6,10,11,13,15,19
+London,2021-05-11,,estimate,13,13.4,4.1,7,11,12,14,16,21
+London,2021-05-12,,estimate,12,12.5,3.8,7,10,11,13,15,19
+London,2021-05-13,,estimate,12,12.6,3.9,7,10,11,13,15,19
+London,2021-05-14,,estimate,12,11.8,3.7,6,9,11,13,14,18
+London,2021-05-15,,estimate,12,12.2,3.7,6,10,11,13,15,19
+London,2021-05-16,,estimate,14,14.3,4.2,8,11,13,15,17,22
+London,2021-05-17,,estimate,13,13.5,4.1,7,11,12,14,16,20
+London,2021-05-18,,estimate,14,14.7,4.3,8,12,13,16,17,22
+London,2021-05-19,,estimate,14,14,4.1,8,11,13,15,17,21
+London,2021-05-20,,estimate,14,14.3,4.2,8,11,13,15,17,22
+London,2021-05-21,,estimate,13,13.2,4,7,10,12,14,16,20
+London,2021-05-22,,estimate,14,14,4.1,8,11,13,15,17,21
+London,2021-05-23,,estimate,16,16.5,4.5,10,13,15,17,19,24
+London,2021-05-24,,estimate,15,15.4,4.4,9,12,14,16,18,23
+London,2021-05-25,,estimate,17,17.1,4.6,10,14,16,18,20,25
+London,2021-05-26,,estimate,16,16.2,4.5,9,13,15,17,19,24
+London,2021-05-27,,estimate,17,16.7,4.6,10,14,15,18,20,25
+London,2021-05-28,,estimate,15,15.6,4.4,9,12,14,17,18.2,23
+London,2021-05-29,,estimate,16,16.6,4.6,10,13,15,18,20,24
+London,2021-05-30,,estimate,19,19.6,5.1,12,16,18,21,23,28
+London,2021-05-31,,estimate,18,18.4,4.8,11,15,17,19,22,27
+London,2021-06-01,,estimate,20,20.5,5.2,12,17,19,22,24,29
+London,2021-06-02,,estimate,19,19.5,5,12,16,18,20,23,28
+London,2021-06-03,,estimate,20,20.4,5.1,12,17,19,21,24,29
+London,2021-06-04,,estimate,19,18.9,5,11,15,17,20,22,27
+London,2021-06-05,,estimate,20,20,5.1,12,16,18,21,23,29
+London,2021-06-06,,estimate,23,23.7,5.7,15,20,22,25,27,34
+London,2021-06-07,,estimate,22,22.3,5.5,14,18,21,23,26,32
+London,2021-06-08,,estimate,24,24.6,5.9,15,20,23,26,28,35
+London,2021-06-09,,estimate,23,23.4,5.6,15,19,22,24,27,33
+London,2021-06-10,,estimate,24,24,5.8,15,20,22,25,28,34
+London,2021-06-11,,estimate,22,22.4,5.5,14,19,21,23,26,32
+London,2021-06-12,,estimate,23,23.3,5.6,14,19,22,24,27,33
+London,2021-06-13,,estimate,27,27.3,6.2,18,23,25,29,31,38
+London,2021-06-14,,estimate,25,25.6,6,17,21,24,27,29,36
+London,2021-06-15,,estimate,28,28.1,6.2,19,24,26,29,32,39
+London,2021-06-16,,estimate,26,26.3,6,17,22,25,28,30,37
+London,2021-06-17,,estimate based on partial data,27,27,6.1,17,23,25,28,31,38
+London,2021-06-18,,estimate based on partial data,25,25.1,5.9,16,21,23,26,29,35
+London,2021-06-19,,estimate based on partial data,25,25.8,6,16,22,24,27,30,36
+London,2021-06-20,,estimate based on partial data,30,30.1,6.5,20,26,28,31,34,41
+London,2021-06-21,,estimate based on partial data,28,28.2,6.4,18,24,26,30,32,39
+London,2021-06-22,,estimate based on partial data,30,30.8,6.8,20,26,29,32,35,43
+London,2021-06-23,,estimate based on partial data,28,28.5,6.5,18,24,27,30,33,40
+London,2021-06-24,,estimate based on partial data,29,29.2,6.5,19,25,27,30,33,41
+London,2021-06-25,,estimate based on partial data,26,26.7,6.4,17,22,25,28,31,38
+London,2021-06-26,,estimate based on partial data,27,27.5,6.4,17,23,26,29,32,38
+London,2021-06-27,,estimate based on partial data,31,31.8,7.3,20,27,30,33,36,45
+London,2021-06-28,,forecast,29,29.9,7.3,19,25,28,31,35,43
+London,2021-06-29,,forecast,32,32.6,7.8,21,27,30,34,37,46
+London,2021-06-30,,forecast,30,30.5,7.7,19,25,28,32,35,44
+London,2021-07-01,,forecast,30,31,8.3,19,25,28,33,36,45
+London,2021-07-02,,forecast,28,28.4,8.2,16,23,26,30,33,43
+London,2021-07-03,,forecast,29,29.6,8.9,17,24,27,31,35,45
+London,2021-07-04,,forecast,33,34.3,10.5,19,27,31,36,40,52
+London,2021-07-05,,forecast,31,32.4,10.6,18,25,29,34,38,50
+London,2021-07-06,,forecast,34,35.4,12.6,18,27,31,37,42,56
+London,2021-07-07,,forecast,31,32.9,12.4,16,25,29,34,39,54
+London,2021-07-08,,forecast,32,33.7,13.5,16,25,29,35,40,57
+London,2021-07-09,,forecast,29,31.1,13.7,14,22,26,32,37,54
+London,2021-07-10,,forecast,30,32.1,15.1,14,23,27,33,38,57
+London,2021-07-11,,forecast,35,38,18.5,16,27,32,39,46,66
+London,2021-07-12,,forecast,32,35.7,19.6,14,24,29,36,42,67
+Midlands,2021-03-07,,estimate,76.5,77.2,12.6,57,69,74,80,85,100
+Midlands,2021-03-08,,estimate,96,96.5,15,73,86,92,100,106,122
+Midlands,2021-03-09,,estimate,92,92.1,14.3,70,82,88,95,101,117
+Midlands,2021-03-10,,estimate,92,92.7,14.8,70,83,89,96,102,118
+Midlands,2021-03-11,,estimate,92,91.9,14.3,69,82,88,95,101,117
+Midlands,2021-03-12,,estimate,83,83.3,13.6,62,74,79,86,92,106
+Midlands,2021-03-13,,estimate,80,80.5,13.1,61,71,76,83,89,103
+Midlands,2021-03-14,,estimate,74,75,12.3,56,67,71,78,83,96
+Midlands,2021-03-15,,estimate,86,87.2,13.6,66,78,83,90,96,111
+Midlands,2021-03-16,,estimate,78,78,12.6,58,69,75,81,86,99
+Midlands,2021-03-17,,estimate,75,75.9,12.4,57,67,72,79,84,97
+Midlands,2021-03-18,,estimate,72,72.5,12,54,64,69,75,80,93
+Midlands,2021-03-19,,estimate,65,64.9,10.9,48,57,62,67,72,84
+Midlands,2021-03-20,,estimate,61,61.8,10.8,45,54,59,64,69,80
+Midlands,2021-03-21,,estimate,57,57.6,10,42,51,55,59,64,75
+Midlands,2021-03-22,,estimate,66,66.6,11.2,49,59,64,69,74,85
+Midlands,2021-03-23,,estimate,59,59.4,10.3,43,52,56,62,66,77
+Midlands,2021-03-24,,estimate,57,57.5,10,42,51,54,60,64,75
+Midlands,2021-03-25,,estimate,55,55.6,9.7,40,49,53,58,62,72
+Midlands,2021-03-26,,estimate,49,49.5,9,35,43,47,51,55,65
+Midlands,2021-03-27,,estimate,47,47.4,9,33,41,45,49,53,63
+Midlands,2021-03-28,,estimate,44,44.4,8.4,31,39,42,46,50,59
+Midlands,2021-03-29,,estimate,51,51.3,9.1,37,45,49,53,57,67
+Midlands,2021-03-30,,estimate,46,45.8,8.5,33,40,43,48,51,60
+Midlands,2021-03-31,,estimate,44,44.6,8.4,31,39,42,46,50,59
+Midlands,2021-04-01,,estimate,42,42.9,8.2,30,37,41,45,48,57
+Midlands,2021-04-02,,estimate,38,38.3,7.8,26,33,36,40,43,52
+Midlands,2021-04-03,,estimate,36,36.6,7.5,25,31,35,38,41,50
+Midlands,2021-04-04,,estimate,34,34.2,7.1,23,29,32,36,39,46
+Midlands,2021-04-05,,estimate,39,39.6,7.8,27,34,37,41,45,53
+Midlands,2021-04-06,,estimate,35,35.7,7.2,24,31,34,37,40,48
+Midlands,2021-04-07,,estimate,34,34.6,7,24,30,33,36,39,46
+Midlands,2021-04-08,,estimate,33,33.7,7.2,23,29,32,35,38,46
+Midlands,2021-04-09,,estimate,30,30,6.5,20,25,28,31,34,41
+Midlands,2021-04-10,,estimate,29,29,6.4,19,24,27,30,33,40
+Midlands,2021-04-11,,estimate,27,27.5,6.2,18,23,26,29,31,38
+Midlands,2021-04-12,,estimate,32,31.8,6.6,21,27,30,33,36,43
+Midlands,2021-04-13,,estimate,28,28.7,6.4,19,24,27,30,33,39
+Midlands,2021-04-14,,estimate,28,28.2,6.2,18,24,26,30,32,39
+Midlands,2021-04-15,,estimate,27,27.5,6.2,18,23,26,29,31,38
+Midlands,2021-04-16,,estimate,25,24.8,5.8,16,21,23,26,29,35
+Midlands,2021-04-17,,estimate,24,23.9,5.7,15,20,22,25,27,33
+Midlands,2021-04-18,,estimate,22,22.6,5.4,14,19,21,24,26,32
+Midlands,2021-04-19,,estimate,26,26.6,6,17,22,25,28,30,37
+Midlands,2021-04-20,,estimate,24,24.1,5.6,15,20,22,25,28,34
+Midlands,2021-04-21,,estimate,23,23.6,5.6,15,20,22,25,27,33
+Midlands,2021-04-22,,estimate,23,23.2,5.6,14,19,21,24,27,33
+Midlands,2021-04-23,,estimate,21,21,5.1,13,17,19,22,24,30
+Midlands,2021-04-24,,estimate,20,20.6,5.2,12,17,19,22,24,30
+Midlands,2021-04-25,,estimate,19,19.5,5,12,16,18,20,23,28
+Midlands,2021-04-26,,estimate,23,23,5.5,15,19,21,24,26,32
+Midlands,2021-04-27,,estimate,21,20.9,5.2,13,17,19,22,24,30
+Midlands,2021-04-28,,estimate,20,20.5,5.2,13,17,19,22,24,29
+Midlands,2021-04-29,,estimate,20,20.2,5.1,12,17,19,21,23,29
+Midlands,2021-04-30,,estimate,18,18.2,4.8,11,15,17,19,21,26
+Midlands,2021-05-01,,estimate,18,18,4.7,11,15,16,19,21,26
+Midlands,2021-05-02,,estimate,17,16.9,4.6,10,14,15,18,20,25
+Midlands,2021-05-03,,estimate,20,20.1,5.1,12,17,19,21,24,29
+Midlands,2021-05-04,,estimate,18,18.5,4.8,11,15,17,20,22,27
+Midlands,2021-05-05,,estimate,18,18.2,4.8,11,15,17,19,21,26
+Midlands,2021-05-06,,estimate,18,18,4.8,10,15,16,19,21,26
+Midlands,2021-05-07,,estimate,16,16.5,4.6,10,13,15,17,19,25
+Midlands,2021-05-08,,estimate,16,16.1,4.4,9,13,15,17,19,24
+Midlands,2021-05-09,,estimate,15,15.5,4.4,9,12,14,16,18,23
+Midlands,2021-05-10,,estimate,18,18.4,4.9,11,15,17,19,21,27
+Midlands,2021-05-11,,estimate,17,17,4.6,10,14,16,18,20,25
+Midlands,2021-05-12,,estimate,17,17,4.7,10,14,16,18,20,25
+Midlands,2021-05-13,,estimate,17,16.8,4.6,10,14,15,18,20,25
+Midlands,2021-05-14,,estimate,15,15.6,4.5,9,12,14,16,18,23
+Midlands,2021-05-15,,estimate,15,15.3,4.3,9,12,14,16,18,23
+Midlands,2021-05-16,,estimate,15,14.7,4.2,8,12,14,16,17,22
+Midlands,2021-05-17,,estimate,17,17.7,4.7,11,14,16,19,21,26
+Midlands,2021-05-18,,estimate,16,16.4,4.4,10,13,15,17,19,24
+Midlands,2021-05-19,,estimate,16,16.5,4.5,10,13,15,17,19,24
+Midlands,2021-05-20,,estimate,16,16.5,4.5,9,13,15,17,19,24
+Midlands,2021-05-21,,estimate,15,15.3,4.3,9,12,14,16,18,23
+Midlands,2021-05-22,,estimate,15,15.3,4.4,8,12,14,16,18,23
+Midlands,2021-05-23,,estimate,15,14.9,4.3,8,12,14,16,18,23
+Midlands,2021-05-24,,estimate,18,18,4.8,11,15,16,19,21,26
+Midlands,2021-05-25,,estimate,17,16.8,4.6,10,14,15,18,20,25
+Midlands,2021-05-26,,estimate,17,17.1,4.7,10,14,16,18,20,25
+Midlands,2021-05-27,,estimate,17,17.2,4.7,10,14,16,18,20,25
+Midlands,2021-05-28,,estimate,16,16.2,4.5,9,13,15,17,19,24
+Midlands,2021-05-29,,estimate,16,16.2,4.4,9,13,15,17,19,24
+Midlands,2021-05-30,,estimate,16,15.9,4.5,9,13,15,17,19,24
+Midlands,2021-05-31,,estimate,19,19.4,5,12,16,18,20,23,28
+Midlands,2021-06-01,,estimate,18,18.2,4.8,11,15,17,19,21,27
+Midlands,2021-06-02,,estimate,19,18.7,4.9,11,15,17,20,22,27
+Midlands,2021-06-03,,estimate,19,19.3,5,11,16,18,20,23,28
+Midlands,2021-06-04,,estimate,18,18.3,4.9,11,15,17,19,21,27
+Midlands,2021-06-05,,estimate,18,18.6,4.8,11,15,17,20,22,27
+Midlands,2021-06-06,,estimate,18,18.4,4.8,11,15,17,19,22,27
+Midlands,2021-06-07,,estimate,23,22.8,5.4,15,19,21,24,26,32
+Midlands,2021-06-08,,estimate,21,21.5,5.3,13,18,20,23,25,31
+Midlands,2021-06-09,,estimate,22,22.4,5.6,14,19,21,24,26,32
+Midlands,2021-06-10,,estimate,23,22.9,5.5,14,19,21,24,26,32
+Midlands,2021-06-11,,estimate,22,21.9,5.3,13,18,20,23,25,31
+Midlands,2021-06-12,,estimate,22,22.4,5.5,14,19,21,24,26,32
+Midlands,2021-06-13,,estimate,22,22.5,5.5,14,19,21,24,26,32
+Midlands,2021-06-14,,estimate,28,28,6.3,18,24,26,29,32,39
+Midlands,2021-06-15,,estimate,26,26.7,6.1,17,23,25,28,31,37
+Midlands,2021-06-16,,estimate,27,27.6,6.3,18,23,26,29,32,38
+Midlands,2021-06-17,,estimate based on partial data,28,28.7,6.2,19,24,27,30,33,39
+Midlands,2021-06-18,,estimate based on partial data,27,27.5,6.2,18,23,26,29,32,38
+Midlands,2021-06-19,,estimate based on partial data,28,28.2,6.3,18,24,26,30,32,39
+Midlands,2021-06-20,,estimate based on partial data,28,28.2,6.3,19,24,26,30,32,39
+Midlands,2021-06-21,,estimate based on partial data,35,35.2,7.3,24,30,33,37,40,48
+Midlands,2021-06-22,,estimate based on partial data,33,33.5,7.2,23,28,31,35,38,46
+Midlands,2021-06-23,,estimate based on partial data,35,35,7.4,24,30,33,37,40,48
+Midlands,2021-06-24,,estimate based on partial data,36,36.1,7.4,25,31,34,38,41,49
+Midlands,2021-06-25,,estimate based on partial data,34,34.7,7.4,23,29,32,36,40,48
+Midlands,2021-06-26,,estimate based on partial data,35,35.8,7.6,24,30,33,37,41,49
+Midlands,2021-06-27,,estimate based on partial data,36,35.9,7.7,24,31,34,37,41,49
+Midlands,2021-06-28,,forecast,44,44.8,9.6,30,38,42,47,51,62
+Midlands,2021-06-29,,forecast,42,42.9,9.6,28,36,40,45,49,60
+Midlands,2021-06-30,,forecast,44,44.4,9.9,29,37,42,46,51,62
+Midlands,2021-07-01,,forecast,46,46.7,11.1,30,39,43,49,53,66
+Midlands,2021-07-02,,forecast,44,44.5,11,28,37,41,47,51,64
+Midlands,2021-07-03,,forecast,45,46,12.1,28,38,42,48,53,67
+Midlands,2021-07-04,,forecast,45,46.2,12.3,28,38,42,48,53,68
+Midlands,2021-07-05,,forecast,56,58,16.4,35,47,53,60,67,87
+Midlands,2021-07-06,,forecast,54,55.5,16.4,32,44,50,58,65,85
+Midlands,2021-07-07,,forecast,56,57.9,18.4,32,45,52,60,68,90
+Midlands,2021-07-08,,forecast,58,60.5,20,34,46.8,54,63,71,97
+Midlands,2021-07-09,,forecast,55,58.2,20.3,31,44,51,60,69,95
+Midlands,2021-07-10,,forecast,57,60.1,22.4,31,45,52,62,72,98
+Midlands,2021-07-11,,forecast,57,60.4,23.5,30,45,52,63,72,101
+Midlands,2021-07-12,,forecast,72,76.1,31.7,36,56,65,78,91,129
+North East and Yorkshire,2021-03-07,,estimate,74,75.6,15.6,53,65,71,78,85,104
+North East and Yorkshire,2021-03-08,,estimate,86,87,18,59,75,82,90,98,119
+North East and Yorkshire,2021-03-09,,estimate,82,83.2,16.8,58,72,78,87,94,112
+North East and Yorkshire,2021-03-10,,estimate,94,94.9,19,65,82,89,99,107,128
+North East and Yorkshire,2021-03-11,,estimate,79,80.5,16.5,55,69,75,83,91,109
+North East and Yorkshire,2021-03-12,,estimate,76,76.7,15.7,52,66,72,80,87,103
+North East and Yorkshire,2021-03-13,,estimate,72,72.1,14.8,49,62,68,75,81,98
+North East and Yorkshire,2021-03-14,,estimate,75,76.4,15.2,53,66,71,79,86,103
+North East and Yorkshire,2021-03-15,,estimate,82,82.8,16.4,58,71,78,86,93,111
+North East and Yorkshire,2021-03-16,,estimate,74,74.8,15.2,51,64,70,78,85,101
+North East and Yorkshire,2021-03-17,,estimate,81,82,16.2,57,71,77,85,92,110
+North East and Yorkshire,2021-03-18,,estimate,67,67.8,14,46,58,64,70,77,92
+North East and Yorkshire,2021-03-19,,estimate,63,63.8,13.2,43,54,60,66,72,86
+North East and Yorkshire,2021-03-20,,estimate,59,59.6,12.6,40,50,56,62,68,81
+North East and Yorkshire,2021-03-21,,estimate,62,62.2,13,42.9,53,58,65,70,85
+North East and Yorkshire,2021-03-22,,estimate,66,67.2,13.9,46,57,63,70,76,92
+North East and Yorkshire,2021-03-23,,estimate,61,61,12.7,41,52,57,63,69,83
+North East and Yorkshire,2021-03-24,,estimate,66,66.5,13.6,45,57,63,69,75,90
+North East and Yorkshire,2021-03-25,,estimate,54,54.8,11.9,37,47,51,57,62,76
+North East and Yorkshire,2021-03-26,,estimate,51,51.5,11.5,34,43,48,54,59,71
+North East and Yorkshire,2021-03-27,,estimate,47,48.1,10.9,31,41,45,50,55,67
+North East and Yorkshire,2021-03-28,,estimate,50,50.4,11.1,34,43,47,53,57,70
+North East and Yorkshire,2021-03-29,,estimate,53,54,11.5,37,46,50,56,61,74
+North East and Yorkshire,2021-03-30,,estimate,48,49.1,10.8,33,41,46,51,56,68
+North East and Yorkshire,2021-03-31,,estimate,52,53.2,11.2,36,45,50,55,60,73
+North East and Yorkshire,2021-04-01,,estimate,43,43.9,9.8,29,37,41,46,50,61
+North East and Yorkshire,2021-04-02,,estimate,41,41.3,9.4,27,35,38,43,47,58
+North East and Yorkshire,2021-04-03,,estimate,38,38.5,8.7,25,32,36,40,44,54
+North East and Yorkshire,2021-04-04,,estimate,39,39.8,9.4,26,33,37,41,46,56
+North East and Yorkshire,2021-04-05,,estimate,42,42.7,9.6,28,36,40,45,49,59
+North East and Yorkshire,2021-04-06,,estimate,38,38.8,9.1,25,33,36,40,44,55
+North East and Yorkshire,2021-04-07,,estimate,41,41.8,9.4,27,35,39,44,48,58
+North East and Yorkshire,2021-04-08,,estimate,34,34.6,8.3,22,29,32,36,40,49
+North East and Yorkshire,2021-04-09,,estimate,32,32.4,7.9,20,27,30,34,38,46
+North East and Yorkshire,2021-04-10,,estimate,29,29.8,7.4,18,25,28,31,35,43
+North East and Yorkshire,2021-04-11,,estimate,31,31.1,7.5,19,26,29,32,36,45
+North East and Yorkshire,2021-04-12,,estimate,33,33.2,8,21,27,31,35,38,47
+North East and Yorkshire,2021-04-13,,estimate,30,30.1,7.5,19,25,28,32,35,43
+North East and Yorkshire,2021-04-14,,estimate,32,32.5,8,20,27,30,34,37,47
+North East and Yorkshire,2021-04-15,,estimate,26,26.7,6.9,16,22,24.6,28,31,39
+North East and Yorkshire,2021-04-16,,estimate,25,25.1,6.5,15,20,23,26,29,37
+North East and Yorkshire,2021-04-17,,estimate,23,23.3,6.2,14,19,22,24,27,34
+North East and Yorkshire,2021-04-18,,estimate,24,23.9,6.3,14,19,22,25,28,35
+North East and Yorkshire,2021-04-19,,estimate,26,26.1,6.5,16,21,24,27,30,38
+North East and Yorkshire,2021-04-20,,estimate,23,23.4,6.2,14,19,21,25,27,34
+North East and Yorkshire,2021-04-21,,estimate,25,25.3,6.7,15,21,23,27,29,37
+North East and Yorkshire,2021-04-22,,estimate,21,21.1,5.8,12,17,19,22,25,31
+North East and Yorkshire,2021-04-23,,estimate,19,19.7,5.5,11,16,18,21,23,29
+North East and Yorkshire,2021-04-24,,estimate,18,18.4,5.4,10,15,17,19,22,28
+North East and Yorkshire,2021-04-25,,estimate,19,19.1,5.4,11,15,17,20,22,29
+North East and Yorkshire,2021-04-26,,estimate,20,20.6,5.8,12,17,19,22,24,31
+North East and Yorkshire,2021-04-27,,estimate,18,18.8,5.3,11,15,17,20,22,28
+North East and Yorkshire,2021-04-28,,estimate,20,20.4,5.7,12,16,19,22,24,30
+North East and Yorkshire,2021-04-29,,estimate,17,17,5,9,13,15,18,20,26
+North East and Yorkshire,2021-04-30,,estimate,16,15.9,4.8,8,12,14,17,19,25
+North East and Yorkshire,2021-05-01,,estimate,14,14.8,4.7,8,12,13,16,18,23
+North East and Yorkshire,2021-05-02,,estimate,15,15.6,4.7,8,12,14,16,19,24
+North East and Yorkshire,2021-05-03,,estimate,17,16.9,5,9,13,15,18,20,25
+North East and Yorkshire,2021-05-04,,estimate,15,15.5,4.7,8,12,14,16,18,23
+North East and Yorkshire,2021-05-05,,estimate,17,17,5,9,13,15,18,20,26
+North East and Yorkshire,2021-05-06,,estimate,14,14.1,4.5,7,11,13,15,17,22
+North East and Yorkshire,2021-05-07,,estimate,13,13.5,4.4,7,10,12,14,16,21
+North East and Yorkshire,2021-05-08,,estimate,12,12.6,4.2,6,10,11,13,15,20
+North East and Yorkshire,2021-05-09,,estimate,13,13.3,4.3,7,10,12,14,16,21
+North East and Yorkshire,2021-05-10,,estimate,14,14.6,4.5,8,11,13,15,18,23
+North East and Yorkshire,2021-05-11,,estimate,13,13.4,4.3,7,10,12,14,16,21
+North East and Yorkshire,2021-05-12,,estimate,14,14.7,4.6,8,11,13,16,18,23
+North East and Yorkshire,2021-05-13,,estimate,12,12.5,4.1,6,10,11,13,15,20
+North East and Yorkshire,2021-05-14,,estimate,12,12,4,6,9,11,13,15,19
+North East and Yorkshire,2021-05-15,,estimate,11,11.4,3.9,5,9,10,12,14,18
+North East and Yorkshire,2021-05-16,,estimate,12,12,4,6,9,11,13,14,19
+North East and Yorkshire,2021-05-17,,estimate,13,13.3,4.3,7,10,12,14,16,21
+North East and Yorkshire,2021-05-18,,estimate,12,12.5,4,6,10,11,13,15,20
+North East and Yorkshire,2021-05-19,,estimate,13,13.9,4.6,7,11,12,15,17,22
+North East and Yorkshire,2021-05-20,,estimate,11,11.8,4.1,6,9,10,13,14,19
+North East and Yorkshire,2021-05-21,,estimate,11,11.4,3.9,6,9,10,12,14,18
+North East and Yorkshire,2021-05-22,,estimate,11,11.1,3.9,5,8,10,12,13,18
+North East and Yorkshire,2021-05-23,,estimate,12,11.9,4,6,9,11,13,14,19
+North East and Yorkshire,2021-05-24,,estimate,13,13.4,4.3,7,10,12,14,16,21
+North East and Yorkshire,2021-05-25,,estimate,12,12.7,4.3,6,10,11,14,15,20
+North East and Yorkshire,2021-05-26,,estimate,14,14.3,4.5,8,11,13,15,17,22
+North East and Yorkshire,2021-05-27,,estimate,12,12.4,4.1,6,9,11,13,15,19
+North East and Yorkshire,2021-05-28,,estimate,12,12.2,4.1,6,9,11,13,15,19
+North East and Yorkshire,2021-05-29,,estimate,12,11.8,4.1,6,9,11,13,14,19
+North East and Yorkshire,2021-05-30,,estimate,13,13,4.2,7,10,12,14,16,20
+North East and Yorkshire,2021-05-31,,estimate,15,14.9,4.7,8,12,13,16,18,23
+North East and Yorkshire,2021-06-01,,estimate,14,14.1,4.4,8,11,13,15,17,22
+North East and Yorkshire,2021-06-02,,estimate,16,16.4,5,9,13,15,17,20,25
+North East and Yorkshire,2021-06-03,,estimate,14,14.5,4.5,8,11,13,15,17,23
+North East and Yorkshire,2021-06-04,,estimate,14,14.6,4.6,8,11,13,15,18,23
+North East and Yorkshire,2021-06-05,,estimate,14,14.4,4.5,8,11,13,15,17,22
+North East and Yorkshire,2021-06-06,,estimate,16,16.2,4.9,9,13,15,17,19,25
+North East and Yorkshire,2021-06-07,,estimate,18,18.7,5.4,10,15,17,20,22,28
+North East and Yorkshire,2021-06-08,,estimate,18,18.2,5.3,10,14,17,19,22,27
+North East and Yorkshire,2021-06-09,,estimate,21,21.2,5.9,12,17,19,22,25,31
+North East and Yorkshire,2021-06-10,,estimate,19,19,5.4,11,15,17,20,22,29
+North East and Yorkshire,2021-06-11,,estimate,19,19.4,5.6,11,15,18,20,23,29
+North East and Yorkshire,2021-06-12,,estimate,19,19.6,5.6,11,16,18,21,23,29
+North East and Yorkshire,2021-06-13,,estimate,22,22.3,6,13,18,20,23,26,33
+North East and Yorkshire,2021-06-14,,estimate,25,25.9,6.7,16,21,24,27,30,37
+North East and Yorkshire,2021-06-15,,estimate,25,25.4,6.6,15,21,23,27,30,37
+North East and Yorkshire,2021-06-16,,estimate,30,30.2,7.4,19,25,28,32,35,43
+North East and Yorkshire,2021-06-17,,estimate based on partial data,27,27.2,7,16,22,25,29,32,39
+North East and Yorkshire,2021-06-18,,estimate based on partial data,27,27.9,7,17,23,26,29,32,40
+North East and Yorkshire,2021-06-19,,estimate based on partial data,28,28.1,7.3,17,23,26,30,33,41
+North East and Yorkshire,2021-06-20,,estimate based on partial data,32,32.2,7.8,20,27,30,34,37,46
+North East and Yorkshire,2021-06-21,,estimate based on partial data,37,37.6,8.9,24,31,35,39,43,53
+North East and Yorkshire,2021-06-22,,estimate based on partial data,37,37.2,8.9,24,31,35,39,43,52
+North East and Yorkshire,2021-06-23,,estimate based on partial data,44,44.5,10.3,29,37.8,41,47,51,63
+North East and Yorkshire,2021-06-24,,estimate based on partial data,39,39.8,9.4,26,33,37,42,46,56
+North East and Yorkshire,2021-06-25,,estimate based on partial data,41,41.3,9.9,26,34,38,43,47,59
+North East and Yorkshire,2021-06-26,,estimate based on partial data,41,42,10.1,26,35,39,44,48,60
+North East and Yorkshire,2021-06-27,,estimate based on partial data,47,48,11.6,31,40,44,50,55,68
+North East and Yorkshire,2021-06-28,,forecast,55.5,56.5,13.5,36,47,52,59,64,80
+North East and Yorkshire,2021-06-29,,forecast,55,56,14.1,35,46,51,58,65,81
+North East and Yorkshire,2021-06-30,,forecast,66,67.1,17.2,42,55,61,70,77,97
+North East and Yorkshire,2021-07-01,,forecast,59,60.5,16.3,37,49,55,63,70,89
+North East and Yorkshire,2021-07-02,,forecast,61,62.8,18.1,37,50,56,65,74,96
+North East and Yorkshire,2021-07-03,,forecast,62,63.9,19.1,37,50,57,66,75,99
+North East and Yorkshire,2021-07-04,,forecast,71,73.4,23.2,41,57,65,76.4,86,116
+North East and Yorkshire,2021-07-05,,forecast,83,87,29.8,48,66,76,89,102,141
+North East and Yorkshire,2021-07-06,,forecast,82,86.6,31.1,46,65,75,89,102,144
+North East and Yorkshire,2021-07-07,,forecast,98,103.8,39.9,52,76,89,107,124,174
+North East and Yorkshire,2021-07-08,,forecast,88,94.5,38.2,46,68,80,97,114,164
+North East and Yorkshire,2021-07-09,,forecast,91,98.6,42.5,46,69,83,101,119,177
+North East and Yorkshire,2021-07-10,,forecast,93,100.9,46.1,45,70,83,103.4,122,182
+North East and Yorkshire,2021-07-11,,forecast,106,116.6,56.2,49,79,95,117,143,217
+North East and Yorkshire,2021-07-12,,forecast,125,138.3,71,56,90,111,140,167,265
+North West,2021-03-07,,estimate,63,62.9,11.2,46,55,60,65,70,82
+North West,2021-03-08,,estimate,75,75.5,12.7,55,67,72,78,83,97
+North West,2021-03-09,,estimate,65,65.6,11.4,48,58,62,68,73,85
+North West,2021-03-10,,estimate,74,74.4,12.6,55,66,71,77,83,96
+North West,2021-03-11,,estimate,67,67.1,11.8,48,59,64,69,75,87
+North West,2021-03-12,,estimate,59,60,10.7,43,53,57,62,67,79
+North West,2021-03-13,,estimate,63,63.4,11,46,56,60,66,71,82
+North West,2021-03-14,,estimate,60,60.2,10.5,44,53,57,62,67,78
+North West,2021-03-15,,estimate,67,67.4,11.5,50,59,64,70,75,87
+North West,2021-03-16,,estimate,55,55.6,9.8,40,49,53,58,62,73
+North West,2021-03-17,,estimate,61,61.2,10.6,45,54,58,63,68,79
+North West,2021-03-18,,estimate,53,53.5,9.5,39,47,51,55,60,70
+North West,2021-03-19,,estimate,47,47.1,8.9,33,41,44,49,53,63
+North West,2021-03-20,,estimate,49,49.3,9,36,43,47,51,55,65
+North West,2021-03-21,,estimate,46,46.4,8.6,33,41,44,48,52,61
+North West,2021-03-22,,estimate,51,51.6,9.4,37,45,49,54,58,68
+North West,2021-03-23,,estimate,42,42.2,7.9,30,37,40,44,47,55
+North West,2021-03-24,,estimate,46,46.3,8.7,33,40,44,48,52,61
+North West,2021-03-25,,estimate,40,40.5,7.9,28,35,38,42,46,54
+North West,2021-03-26,,estimate,35,35.2,7.4,24,30,33,37,40,48
+North West,2021-03-27,,estimate,37,37,7.4,25,32,35,39,42,50
+North West,2021-03-28,,estimate,34,34.6,7.2,23,30,32,36,39,47
+North West,2021-03-29,,estimate,38,38.6,7.7,27,33,36,40,44,52
+North West,2021-03-30,,estimate,31,31.4,6.7,21,27,29,33,36,43
+North West,2021-03-31,,estimate,34,34.1,7.1,23,29,32,36,39,47
+North West,2021-04-01,,estimate,29,29.7,6.3,20,25,28,31,34,41
+North West,2021-04-02,,estimate,25,25.7,6,16,22,24,27,30,36
+North West,2021-04-03,,estimate,27,26.8,6,17,23,25,28,31,37
+North West,2021-04-04,,estimate,25,25.2,5.8,16,21,23,26,29,35
+North West,2021-04-05,,estimate,28,27.8,6.2,18,23,26,29,32,38
+North West,2021-04-06,,estimate,22,22.6,5.5,14,19,21,24,26,32
+North West,2021-04-07,,estimate,24,24.6,5.9,16,21,23,26,28,34
+North West,2021-04-08,,estimate,21,21.4,5.4,13,17,20,22,25,30
+North West,2021-04-09,,estimate,18,18.8,4.8,12,15,17,20,22,27
+North West,2021-04-10,,estimate,19,19.7,5.1,12,16,18,21,23,29
+North West,2021-04-11,,estimate,18,18.4,4.8,11,15,17,19,22,27
+North West,2021-04-12,,estimate,20,20.6,5.2,12,17,19,22,24,30
+North West,2021-04-13,,estimate,16,16.8,4.6,10,14,15,18,20,25
+North West,2021-04-14,,estimate,18,18.4,4.9,11,15,17,19,22,27
+North West,2021-04-15,,estimate,16,16.3,4.5,9,13,15,17,19,24
+North West,2021-04-16,,estimate,14,14.5,4.3,8,11,13,15,17,22
+North West,2021-04-17,,estimate,15,15.2,4.4,8,12,14,16,18,23
+North West,2021-04-18,,estimate,14,14.6,4.2,8,12,13,15,17,22
+North West,2021-04-19,,estimate,16,16.4,4.6,9,13,15,17,19,25
+North West,2021-04-20,,estimate,13,13.7,4.1,7,11,12,14,16,21
+North West,2021-04-21,,estimate,15,15.3,4.5,9,12,14,16,18,23
+North West,2021-04-22,,estimate,14,13.7,4.1,7,11,12,15,16,21
+North West,2021-04-23,,estimate,12,12.3,3.8,6,10,11,13,15,19
+North West,2021-04-24,,estimate,13,13.1,4,7,10,12,14,16,20
+North West,2021-04-25,,estimate,13,12.8,3.9,7,10,12,14,15,20
+North West,2021-04-26,,estimate,14,14.6,4.2,8,12,13,15,17,22
+North West,2021-04-27,,estimate,12,12.4,3.9,6.9,10,11,13,15,19
+North West,2021-04-28,,estimate,14,14.1,4.1,8,11,13,15,17,21
+North West,2021-04-29,,estimate,13,12.8,4,7,10,12,14,15,20
+North West,2021-04-30,,estimate,11,11.6,3.8,6,9,10,12,14,18
+North West,2021-05-01,,estimate,13,12.9,3.9,7,10,12,14,15,20
+North West,2021-05-02,,estimate,12,12.5,3.9,6,10,11,13,15,19
+North West,2021-05-03,,estimate,14,14.7,4.3,8,12,13,16,17,22
+North West,2021-05-04,,estimate,12,12.5,3.9,6,10,11,13,15,19
+North West,2021-05-05,,estimate,14,14.5,4.2,8,11,13,15,17,22
+North West,2021-05-06,,estimate,13,13.4,4.1,7,11,12,14,16,20
+North West,2021-05-07,,estimate,12,12.3,3.8,6,10,11,13,15,19
+North West,2021-05-08,,estimate,13,13.5,4,7,11,12,14,16,20
+North West,2021-05-09,,estimate,13,13.5,4,7,11,12,14,16,20
+North West,2021-05-10,,estimate,16,16,4.5,9,13,15,17,19,24
+North West,2021-05-11,,estimate,14,13.8,4.1,8,11,13,15,17,21
+North West,2021-05-12,,estimate,16,15.9,4.4,9,13,15,17,19,23
+North West,2021-05-13,,estimate,15,14.7,4.2,8,12,13,16,17,22
+North West,2021-05-14,,estimate,14,13.8,4.1,7,11,13,15,16,21
+North West,2021-05-15,,estimate,15,15.4,4.4,9,12,14,16,18,23
+North West,2021-05-16,,estimate,15,15.5,4.4,9,12,14,16,18,23
+North West,2021-05-17,,estimate,18,18.4,4.9,11,15,17,19,22,27
+North West,2021-05-18,,estimate,16,16,4.4,9,13,15,17,19,24
+North West,2021-05-19,,estimate,19,18.8,5,11,15,17,20,22,28
+North West,2021-05-20,,estimate,17,17.7,4.7,10,14,16,19,21,26
+North West,2021-05-21,,estimate,16,16.7,4.6,10,13,15,18,20,25
+North West,2021-05-22,,estimate,18,18.7,5,11,15,17,20,22,27
+North West,2021-05-23,,estimate,19,19.2,4.9,12,16,18,20,22,28
+North West,2021-05-24,,estimate,23,23.1,5.5,15,19,21,24,27,33
+North West,2021-05-25,,estimate,20,20.4,5.2,12,17,19,21,24,30
+North West,2021-05-26,,estimate,24,24.2,5.8,15,20,22,25,28,34
+North West,2021-05-27,,estimate,23,23,5.7,14,19,21,24,27,33
+North West,2021-05-28,,estimate,22,22.1,5.2,14,19,21,23,26,31
+North West,2021-05-29,,estimate,25,25.4,5.9,16,21,24,27,29,35
+North West,2021-05-30,,estimate,26,26.1,6,17,22,24,27,30,36
+North West,2021-05-31,,estimate,32,32.1,6.9,21,27,30,33,37,44
+North West,2021-06-01,,estimate,29,28.8,6.4,19,24,27,30,33,40
+North West,2021-06-02,,estimate,34,34.4,7.2,23,29,32,36,39,47
+North West,2021-06-03,,estimate,33,33.2,7,22,28,31,35,38,45
+North West,2021-06-04,,estimate,32,31.9,6.8,21,27,30,33,36,44
+North West,2021-06-05,,estimate,36,37,7.6,25,32,35,38,42,50
+North West,2021-06-06,,estimate,38,38,7.5,26,33,36,40,43,51
+North West,2021-06-07,,estimate,46,46.4,8.8,33,40,44,48,52,62
+North West,2021-06-08,,estimate,41,41.2,8,29,35,39,43,46,55
+North West,2021-06-09,,estimate,49,49.2,8.9,35,43,47,51,55,64
+North West,2021-06-10,,estimate,46,46.6,8.7,33,40,44,49,52,61
+North West,2021-06-11,,estimate,44,44.1,8.5,31,38,42,46,50,59
+North West,2021-06-12,,estimate,50,49.8,9.2,35,43,47,52,56,66
+North West,2021-06-13,,estimate,50,50.3,9.4,36,44,47,52,56,67
+North West,2021-06-14,,estimate,59,59.9,10.6,43,53,57,62,67,78
+North West,2021-06-15,,estimate,52,52.1,9.7,37,45,49,54,58,69
+North West,2021-06-16,,estimate,60,60.7,10.8,44,53,57,63,68,79
+North West,2021-06-17,,estimate based on partial data,56,56,9.9,40,49,53,58,62,73
+North West,2021-06-18,,estimate based on partial data,52,52,9.4,37,46,49,54,58,68
+North West,2021-06-19,,estimate based on partial data,56,56.9,10.2,41,50,54,59,63,75
+North West,2021-06-20,,estimate based on partial data,55,55.9,9.8,41,49,53,58,62,73
+North West,2021-06-21,,estimate based on partial data,65,65.4,11.2,48,58,62,68,72.2,85
+North West,2021-06-22,,estimate based on partial data,55,55.7,10.2,40,49,53,58,62,73
+North West,2021-06-23,,estimate based on partial data,63,63.3,11,46,56,60,66,70,82
+North West,2021-06-24,,estimate based on partial data,57,57.6,10.4,41,50,54,60,64,75
+North West,2021-06-25,,estimate based on partial data,52,52.4,9.8,37,45,49,55,59,69
+North West,2021-06-26,,estimate based on partial data,57,57.2,10.8,40,50,54,59,64,76
+North West,2021-06-27,,estimate based on partial data,55,55.9,10.6,40,49,53,58,63,74
+North West,2021-06-28,,forecast,64,64.9,13.3,45,56,61,67,73,88
+North West,2021-06-29,,forecast,55,55.2,11.7,37,47,52,57,62,75
+North West,2021-06-30,,forecast,61,62.3,14,42,53,58,65,71,87
+North West,2021-07-01,,forecast,55,56.7,13.7,36.9,47,52,59,65,80
+North West,2021-07-02,,forecast,50,51.9,14.2,32,42,48,54,60,76
+North West,2021-07-03,,forecast,55,56.9,17.5,34,46,51,59,66,86
+North West,2021-07-04,,forecast,53,55.7,19.4,32,44,49,57,64,87
+North West,2021-07-05,,forecast,61,65.2,25.4,36,50,57,66,75,105
+North West,2021-07-06,,forecast,51,55.4,25.5,28,41,48,56,65,92
+North West,2021-07-07,,forecast,58,63.6,34.1,31,46,53,63,74,110
+North West,2021-07-08,,forecast,53,58.6,36.9,28,41,48,58,67.2,102
+North West,2021-07-09,,forecast,48,54.2,42.1,23,37,43,53,62,98
+North West,2021-07-10,,forecast,51,59.7,52.7,25,39,46,57,69,111
+North West,2021-07-11,,forecast,50,59.4,61.8,23,37,45,56,68,113
+North West,2021-07-12,,forecast,58,70.2,86.3,25,42,51,65,79,137
+Northern Ireland,2021-03-07,,estimate,7,8,3.9,3,5,7,8,10,15
+Northern Ireland,2021-03-08,,estimate,12,12.1,5.2,5,8,10,13,15,22
+Northern Ireland,2021-03-09,,estimate,13,14,5.9,6,10,12,15,17,25
+Northern Ireland,2021-03-10,,estimate,12,12.8,5.6,5,9,11,13.4,16,23
+Northern Ireland,2021-03-11,,estimate,11,11.3,5,4,8,9,12,14,20
+Northern Ireland,2021-03-12,,estimate,15,15.5,6.4,6,11,13,16,19,27
+Northern Ireland,2021-03-13,,estimate,10,11,5,4,8,9,12,14,20
+Northern Ireland,2021-03-14,,estimate,8,8.2,3.8,3,5,7,9,10,15
+Northern Ireland,2021-03-15,,estimate,11,11.7,5.1,5,8,10,12,15,21
+Northern Ireland,2021-03-16,,estimate,12,12.7,5.6,5,9,11,13,16,23
+Northern Ireland,2021-03-17,,estimate,11,11.1,4.8,4,8,9,12,14,19
+Northern Ireland,2021-03-18,,estimate,9,9.7,4.4,3,7,8,10,12,18
+Northern Ireland,2021-03-19,,estimate,13,13,5.4,5,9,11,14,16,23
+Northern Ireland,2021-03-20,,estimate,9,9.2,4.3,3,6,8,10,12,17
+Northern Ireland,2021-03-21,,estimate,6,6.6,3.4,2,4,5,7,8,13
+Northern Ireland,2021-03-22,,estimate,9,9.5,4.3,3,6,8,10,12,17
+Northern Ireland,2021-03-23,,estimate,10,10.3,4.5,4,7,9,11,13,19
+Northern Ireland,2021-03-24,,estimate,8,9,4.1,3,6,8,10,11,16
+Northern Ireland,2021-03-25,,estimate,7,7.8,3.7,3,5,6,8,10,15
+Northern Ireland,2021-03-26,,estimate,10,10.5,4.6,4,7,9,11,13,19
+Northern Ireland,2021-03-27,,estimate,7,7.4,3.6,2,5,6,8,10,14
+Northern Ireland,2021-03-28,,estimate,5,5.3,2.9,1,3,4,6,7,11
+Northern Ireland,2021-03-29,,estimate,7,7.7,3.8,2,5,6,8,10,14
+Northern Ireland,2021-03-30,,estimate,8,8.4,4,3,6,7,9,11,15
+Northern Ireland,2021-03-31,,estimate,7,7.4,3.6,2,5,6,8,9,14
+Northern Ireland,2021-04-01,,estimate,6,6.4,3.3,2,4,5,7,8,12
+Northern Ireland,2021-04-02,,estimate,8,8.5,4.1,3,6,7,9,11,16
+Northern Ireland,2021-04-03,,estimate,6,6,3.2,2,4,5,6,8,12
+Northern Ireland,2021-04-04,,estimate,4,4.4,2.6,1,3,3,5,6,9
+Northern Ireland,2021-04-05,,estimate,6,6.4,3.3,2,4,5,7,8,12
+Northern Ireland,2021-04-06,,estimate,6,6.9,3.5,2,4,6,7,9,13
+Northern Ireland,2021-04-07,,estimate,6,6.2,3.1,2,4,5,7,8,12
+Northern Ireland,2021-04-08,,estimate,5,5.3,2.9,1,3,4,6,7,11
+Northern Ireland,2021-04-09,,estimate,7,7.2,3.6,2,5,6,8,9,14
+Northern Ireland,2021-04-10,,estimate,5,5.1,2.8,1,3,4,5,7,10
+Northern Ireland,2021-04-11,,estimate,3,3.7,2.3,1,2,3,4,5,8
+Northern Ireland,2021-04-12,,estimate,5,5.5,3,1,3,4,6,7,11
+Northern Ireland,2021-04-13,,estimate,6,5.9,3.1,2,4,5,6,8,11
+Northern Ireland,2021-04-14,,estimate,5,5.4,2.9,1,3,4,6,7,11
+Northern Ireland,2021-04-15,,estimate,4,4.7,2.6,1,3,4,5,6,9
+Northern Ireland,2021-04-16,,estimate,6,6.3,3.1,2,4,5,7,8,12
+Northern Ireland,2021-04-17,,estimate,4,4.5,2.5,1,3,4,5,6,9
+Northern Ireland,2021-04-18,,estimate,3,3.3,2.1,0,2,3,4,5,7
+Northern Ireland,2021-04-19,,estimate,4,4.9,2.8,1,3,4,5,6,10
+Northern Ireland,2021-04-20,,estimate,5,5.3,2.8,1,3,4,6,7,10
+Northern Ireland,2021-04-21,,estimate,4,4.7,2.6,1,3,4,5,6,9
+Northern Ireland,2021-04-22,,estimate,4,4.2,2.5,1,2,3,4,6,9
+Northern Ireland,2021-04-23,,estimate,5,5.6,3,1,3,5,6,7,11
+Northern Ireland,2021-04-24,,estimate,4,4,2.3,1,2,3,4,5,8
+Northern Ireland,2021-04-25,,estimate,3,2.9,2,0,1,2,3,4,7
+Northern Ireland,2021-04-26,,estimate,4,4.3,2.6,1,2,3,5,6,9
+Northern Ireland,2021-04-27,,estimate,4,4.5,2.6,1,3,4,5,6,9
+Northern Ireland,2021-04-28,,estimate,4,4.1,2.5,1,2,3,4,5,9
+Northern Ireland,2021-04-29,,estimate,3,3.5,2.2,1,2,3,4,5,8
+Northern Ireland,2021-04-30,,estimate,4,4.8,2.7,1,3,4,5,6,10
+Northern Ireland,2021-05-01,,estimate,3,3.3,2.2,0,2,2,4,5,7
+Northern Ireland,2021-05-02,,estimate,2,2.5,1.8,0,1,2,3,4,6
+Northern Ireland,2021-05-03,,estimate,3,3.5,2.2,1,2,3,4,5,7
+Northern Ireland,2021-05-04,,estimate,4,3.9,2.4,1,2,3,4,5,8
+Northern Ireland,2021-05-05,,estimate,3,3.3,2.1,0,2,3,4,5,7
+Northern Ireland,2021-05-06,,estimate,3,2.9,1.9,0,1,2,3,4,6
+Northern Ireland,2021-05-07,,estimate,4,3.9,2.3,1,2,3,4,5,8
+Northern Ireland,2021-05-08,,estimate,2,2.7,1.9,0,1,2,3,4,6
+Northern Ireland,2021-05-09,,estimate,2,1.9,1.5,0,1,1,2,3,5
+Northern Ireland,2021-05-10,,estimate,3,2.8,1.9,0,1,2,3,4,6
+Northern Ireland,2021-05-11,,estimate,3,3,2,0,2,2,3,4,7
+Northern Ireland,2021-05-12,,estimate,2,2.7,1.9,0,1,2,3,4,6
+Northern Ireland,2021-05-13,,estimate,2,2.3,1.7,0,1,2,3,3,5
+Northern Ireland,2021-05-14,,estimate,3,3,1.9,0,2,2,3,4,7
+Northern Ireland,2021-05-15,,estimate,2,2.1,1.7,0,1,2,2,3,5
+Northern Ireland,2021-05-16,,estimate,1,1.5,1.3,0,1,1,2,2,4
+Northern Ireland,2021-05-17,,estimate,2,2.3,1.7,0,1,2,2,3,5
+Northern Ireland,2021-05-18,,estimate,2,2.4,1.8,0,1,2,3,3,6
+Northern Ireland,2021-05-19,,estimate,2,2.1,1.6,0,1,1,2,3,5
+Northern Ireland,2021-05-20,,estimate,2,1.8,1.5,0,1,1,2,3,5
+Northern Ireland,2021-05-21,,estimate,2,2.5,1.8,0,1,2,3,3,6
+Northern Ireland,2021-05-22,,estimate,1,1.7,1.5,0,1,1,2,3,4
+Northern Ireland,2021-05-23,,estimate,1,1.2,1.2,0,0,1,1,2,3
+Northern Ireland,2021-05-24,,estimate,2,1.8,1.5,0,1,1,2,3,5
+Northern Ireland,2021-05-25,,estimate,2,2,1.6,0,1,1,2,3,5
+Northern Ireland,2021-05-26,,estimate,2,1.7,1.4,0,1,1,2,3,4
+Northern Ireland,2021-05-27,,estimate,1,1.5,1.4,0,0,1,2,2,4
+Northern Ireland,2021-05-28,,estimate,2,2,1.6,0,1,1,2,3,5
+Northern Ireland,2021-05-29,,estimate,1,1.4,1.3,0,0,1,2,2,4
+Northern Ireland,2021-05-30,,estimate,1,1,1.1,0,0,1,1,2,3
+Northern Ireland,2021-05-31,,estimate,1,1.5,1.3,0,0,1,2,2,4
+Northern Ireland,2021-06-01,,estimate,1,1.7,1.4,0,1,1,2,2,4
+Northern Ireland,2021-06-02,,estimate,1,1.5,1.3,0,0,1,2,2,4
+Northern Ireland,2021-06-03,,estimate,1,1.3,1.2,0,0,1,1,2,4
+Northern Ireland,2021-06-04,,estimate,2,1.8,1.4,0,1,1,2,3,4
+Northern Ireland,2021-06-05,,estimate,1,1.3,1.2,0,0,1,1,2,4
+Northern Ireland,2021-06-06,,estimate,1,0.9,1,0,0,0,1,1,3
+Northern Ireland,2021-06-07,,estimate,1,1.3,1.2,0,0,1,1,2,4
+Northern Ireland,2021-06-08,,estimate,1,1.5,1.3,0,0,1,2,2,4
+Northern Ireland,2021-06-09,,estimate,1,1.3,1.2,0,0,1,1,2,4
+Northern Ireland,2021-06-10,,estimate,1,1.1,1.2,0,0,1,1,2,3
+Northern Ireland,2021-06-11,,estimate,1,1.6,1.4,0,1,1,2,2,4
+Northern Ireland,2021-06-12,,estimate,1,1.1,1.2,0,0,1,1,2,3
+Northern Ireland,2021-06-13,,estimate,1,0.8,1,0,0,0,1,1,3
+Northern Ireland,2021-06-14,,estimate,1,1.3,1.2,0,0,1,1,2,3
+Northern Ireland,2021-06-15,,estimate,1,1.4,1.3,0,0,1,1,2,4
+Northern Ireland,2021-06-16,,estimate,1,1.2,1.2,0,0,1,1,2,3
+Northern Ireland,2021-06-17,,estimate based on partial data,1,1.1,1.1,0,0,1,1,2,3
+Northern Ireland,2021-06-18,,estimate based on partial data,1,1.5,1.4,0,0,1,2,2,4
+Northern Ireland,2021-06-19,,estimate based on partial data,1,1.1,1.1,0,0,1,1,2,3
+Northern Ireland,2021-06-20,,estimate based on partial data,1,0.8,0.9,0,0,0,1,1,3
+Northern Ireland,2021-06-21,,estimate based on partial data,1,1.2,1.2,0,0,1,1,2,3
+Northern Ireland,2021-06-22,,estimate based on partial data,1,1.3,1.3,0,0,1,1,2,4
+Northern Ireland,2021-06-23,,estimate based on partial data,1,1.2,1.2,0,0,1,1,2,3
+Northern Ireland,2021-06-24,,estimate based on partial data,1,1.1,1.1,0,0,1,1,2,3
+Northern Ireland,2021-06-25,,estimate based on partial data,1,1.5,1.4,0,0,1,2,2,4
+Northern Ireland,2021-06-26,,estimate based on partial data,1,1.1,1.1,0,0,1,1,2,3
+Northern Ireland,2021-06-27,,estimate based on partial data,1,0.8,1,0,0,0,1,1,3
+Northern Ireland,2021-06-28,,forecast,1,1.2,1.3,0,0,1,1,2,4
+Northern Ireland,2021-06-29,,forecast,1,1.4,1.4,0,0,1,1,2,4
+Northern Ireland,2021-06-30,,forecast,1,1.3,1.4,0,0,1,1,2,4
+Northern Ireland,2021-07-01,,forecast,1,1.1,1.3,0,0,1,1,2,4
+Northern Ireland,2021-07-02,,forecast,1,1.5,1.7,0,0,1,1,2,5
+Northern Ireland,2021-07-03,,forecast,1,1.2,1.5,0,0,1,1,2,4
+Northern Ireland,2021-07-04,,forecast,1,0.9,1.3,0,0,0,1,1,3
+Northern Ireland,2021-07-05,,forecast,1,1.4,1.9,0,0,1,1,2,5
+Northern Ireland,2021-07-06,,forecast,1,1.5,2.6,0,0,1,1,2,5
+Northern Ireland,2021-07-07,,forecast,1,1.5,2.7,0,0,1,1,2,5
+Northern Ireland,2021-07-08,,forecast,1,1.4,3.1,0,0,1,1,2,4
+Northern Ireland,2021-07-09,,forecast,1,2,4.4,0,0,1,2,2,6
+Northern Ireland,2021-07-10,,forecast,1,1.6,6.4,0,0,0,1,2,5
+Northern Ireland,2021-07-11,,forecast,1,1.2,5.1,0,0,0,1,1,4
+Northern Ireland,2021-07-12,,forecast,1,2,10.8,0,0,1,1,2,6
+Scotland,2021-03-03,,estimate,34,34.1,7.2,23,29,32,35,39,46
+Scotland,2021-03-04,,estimate,36,36.4,7.8,24,31,34,38,41,50
+Scotland,2021-03-05,,estimate,38,38.3,7.9,26,33,36,40,43,52
+Scotland,2021-03-06,,estimate,32,32.1,7,21,27,30,33,36,44
+Scotland,2021-03-07,,estimate,31,31,6.9,20,26,29,32,36,43
+Scotland,2021-03-08,,estimate,36,36.7,7.7,25,31,34,38,42,50
+Scotland,2021-03-09,,estimate,36,36.1,7.4,25,31,34,38,41,49
+Scotland,2021-03-10,,estimate,36,36.2,7.3,25,31,34,38,41,49
+Scotland,2021-03-11,,estimate,35,35.8,7.4,24,31,34,37,41,48
+Scotland,2021-03-12,,estimate,36,35.9,7.2,25,31,34,37,41,48
+Scotland,2021-03-13,,estimate,29,29,6.5,19,25,27,30,33,40
+Scotland,2021-03-14,,estimate,27,27.3,6.2,18,23,25,29,31,38
+Scotland,2021-03-15,,estimate,32,31.8,6.8,21,27,30,33,36,43
+Scotland,2021-03-16,,estimate,31,31.3,6.8,21,26.8,29,33,36,43
+Scotland,2021-03-17,,estimate,30,30.8,6.6,20,26,29,32,35,42
+Scotland,2021-03-18,,estimate,31,31,6.6,21,26,29,32,35,42
+Scotland,2021-03-19,,estimate,30,30.5,6.5,21,26,28,32,35,42
+Scotland,2021-03-20,,estimate,24,24.8,5.9,16,21,23,26,29,35
+Scotland,2021-03-21,,estimate,23,23.5,5.8,14,19,22,25,27,33
+Scotland,2021-03-22,,estimate,27,27.3,6.1,18,23,25,29,31,38
+Scotland,2021-03-23,,estimate,26,26.6,6,17,22,25,28,30,37
+Scotland,2021-03-24,,estimate,26,26.3,6.1,17,22,24,27,30,37
+Scotland,2021-03-25,,estimate,26,26.2,6.1,17,22,24,27,30,37
+Scotland,2021-03-26,,estimate,26,25.9,6,17,22,24,27,30,36
+Scotland,2021-03-27,,estimate,21,21.1,5.2,13,18,20,22,24,30
+Scotland,2021-03-28,,estimate,19,19.8,5,12,16,18,21,23,28
+Scotland,2021-03-29,,estimate,22,22.7,5.4,14,19,21,24,26,32
+Scotland,2021-03-30,,estimate,22,22.3,5.4,14,19,21,23,26,32
+Scotland,2021-03-31,,estimate,22,21.9,5.3,14,18,20,23,25,31
+Scotland,2021-04-01,,estimate,21,21.5,5.4,13,18,20,23,25,31
+Scotland,2021-04-02,,estimate,21,21.3,5.4,13,17,20,22,25,30
+Scotland,2021-04-03,,estimate,17,17.2,4.7,10,14,16,18,20,25
+Scotland,2021-04-04,,estimate,16,16.1,4.5,9,13,15,17,19,24
+Scotland,2021-04-05,,estimate,18,18.5,4.9,11,15,17,19.4,22,27
+Scotland,2021-04-06,,estimate,18,17.8,4.7,11,14,16,19,21,26
+Scotland,2021-04-07,,estimate,17,17.5,4.7,10,14,16,18,21,25
+Scotland,2021-04-08,,estimate,17,17.2,4.7,10,14,16,18,20,25
+Scotland,2021-04-09,,estimate,17,17.1,4.7,10,14,16,18,20,25
+Scotland,2021-04-10,,estimate,13,13.4,4,7,11,12,14,16,20
+Scotland,2021-04-11,,estimate,13,12.7,3.9,7,10,12,13,15,19
+Scotland,2021-04-12,,estimate,14,14.5,4.2,8,11,13,15,17,22
+Scotland,2021-04-13,,estimate,14,14.1,4.1,8,11,13,15,17,21
+Scotland,2021-04-14,,estimate,14,13.9,4.1,8,11,13,15,17,21
+Scotland,2021-04-15,,estimate,13,13.5,4.1,7,11,12,14,16,20
+Scotland,2021-04-16,,estimate,13,13.4,4,7,11,12,14,16,20
+Scotland,2021-04-17,,estimate,10,10.6,3.5,5,8,10,11,13,17
+Scotland,2021-04-18,,estimate,10,10,3.4,5,8,9,11,12,16
+Scotland,2021-04-19,,estimate,11,11.5,3.7,6,9,10,12,14,18
+Scotland,2021-04-20,,estimate,11,11.1,3.6,5,9,10,12,13,17
+Scotland,2021-04-21,,estimate,11,11,3.6,5,9,10,12,13,17
+Scotland,2021-04-22,,estimate,11,10.8,3.5,5,8,10,12,13,17
+Scotland,2021-04-23,,estimate,11,10.8,3.5,5,8,10,12,13,17
+Scotland,2021-04-24,,estimate,8,8.7,3.1,4,6,8,9,11,14
+Scotland,2021-04-25,,estimate,8,8.2,3.1,4,6,7,9,10,14
+Scotland,2021-04-26,,estimate,9,9.6,3.4,4,7,9,10,12,16
+Scotland,2021-04-27,,estimate,9,9.5,3.3,4,7,8,10,12,15
+Scotland,2021-04-28,,estimate,9,9.5,3.3,4,7,8,10,12,15
+Scotland,2021-04-29,,estimate,9,9.5,3.3,4,7,8,10,12,15
+Scotland,2021-04-30,,estimate,9,9.5,3.3,4,7,8,10,12,15
+Scotland,2021-05-01,,estimate,8,7.9,3,3,6,7,9,10,13
+Scotland,2021-05-02,,estimate,8,7.7,2.9,3,6,7,8,10,13
+Scotland,2021-05-03,,estimate,9,9.1,3.3,4,7,8,10,11,15
+Scotland,2021-05-04,,estimate,9,9.2,3.2,4,7,8,10,11,15
+Scotland,2021-05-05,,estimate,9,9.3,3.3,4,7,8,10,11,15
+Scotland,2021-05-06,,estimate,10,9.8,3.4,5,7,9,10,12,16
+Scotland,2021-05-07,,estimate,10,10.1,3.4,5,8,9,11,12,16
+Scotland,2021-05-08,,estimate,8,8.5,3.1,4,6,8,9,11,14
+Scotland,2021-05-09,,estimate,8,8.4,3.1,4,6,7,9,10,14
+Scotland,2021-05-10,,estimate,10,10.2,3.4,5,8,9,11,12,16
+Scotland,2021-05-11,,estimate,10,10.5,3.5,5,8,9,11,13,17
+Scotland,2021-05-12,,estimate,11,11,3.6,6,9,10,12,13,17
+Scotland,2021-05-13,,estimate,12,11.6,3.6,6,9,11,12,14,18
+Scotland,2021-05-14,,estimate,12,12.2,3.9,6,9,11,13,15,19
+Scotland,2021-05-15,,estimate,10,10.4,3.5,5,8,9,11,13,17
+Scotland,2021-05-16,,estimate,10,10.6,3.5,5,8,9,11,13,17
+Scotland,2021-05-17,,estimate,13,13,4,7,10,12,14,16,20
+Scotland,2021-05-18,,estimate,13,13.7,4.1,7,11,12,14,16,21
+Scotland,2021-05-19,,estimate,14,14.3,4.2,8,11,13,15,17,21
+Scotland,2021-05-20,,estimate,15,15.3,4.4,8,12,14,16,18,23
+Scotland,2021-05-21,,estimate,16,16.1,4.5,9,13,15,17,19,24
+Scotland,2021-05-22,,estimate,14,14,4.1,8,11,13,15,17,21
+Scotland,2021-05-23,,estimate,14,14.1,4.1,8,11,13,15,17,21
+Scotland,2021-05-24,,estimate,17,17.4,4.7,10,14,16,18,20,26
+Scotland,2021-05-25,,estimate,18,18.1,4.9,11,15,17,19,21,27
+Scotland,2021-05-26,,estimate,19,19,4.9,11,16,18,20,22,27
+Scotland,2021-05-27,,estimate,20,20,5,12,16,18,21,23,29
+Scotland,2021-05-28,,estimate,21,21,5.4,13,17,19,22,24,30
+Scotland,2021-05-29,,estimate,18,17.9,4.7,11,15,16,19,21,26
+Scotland,2021-05-30,,estimate,18,18,4.8,11,15,17,19,21,26
+Scotland,2021-05-31,,estimate,22,21.9,5.4,13.9,18,20,23,25,31
+Scotland,2021-06-01,,estimate,22,22.5,5.6,14,19,21,24,26,32
+Scotland,2021-06-02,,estimate,24,23.7,5.7,15,20,22,25,27,33
+Scotland,2021-06-03,,estimate,24,24.6,5.9,15.9,21,23,26,28,35
+Scotland,2021-06-04,,estimate,25,25.6,5.9,17,22,24,27,29,36
+Scotland,2021-06-05,,estimate,21,21.7,5.3,13,18,20,23,25,31
+Scotland,2021-06-06,,estimate,21,21.4,5.3,13,18,20,22,25,31
+Scotland,2021-06-07,,estimate,26,25.9,6,17,22,24,27,30,36
+Scotland,2021-06-08,,estimate,26,26.6,6.1,17,22,25,28,30,37
+Scotland,2021-06-09,,estimate,27,27.6,6.3,18,23,26,29,32,39
+Scotland,2021-06-10,,estimate,29,28.7,6.3,19,24,27,30,33,40
+Scotland,2021-06-11,,estimate,29,29.6,6.5,19,25,28,31,34,41
+Scotland,2021-06-12,,estimate,25,25,5.9,16,21,23,26,29,35
+Scotland,2021-06-13,,estimate based on partial data,25,24.8,5.8,16,21,23,26,29,35
+Scotland,2021-06-14,,estimate based on partial data,29,29.8,6.6,20,25,28,31,34,41
+Scotland,2021-06-15,,estimate based on partial data,30,30.6,6.6,20,26,29,32,35,42
+Scotland,2021-06-16,,estimate based on partial data,31,31.7,6.9,21,27,30,33,36,44
+Scotland,2021-06-17,,estimate based on partial data,33,32.8,7,22,28,31,34,37,45
+Scotland,2021-06-18,,estimate based on partial data,34,34.2,7.2,23,29,32,36,39,47
+Scotland,2021-06-19,,estimate based on partial data,29,28.9,6.5,19,24,27,30,33,40
+Scotland,2021-06-20,,estimate based on partial data,28,28.6,6.5,19,24,27,30,33,40
+Scotland,2021-06-21,,estimate based on partial data,34,34.8,7.5,23,30,33,36,40,48
+Scotland,2021-06-22,,estimate based on partial data,36,36.2,7.9,24,31,34,38,41,49
+Scotland,2021-06-23,,estimate based on partial data,37,37.3,8.1,25,32,35,39,42,51
+Scotland,2021-06-24,,forecast,39,39,8.7,26,33,36,41,44,54
+Scotland,2021-06-25,,forecast,40,41,9.6,27,34,38,43,47,57
+Scotland,2021-06-26,,forecast,34,35.2,9,22,29,32,37,41,51
+Scotland,2021-06-27,,forecast,34,35.1,9.5,21,28,32,36,41,52
+Scotland,2021-06-28,,forecast,42,43,12.1,26,35,39,44,50,65
+Scotland,2021-06-29,,forecast,43,44.8,13.8,26,35,40,46,52,70
+Scotland,2021-06-30,,forecast,45,46.6,15.3,26,36,41,48,54,73
+Scotland,2021-07-01,,forecast,47,50,18,27,38,43,51,59,82
+Scotland,2021-07-02,,forecast,49,52.7,21,27,39,45,54,62,92
+Scotland,2021-07-03,,forecast,42,45.5,19.8,22,32,38,46,54,80
+Scotland,2021-07-04,,forecast,42,45.8,21.2,21,32,38,46,54,84
+Scotland,2021-07-05,,forecast,50,56.6,28.5,25,38,46,56,67,108
+Scotland,2021-07-06,,forecast,52,59.4,32.1,26,39,46.6,59,71,116
+Scotland,2021-07-07,,forecast,54,62.7,36.9,26,40,48,60,75,128
+Scotland,2021-07-08,,forecast,56,67.2,43.5,26,41,50,64,79,142
+Scotland,2021-07-09,,forecast,59,71.7,49.8,25,43,53,68,84,157
+Scotland,2021-07-10,,forecast,51,62.6,47.8,21,36,44,58,74,140
+Scotland,2021-07-11,,forecast,50.5,63.5,51.4,20,35,44,58,74.2,146
+Scotland,2021-07-12,,forecast,61,79.5,70,24,42,53,71,92,191
+South East,2021-03-07,,estimate,56.5,57.2,12,39,49,54,59,65,78
+South East,2021-03-08,,estimate,53,53.5,11.4,36,46,50,56,60,73
+South East,2021-03-09,,estimate,62,62.5,12.6,43,54,58,65,71,84
+South East,2021-03-10,,estimate,52,52.5,11.1,36,45,49,55,60,71
+South East,2021-03-11,,estimate,48,49,10.8,33,42,46,51,56,67
+South East,2021-03-12,,estimate,43,43.5,9.8,28,37,41,45,49,60
+South East,2021-03-13,,estimate,35,35.7,8.5,23,30,33,37,41,50
+South East,2021-03-14,,estimate,55,55.4,11.5,38,48,52,58,63,76
+South East,2021-03-15,,estimate,45.5,46.1,9.9,31,39,43,48,52,63
+South East,2021-03-16,,estimate,49,49.5,11,33,42,46,52,56,68
+South East,2021-03-17,,estimate,38,38.8,8.6,26,33,36,40,44,54
+South East,2021-03-18,,estimate,34,34.9,8.2,22,29,32,36,40,49
+South East,2021-03-19,,estimate,29,29.8,7.4,19,25,28,31,34,43
+South East,2021-03-20,,estimate,24,24.1,6.4,14,20,22,25,28,35
+South East,2021-03-21,,estimate,36,36.9,8.3,24,31,34.6,38,42,51
+South East,2021-03-22,,estimate,30,30.4,7.3,19,25,28,32,35,43
+South East,2021-03-23,,estimate,32,32.7,8,20,27,30,34,38,47
+South East,2021-03-24,,estimate,25,25.7,6.7,16,21,24,27,30,37
+South East,2021-03-25,,estimate,23,23,6.2,14,19,21,24,27,34
+South East,2021-03-26,,estimate,20,20,5.6,12,16,18,21,24,30
+South East,2021-03-27,,estimate,16,16.2,5,9,13,15,17,19,25
+South East,2021-03-28,,estimate,25,25.3,6.4,16,21,23,26,29,36
+South East,2021-03-29,,estimate,21,21.3,5.6,13,17,20,22,25,31
+South East,2021-03-30,,estimate,23,23,6.1,14,19,21,24,27,34
+South East,2021-03-31,,estimate,18,18.5,5.3,11,15,17,19,22,28
+South East,2021-04-01,,estimate,16,16.8,5,9,13,15,18,20,25
+South East,2021-04-02,,estimate,15,14.9,4.6,8,12,13,16,18,23
+South East,2021-04-03,,estimate,12,12.2,4.1,6,9,11,13,15,20
+South East,2021-04-04,,estimate,19,19.5,5.5,11,16,18,21,23,29
+South East,2021-04-05,,estimate,17,16.9,4.9,9,13,15,18,20,26
+South East,2021-04-06,,estimate,18,18.6,5.3,10.9,15,17,19,22,28
+South East,2021-04-07,,estimate,15,15.2,4.6,8,12,14,16,18,23
+South East,2021-04-08,,estimate,14,14.2,4.4,8,11,13,15,17,22
+South East,2021-04-09,,estimate,12,12.7,4.2,6,10,11,14,15,20
+South East,2021-04-10,,estimate,10,10.7,3.8,5,8,10,11,13,17
+South East,2021-04-11,,estimate,17,17.2,4.9,10,14,16,18,20,26
+South East,2021-04-12,,estimate,15,15,4.6,8,12,14,16,18,23
+South East,2021-04-13,,estimate,16,16.7,4.9,9,13,15,18,20,25
+South East,2021-04-14,,estimate,13,13.7,4.4,7,11,12,15,16,22
+South East,2021-04-15,,estimate,12,12.7,4.3,6,10,11,13,15,20
+South East,2021-04-16,,estimate,11,11.5,4,6,9,10,12,14,19
+South East,2021-04-17,,estimate,9,9.5,3.5,4,7,8,10,12,16
+South East,2021-04-18,,estimate,15,15.2,4.7,8,12,14,16,18,24
+South East,2021-04-19,,estimate,13,12.9,4.2,7,10,12,14,16,20
+South East,2021-04-20,,estimate,14,14.2,4.5,7,11,13,15,17,22
+South East,2021-04-21,,estimate,11,11.6,4,6,9,10,12,14,18
+South East,2021-04-22,,estimate,10,10.5,3.7,5,8,9,11,13,17
+South East,2021-04-23,,estimate,9,9.3,3.4,4,7,8,10,11,15
+South East,2021-04-24,,estimate,7,7.7,3,3,5.8,7,8,10,13
+South East,2021-04-25,,estimate,11,11.8,4,6,9,11,13,14,19
+South East,2021-04-26,,estimate,10,9.9,3.6,5,7,9,11,12,16
+South East,2021-04-27,,estimate,11,10.7,3.7,5,8,10,11,13,17
+South East,2021-04-28,,estimate,8,8.6,3.3,4,6,8,9,11,14
+South East,2021-04-29,,estimate,7,7.7,3.1,3,6,7,8,10,13
+South East,2021-04-30,,estimate,6,6.7,2.8,3,5,6,7,8,12
+South East,2021-05-01,,estimate,5,5.5,2.5,2,4,5,6,7,10
+South East,2021-05-02,,estimate,8,8.6,3.3,4,6,8,9,11,14
+South East,2021-05-03,,estimate,7,7.1,3,3,5,6,8,9,12
+South East,2021-05-04,,estimate,8,7.8,3.1,3,6,7,8,10,13
+South East,2021-05-05,,estimate,6,6.2,2.8,2,4,5,7,8,11
+South East,2021-05-06,,estimate,5,5.6,2.6,2,4,5,6,7,10
+South East,2021-05-07,,estimate,5,5,2.4,1,3,4,5,6,9
+South East,2021-05-08,,estimate,4,4,2.2,1,3,3,4,5,8
+South East,2021-05-09,,estimate,6,6.5,2.8,2,4,6,7,8,12
+South East,2021-05-10,,estimate,5,5.6,2.6,2,4,5,6,7,10
+South East,2021-05-11,,estimate,6,6.2,2.8,2,4,5,7,8,11
+South East,2021-05-12,,estimate,5,5,2.4,2,3,4,5,6,9
+South East,2021-05-13,,estimate,4,4.6,2.3,1,3,4,5,6,9
+South East,2021-05-14,,estimate,4,4.2,2.2,1,3,3,5,6,8
+South East,2021-05-15,,estimate,3,3.7,2.1,1,2,3,4,5,7
+South East,2021-05-16,,estimate,6,5.8,2.7,2,4,5,6,7,11
+South East,2021-05-17,,estimate,5,5.2,2.4,2,3,4,6,7,9
+South East,2021-05-18,,estimate,6,5.9,2.7,2,4,5,6,8,11
+South East,2021-05-19,,estimate,5,4.9,2.4,1,3,4,5,6,9
+South East,2021-05-20,,estimate,4,4.7,2.3,1,3,4,5,6,9
+South East,2021-05-21,,estimate,4,4.3,2.2,1,3,4,5,6,8
+South East,2021-05-22,,estimate,4,3.8,2.1,1,2,3,4,5,7
+South East,2021-05-23,,estimate,6,6.2,2.7,2,4,5,7,8,11
+South East,2021-05-24,,estimate,5,5.6,2.6,2,4,5,6,7,10
+South East,2021-05-25,,estimate,6,6.5,2.8,2,4,6,7,8,12
+South East,2021-05-26,,estimate,5,5.5,2.6,2,4,5,6,7,10
+South East,2021-05-27,,estimate,5,5.4,2.5,2,4,4,6,7,10
+South East,2021-05-28,,estimate,5,5,2.4,1,3,4,5,6,9
+South East,2021-05-29,,estimate,4,4.3,2.2,1,3,4,5,6,8
+South East,2021-05-30,,estimate,7,7.3,3,3,5,6,8,9,13
+South East,2021-05-31,,estimate,6,6.5,2.8,2,4,6,7,8,12
+South East,2021-06-01,,estimate,7,7.4,3,3,5,6,8,9,13
+South East,2021-06-02,,estimate,6,6.4,2.8,2,4,5,7,8,11
+South East,2021-06-03,,estimate,6,6.3,2.7,2,4,5,7,8,11
+South East,2021-06-04,,estimate,5,5.8,2.7,2,4,5,6,7,11
+South East,2021-06-05,,estimate,5,5.1,2.4,2,3,4,6,7,9
+South East,2021-06-06,,estimate,8,8.5,3.2,4,6,7,9,11,14
+South East,2021-06-07,,estimate,8,7.8,3.1,3,6,7,8,10,13
+South East,2021-06-08,,estimate,9,9,3.4,4,7,8,10,11,15
+South East,2021-06-09,,estimate,7,7.8,3.2,3,6,7,8,10,13
+South East,2021-06-10,,estimate,7,7.5,3.1,3,5,7,8,9,13
+South East,2021-06-11,,estimate,7,7,2.9,3,5,6,7,9,12
+South East,2021-06-12,,estimate,6,6.2,2.8,2,4,5,7,8,11
+South East,2021-06-13,,estimate,10,10.5,3.7,5,8,9,11,13,17
+South East,2021-06-14,,estimate,9,9.4,3.4,4,7,8,10,12,16
+South East,2021-06-15,,estimate,11,11.1,3.9,5,8,10,12,13,18
+South East,2021-06-16,,estimate,9,9.5,3.5,4,7,8,10,12,16
+South East,2021-06-17,,estimate based on partial data,9,9.3,3.5,4,7,8,10,11,15
+South East,2021-06-18,,estimate based on partial data,8,8.8,3.4,4,6,8,9,11,15
+South East,2021-06-19,,estimate based on partial data,7,7.7,3.1,3,6,7,8,10,13
+South East,2021-06-20,,estimate based on partial data,13,12.9,4.2,7,10,12,14,16,20
+South East,2021-06-21,,estimate based on partial data,11,11.8,4,6,9,10,13,14,19
+South East,2021-06-22,,estimate based on partial data,13,13.8,4.5,7,11,12,15,17,22
+South East,2021-06-23,,estimate based on partial data,12,11.9,4.2,6,9,11,13,15,19
+South East,2021-06-24,,estimate based on partial data,11,11.6,4,6,9,10,12,14,19
+South East,2021-06-25,,estimate based on partial data,11,11,4,5,8,10,12,14,18
+South East,2021-06-26,,estimate based on partial data,9,9.8,3.7,4,7,9,10,12,16
+South East,2021-06-27,,estimate based on partial data,16,16.3,5.4,8,12,15,17,20,26
+South East,2021-06-28,,forecast,15,15.2,5.4,7,11,13,16,18,25
+South East,2021-06-29,,forecast,17,17.7,6.5,9,13,15,19,22,29
+South East,2021-06-30,,forecast,15,15.4,6.3,7,11,13,16,19,27
+South East,2021-07-01,,forecast,14,15.4,6.8,6,11,13,16,19,28
+South East,2021-07-02,,forecast,13,14.7,7.2,6,10,12,15,18,28
+South East,2021-07-03,,forecast,12,13.1,7,5,8,10,13,16,25
+South East,2021-07-04,,forecast,20,22.6,12.9,8,14,18,23,27,45
+South East,2021-07-05,,forecast,19,21.4,14.1,7,13,16,21,26,46
+South East,2021-07-06,,forecast,21,25.9,18.8,8,15,18.6,25,32,58
+South East,2021-07-07,,forecast,18,23,20.6,6,12,15,21,27,54
+South East,2021-07-08,,forecast,18,23.5,23,5,12,15,21,28,58
+South East,2021-07-09,,forecast,17,23,25.3,5,11,14,20,28,59
+South East,2021-07-10,,forecast,15,21.5,28.2,4,9,12,18,25,58
+South East,2021-07-11,,forecast,25,37.6,52.9,7,15,21,30,42,103
+South East,2021-07-12,,forecast,23,36.7,60.9,6,13,19,28,40,104
+South West,2021-03-07,,estimate,20,20.1,6.2,11,16,18,21,24,31
+South West,2021-03-08,,estimate,24,24.7,7.3,14,20,22,26,29,37
+South West,2021-03-09,,estimate,24,25,7.3,14,20,23,26,29,38
+South West,2021-03-10,,estimate,29,30.1,8.7,17,24,27,31,35,45
+South West,2021-03-11,,estimate,23,23.3,7.2,13,18,21,24,28,36
+South West,2021-03-12,,estimate,19,19.5,6.3,10,15,17,21,23,30
+South West,2021-03-13,,estimate,19,20.1,6.3,11,16,18,21,24,31
+South West,2021-03-14,,estimate,19,19.2,5.9,10,15,17,20,23,29
+South West,2021-03-15,,estimate,21,21.4,6.4,12,17,19,22,25,33
+South West,2021-03-16,,estimate,20,20.3,6.3,11,16,18,21,24,31
+South West,2021-03-17,,estimate,23,23.2,7,13,18,21,24,27,35
+South West,2021-03-18,,estimate,17,17.4,5.7,9,13,16,18,21,28
+South West,2021-03-19,,estimate,14,14.3,4.9,7,11,13,15,17,23
+South West,2021-03-20,,estimate,14,14.5,4.9,7,11,13,15,18,23
+South West,2021-03-21,,estimate,14,14.1,4.9,7,11,13,15,17,23
+South West,2021-03-22,,estimate,15,15.5,5.3,8,12,14,16,19,25
+South West,2021-03-23,,estimate,14,14.8,4.9,7,11,13,16,18,23
+South West,2021-03-24,,estimate,16,16.9,5.4,9,13,15,18,20,26
+South West,2021-03-25,,estimate,12,12.7,4.5,6,10,11,13,15,21
+South West,2021-03-26,,estimate,10,10.3,4,4,8,9,11,13,18
+South West,2021-03-27,,estimate,10,10.7,4,5,8,9,11,13,18
+South West,2021-03-28,,estimate,10,10.2,3.9,4,7,9,11,13,17
+South West,2021-03-29,,estimate,11,11.5,4.3,5,8,10,12,14,19
+South West,2021-03-30,,estimate,11,11.1,4,5,8,10,12,14,18
+South West,2021-03-31,,estimate,13,12.8,4.5,6,10,11,14,16,20
+South West,2021-04-01,,estimate,9,9.6,3.8,4,7,8,10,12,16
+South West,2021-04-02,,estimate,8,7.9,3.3,3,6,7,9,10,14
+South West,2021-04-03,,estimate,8,8.3,3.5,3,6,7,9,10,15
+South West,2021-04-04,,estimate,8,8.1,3.3,3,6,7,9,10,14
+South West,2021-04-05,,estimate,9,9.2,3.7,4,6,8,10,11,16
+South West,2021-04-06,,estimate,8,8.8,3.5,4,6,8,9,11,15
+South West,2021-04-07,,estimate,10,10.4,4,4,8,9,11,13,18
+South West,2021-04-08,,estimate,8,7.8,3.2,3,6,7,8,10,14
+South West,2021-04-09,,estimate,6,6.6,3,2,4,6,7,8,12
+South West,2021-04-10,,estimate,7,7,3.1,2,5,6,7,9,13
+South West,2021-04-11,,estimate,7,6.8,3,2,5,6,7,9,12
+South West,2021-04-12,,estimate,8,7.9,3.3,3,6,7,8,10,14
+South West,2021-04-13,,estimate,7,7.6,3.2,3,5,7,8,9,13
+South West,2021-04-14,,estimate,9,9,3.6,4,6,8,10,11,15
+South West,2021-04-15,,estimate,7,7.1,3.1,2,5,6,8,9,13
+South West,2021-04-16,,estimate,6,5.8,2.7,2,4,5,6,7,11
+South West,2021-04-17,,estimate,6,6.2,2.9,2,4,5,7,8,11
+South West,2021-04-18,,estimate,6,6.1,2.8,2,4,5,6,8,11
+South West,2021-04-19,,estimate,7,7.1,3.1,3,5,6,8,9,13
+South West,2021-04-20,,estimate,6,6.8,3.1,2,5,6,7,9,12
+South West,2021-04-21,,estimate,8,8.1,3.4,3,6,7,9,10,14
+South West,2021-04-22,,estimate,6,6.2,2.9,2,4,5,7,8,11
+South West,2021-04-23,,estimate,5,5.2,2.6,2,3,4,6,7,10
+South West,2021-04-24,,estimate,5,5.6,2.7,2,4,5,6,7,10
+South West,2021-04-25,,estimate,5,5.5,2.6,2,4,5,6,7,10
+South West,2021-04-26,,estimate,6,6.3,2.9,2,4,5,7,8,12
+South West,2021-04-27,,estimate,6,6.1,2.9,2,4,5,7,8,11
+South West,2021-04-28,,estimate,7,7.3,3.2,3,5,6,8,9,13
+South West,2021-04-29,,estimate,5,5.6,2.7,2,4,5,6,7,10
+South West,2021-04-30,,estimate,4,4.7,2.4,1,3,4,5,6,9
+South West,2021-05-01,,estimate,5,5,2.5,1,3,4,5,6,10
+South West,2021-05-02,,estimate,5,4.9,2.4,1,3,4,5,6,9
+South West,2021-05-03,,estimate,5,5.7,2.7,2,4,5,6,7,10
+South West,2021-05-04,,estimate,5,5.6,2.7,2,4,5,6,7,10
+South West,2021-05-05,,estimate,6,6.5,3,2,4,6,7,8,12
+South West,2021-05-06,,estimate,5,5,2.5,1,3,4,5,7,9
+South West,2021-05-07,,estimate,4,4.3,2.3,1,3,3,5,6,8
+South West,2021-05-08,,estimate,4,4.4,2.3,1,3,4,5,6,9
+South West,2021-05-09,,estimate,4,4.3,2.3,1,3,3,5,6,8
+South West,2021-05-10,,estimate,5,5,2.5,1,3,4,5,7,10
+South West,2021-05-11,,estimate,5,4.8,2.5,1,3,4,5,6,9
+South West,2021-05-12,,estimate,5,5.7,2.7,2,4,5,6,7,10
+South West,2021-05-13,,estimate,4,4.4,2.3,1,3,4,5,6,8
+South West,2021-05-14,,estimate,3,3.7,2.1,1,2,3,4,5,7
+South West,2021-05-15,,estimate,4,3.8,2.2,1,2,3,4,5,8
+South West,2021-05-16,,estimate,3,3.7,2.1,1,2,3,4,5,8
+South West,2021-05-17,,estimate,4,4.4,2.3,1,3,4,5,6,9
+South West,2021-05-18,,estimate,4,4.1,2.2,1,3,3,4,5,8
+South West,2021-05-19,,estimate,5,4.8,2.4,1,3,4,5,6,9
+South West,2021-05-20,,estimate,3,3.7,2.1,1,2,3,4,5,8
+South West,2021-05-21,,estimate,3,3.1,1.9,0,2,2,3,4,6
+South West,2021-05-22,,estimate,3,3.3,1.9,0,2,3,4,4,7
+South West,2021-05-23,,estimate,3,3.2,2,1,2,2,3,4,7
+South West,2021-05-24,,estimate,4,3.7,2.1,1,2,3,4,5,8
+South West,2021-05-25,,estimate,3,3.6,2.1,1,2,3,4,5,7
+South West,2021-05-26,,estimate,4,4.3,2.3,1,3,3,5,6,9
+South West,2021-05-27,,estimate,3,3.4,2,1,2,3,4,5,7
+South West,2021-05-28,,estimate,3,2.9,1.8,0,1,2,3,4,6
+South West,2021-05-29,,estimate,3,3.1,1.9,0,2,2,3,4,7
+South West,2021-05-30,,estimate,3,3.1,1.9,0,2,2,3,4,6
+South West,2021-05-31,,estimate,4,3.8,2.2,1,2,3,4,5,8
+South West,2021-06-01,,estimate,4,3.8,2.2,1,2,3,4,5,8
+South West,2021-06-02,,estimate,4,4.6,2.4,1,3,4,5,6,9
+South West,2021-06-03,,estimate,4,3.8,2.1,1,2,3,4,5,8
+South West,2021-06-04,,estimate,3,3.4,2,1,2,3,4,5,7
+South West,2021-06-05,,estimate,4,3.8,2.2,1,2,3,4,5,8
+South West,2021-06-06,,estimate,4,4,2.2,1,2,3,4,5,8
+South West,2021-06-07,,estimate,5,4.9,2.5,1,3,4,5,6,9
+South West,2021-06-08,,estimate,5,5.2,2.6,1,3,4,5,7,10
+South West,2021-06-09,,estimate,6,6.6,3,2,4,6,7,8,12
+South West,2021-06-10,,estimate,5,5.5,2.7,2,4,5,6,7,10
+South West,2021-06-11,,estimate,5,5,2.5,1,3,4,5,6,10
+South West,2021-06-12,,estimate,5,5.8,2.8,2,4,5,6,7,11
+South West,2021-06-13,,estimate,6,6.2,2.9,2,4,5,7,8,11
+South West,2021-06-14,,estimate,7,7.8,3.3,3,5,7,8,10,14
+South West,2021-06-15,,estimate,8,8.3,3.4,3,6,7,9,10,14
+South West,2021-06-16,,estimate,10,10.8,4.1,5,8,9,12,13,18
+South West,2021-06-17,,estimate based on partial data,9,9.1,3.6,4,7,8,10,11,15
+South West,2021-06-18,,estimate based on partial data,8,8.4,3.4,3,6,7,9,10,15
+South West,2021-06-19,,estimate based on partial data,9,9.7,3.9,4,7,8,10,12,16
+South West,2021-06-20,,estimate based on partial data,10,10.2,3.9,4,7,9,11,13,17
+South West,2021-06-21,,estimate based on partial data,13,13,4.6,6,10,11,14,16,21
+South West,2021-06-22,,estimate based on partial data,13,13.7,4.9,6,10,12,14,17,22
+South West,2021-06-23,,estimate based on partial data,17,17.7,5.8,9,14,16,18,21,28
+South West,2021-06-24,,estimate based on partial data,14,14.6,5,7,11,13,15,18,24
+South West,2021-06-25,,estimate based on partial data,13,13.4,4.8,6,10,12,14,16,22
+South West,2021-06-26,,estimate based on partial data,15,15.2,5.4,7,11,13,16,18,25
+South West,2021-06-27,,estimate based on partial data,15,16.1,6,8,12,14,17,20,27
+South West,2021-06-28,,forecast,20,20.4,7.4,10,15,18,21,25,34
+South West,2021-06-29,,forecast,20,21.2,8,10,16,18,22,26,35
+South West,2021-06-30,,forecast,26,27,10.6,12,20,23,28,33,46
+South West,2021-07-01,,forecast,21,22.6,9.7,10,16,19,24,28,40
+South West,2021-07-02,,forecast,19,20.7,9.9,8,14,17,21,26,38
+South West,2021-07-03,,forecast,22,23.9,11.7,9,16,20,25,30,45
+South West,2021-07-04,,forecast,23,25.6,14.2,9,16,20,26,32,50
+South West,2021-07-05,,forecast,28,32.3,19.4,10,20,25,32,40,68
+South West,2021-07-06,,forecast,30,34.7,23.5,10,20,26,35,43,75
+South West,2021-07-07,,forecast,38,45.1,33.2,11,24,33,44,57,100
+South West,2021-07-08,,forecast,31,38.3,29.6,9,20,26,37,48,90
+South West,2021-07-09,,forecast,28,35.3,29.3,7,17,24,34,44,86
+South West,2021-07-10,,forecast,32,41.4,38.5,7,19,27,39,52,103
+South West,2021-07-11,,forecast,34,45.2,47.2,7,20,28,41,56,117
+South West,2021-07-12,,forecast,42,58.9,70.3,8,23,34,51,72,158
+United Kingdom,2021-03-03,,estimate,619,619.5,48.1,541,587,607,631,651,700
+United Kingdom,2021-03-04,,estimate,600,599.5,44.5,526,570,588,611,629,673
+United Kingdom,2021-03-05,,estimate,562,562,40.8,496,534,552,572,589,632
+United Kingdom,2021-03-06,,estimate,542,542.7,38.9,480,516,532,552,568,607
+United Kingdom,2021-03-07,,estimate,536,537.9,38.9,475,512,527,546,563,602
+United Kingdom,2021-03-08,,estimate,568,569,40.7,504,541,558,578,595,638
+United Kingdom,2021-03-09,,estimate,547,547.9,40.1,483,521,537,557,573,616
+United Kingdom,2021-03-10,,estimate,548,548.6,39.7,485,522,538,558,575,613
+United Kingdom,2021-03-11,,estimate,504,504.4,36.6,446,480,495,513,528,567
+United Kingdom,2021-03-12,,estimate,456,457,33.4,405,434,448,464,478,514
+United Kingdom,2021-03-13,,estimate,430,430.6,32.1,379,408,422,438,451,484
+United Kingdom,2021-03-14,,estimate,419,419.7,31.2,370,399,411,427,439,472
+United Kingdom,2021-03-15,,estimate,438,438.9,32.5,386,416,431,447,460,493
+United Kingdom,2021-03-16,,estimate,421,421.9,31.7,371,400,414,429,443,476
+United Kingdom,2021-03-17,,estimate,422,421.8,31.9,370,399,413,430,443,476
+United Kingdom,2021-03-18,,estimate,387,387.1,29.9,340,367,379,393,406,437
+United Kingdom,2021-03-19,,estimate,349,349.5,27.1,306,331,342,356,368,394
+United Kingdom,2021-03-20,,estimate,329,329.9,26.8,287,312,323,336,347,375
+United Kingdom,2021-03-21,,estimate,322,323,25.8,281,306,316,329,340,366
+United Kingdom,2021-03-22,,estimate,338,339,27,295.9,321,332,345,356,385
+United Kingdom,2021-03-23,,estimate,325,325.8,26,284,307,318,332,343,369
+United Kingdom,2021-03-24,,estimate,327,327,26,285.9,309,320,333,344,370
+United Kingdom,2021-03-25,,estimate,300,300.8,23.9,263,285,294,306,317,340
+United Kingdom,2021-03-26,,estimate,272,272.2,22.9,235,257,266,278,287,310
+United Kingdom,2021-03-27,,estimate,258,258,21.8,223,243,252,263,272,294
+United Kingdom,2021-03-28,,estimate,252,251.9,21.9,217,237,246,257,266,289
+United Kingdom,2021-03-29,,estimate,264,264.6,22.3,228,249,259,269,279,302
+United Kingdom,2021-03-30,,estimate,254,254.7,22,219,240,249,260,269,292
+United Kingdom,2021-03-31,,estimate,255,255.5,22,221,240,249,261,270,293
+United Kingdom,2021-04-01,,estimate,236,236,21,203,222,231,241,250,271
+United Kingdom,2021-04-02,,estimate,214,215.3,19.3,185,202,210,219,228,248
+United Kingdom,2021-04-03,,estimate,205,204.7,18.1,176,193,200,209,217,235
+United Kingdom,2021-04-04,,estimate,201,201.5,18.2,173,189,196,206,214,232
+United Kingdom,2021-04-05,,estimate,213,213.6,18.7,184,201,208,218,226,246
+United Kingdom,2021-04-06,,estimate,206,206.1,18.7,176,193,201,211,218,237
+United Kingdom,2021-04-07,,estimate,209,208.9,18.9,178,196,204,213,221,241
+United Kingdom,2021-04-08,,estimate,193,193.7,17.9,165,182,189,198,206,224
+United Kingdom,2021-04-09,,estimate,177,177.5,16.8,151,166,173,181,189,206
+United Kingdom,2021-04-10,,estimate,169,169,16.2,143,158,165,173,179,196
+United Kingdom,2021-04-11,,estimate,167,168,16.3,142,157,164,172,178,195
+United Kingdom,2021-04-12,,estimate,177,177.8,16.8,151,166,173,182,189,206
+United Kingdom,2021-04-13,,estimate,173,172.7,16.6,146,161,168,177,184,200
+United Kingdom,2021-04-14,,estimate,174,174.8,16.8,149,163,170,178,185,203
+United Kingdom,2021-04-15,,estimate,162,162.4,16.1,136,152,158,166,173,189
+United Kingdom,2021-04-16,,estimate,148,148.8,15.1,124,138,145,152,159,174
+United Kingdom,2021-04-17,,estimate,141,141.6,14.6,118,132,138,145,151,165
+United Kingdom,2021-04-18,,estimate,140,139.8,14.5,116,130,136,143,149,164
+United Kingdom,2021-04-19,,estimate,148,148.7,15.3,125,138,144,152,159,175
+United Kingdom,2021-04-20,,estimate,144,144.6,14.7,121,134.8,141,148,154,170
+United Kingdom,2021-04-21,,estimate,146,146.5,15.1,122,136,143,150,156,172
+United Kingdom,2021-04-22,,estimate,136,136.1,14.3,113,126,132,140,146,159
+United Kingdom,2021-04-23,,estimate,124,124.8,13.4,103,116,121,128,134,147
+United Kingdom,2021-04-24,,estimate,119,119.6,13,99,111,116,123,128,141
+United Kingdom,2021-04-25,,estimate,118,118,13.1,97,109,114,121,127,140
+United Kingdom,2021-04-26,,estimate,125,125.9,13.3,105,117,122,129,135,148
+United Kingdom,2021-04-27,,estimate,122,122.5,13.1,102,114,119,125,131,145
+United Kingdom,2021-04-28,,estimate,124,124.2,13.3,103,115,120,127,133,147
+United Kingdom,2021-04-29,,estimate,116,116.5,12.9,96,108,113,119,125,138
+United Kingdom,2021-04-30,,estimate,107,107.2,12.4,88,99,104,110,115,128
+United Kingdom,2021-05-01,,estimate,103,102.9,11.9,84,95,99,106,111,123
+United Kingdom,2021-05-02,,estimate,103,102.9,11.7,84,95,99.6,106,111,123
+United Kingdom,2021-05-03,,estimate,110,110,12.5,90,101,107,113,118,131
+United Kingdom,2021-05-04,,estimate,108,108.3,12.5,88,100,105,111,116,129
+United Kingdom,2021-05-05,,estimate,111,110.8,12.8,90,102,107,114,119,132
+United Kingdom,2021-05-06,,estimate,105,105,12.1,85,97,102,108,113,125
+United Kingdom,2021-05-07,,estimate,97,97.3,11.5,79,89,94,100,105,117
+United Kingdom,2021-05-08,,estimate,94,94.6,11.2,76,87,92,97,102,113
+United Kingdom,2021-05-09,,estimate,95,95.6,11.4,77,88,92,98,103,115
+United Kingdom,2021-05-10,,estimate,104,103.8,11.9,85,96,101,106,112,124
+United Kingdom,2021-05-11,,estimate,103,103.4,12.2,84,95,100,106,112,124
+United Kingdom,2021-05-12,,estimate,107,107.4,12.1,88,99,104,110,115,128
+United Kingdom,2021-05-13,,estimate,103,102.8,11.6,84,95,100,106,111,121
+United Kingdom,2021-05-14,,estimate,97,97.2,11.5,79,89,94,100,105,116
+United Kingdom,2021-05-15,,estimate,95,95.2,11.2,77,87.8,92,98,103,114
+United Kingdom,2021-05-16,,estimate,97,97.3,11.2,79,90,94,99,105,116
+United Kingdom,2021-05-17,,estimate,107,107,12.2,88,99,104,110,115,128
+United Kingdom,2021-05-18,,estimate,107,107.5,12.4,88,99,104,110,116,128
+United Kingdom,2021-05-19,,estimate,112,112.3,12.8,91,104,109,115,121,134
+United Kingdom,2021-05-20,,estimate,108,108.9,12.3,90,100,106,112,117,130
+United Kingdom,2021-05-21,,estimate,102,102.7,11.9,84,95,100,105,110,123
+United Kingdom,2021-05-22,,estimate,102,102.5,11.9,83,94,99,106,110,122
+United Kingdom,2021-05-23,,estimate,105,105.1,12,86,97,102,108,113,125
+United Kingdom,2021-05-24,,estimate,116,116.2,13,96,107,113,119,125,137
+United Kingdom,2021-05-25,,estimate,117,117.1,12.9,97,108,114,120,125,140
+United Kingdom,2021-05-26,,estimate,123,123.7,13.4,103,114,120,126,132,146
+United Kingdom,2021-05-27,,estimate,119,119.5,13,99,110,116,122,128,141
+United Kingdom,2021-05-28,,estimate,114,114.6,12.8,94,106,111,118,123,136
+United Kingdom,2021-05-29,,estimate,115,114.9,12.7,95,106,112,118,123,136
+United Kingdom,2021-05-30,,estimate,118,118.3,13.3,97,109,114,122,127,140
+United Kingdom,2021-05-31,,estimate,131,131.9,14.2,108.9,122,128,135,141,156
+United Kingdom,2021-06-01,,estimate,135,135,14.2,112,125,131,138,144,159
+United Kingdom,2021-06-02,,estimate,143,143.4,15.2,119,133,139,147,153,169
+United Kingdom,2021-06-03,,estimate,140,140.8,14.8,117,131,137,144,150,166
+United Kingdom,2021-06-04,,estimate,136,135.9,14.3,112,127,132,139,145,160
+United Kingdom,2021-06-05,,estimate,137,138,14.5,115,128,134,141,148,163
+United Kingdom,2021-06-06,,estimate,144,144.1,14.8,120,134,140,148,154,169
+United Kingdom,2021-06-07,,estimate,162,162.2,16,137,151,158,166,173,190
+United Kingdom,2021-06-08,,estimate,167,166.9,16.3,140,156,163,171,178,194
+United Kingdom,2021-06-09,,estimate,179,179.2,16.9,152,168,175,183,190,208
+United Kingdom,2021-06-10,,estimate,177,177.3,17,150,166,173,181,189,206
+United Kingdom,2021-06-11,,estimate,171,172,16.7,146,161,167,176,183,200
+United Kingdom,2021-06-12,,estimate,173,173.8,17,147,162,169,178,185,202
+United Kingdom,2021-06-13,,estimate based on partial data,180,180.9,17.4,153,169,176,185,192,210
+United Kingdom,2021-06-14,,estimate based on partial data,202,203,19.1,173,190,197,208,216,234
+United Kingdom,2021-06-15,,estimate based on partial data,207,207.5,19.7,175,194,202,212,221,240
+United Kingdom,2021-06-16,,estimate based on partial data,220,221,19.8,189,208,216,226,234,254
+United Kingdom,2021-06-17,,estimate based on partial data,214,214.6,19.8,183,201,209,219,227.2,247
+United Kingdom,2021-06-18,,estimate based on partial data,206,206.3,19.2,175,193,201,211,219,238
+United Kingdom,2021-06-19,,estimate based on partial data,205,205.4,18.5,175,193,200,210,218,236
+United Kingdom,2021-06-20,,estimate based on partial data,212,211.9,19.3,181,199,207,216,225,244
+United Kingdom,2021-06-21,,estimate based on partial data,233,233.9,21.6,200,219,228,239,248,271
+United Kingdom,2021-06-22,,estimate based on partial data,236,236.3,21.9,201,221,230,242,251,273
+United Kingdom,2021-06-23,,estimate based on partial data,247,247.7,24.5,210,231,241,253,264,289
+United Kingdom,2021-06-24,,forecast,238,238.1,25.4,198,220,231,244,255,281
+United Kingdom,2021-06-25,,forecast,225,225.7,25.8,184,208,219,232,243,270
+United Kingdom,2021-06-26,,forecast,222,222.8,27.9,178,204,215,229,241,269
+United Kingdom,2021-06-27,,forecast,226,227,31.1,178,205,219,234,247,280
+United Kingdom,2021-06-28,,forecast,247,248.8,37.3,189,223,238,257,273,311
+United Kingdom,2021-06-29,,forecast,248,249.7,41.4,186,221,238,259,277,319
+United Kingdom,2021-06-30,,forecast,260,260.4,46,188,228,248,271,290,337
+United Kingdom,2021-07-01,,forecast,248,249.9,49.2,172,215,236,261,281,335
+United Kingdom,2021-07-02,,forecast,236,237,50.4,159,202,223,249,269,323
+United Kingdom,2021-07-03,,forecast,231,233,53.8,148,195.8,217,245,268,322
+United Kingdom,2021-07-04,,forecast,236,238.7,59.6,148,197,221,251,277,338
+United Kingdom,2021-07-05,,forecast,258,261.3,70.4,156,212,240,274,305,380
+United Kingdom,2021-07-06,,forecast,259,262.7,75.2,152,209,240.6,276,309,390
+United Kingdom,2021-07-07,,forecast,269,275.1,84.2,152,216,249,290,327.2,417
+United Kingdom,2021-07-08,,forecast,257.5,264.4,87.2,139,204,237,279,317,412
+United Kingdom,2021-07-09,,forecast,244.5,250.4,87.5,127,189,222,263,302,397
+United Kingdom,2021-07-10,,forecast,239,247.8,91.8,118,182,218,263,299.2,405
+United Kingdom,2021-07-11,,forecast,243,253.6,99.9,117,184,221,267,311,421
+United Kingdom,2021-07-12,,forecast,266,278.3,115.4,123,197.8,241,293,343,467
+Wales,2021-03-08,,estimate,29,30.4,10.2,16,23,27,32,37,48
+Wales,2021-03-09,,estimate,39,40.8,13.4,22,31,36,43,49,65
+Wales,2021-03-10,,estimate,40,41.8,13.8,22,32,37,43.4,50,66
+Wales,2021-03-11,,estimate,43,44.4,14.1,24,35,40,47,53,70
+Wales,2021-03-12,,estimate,39,40.7,13.4,21,31,36,43,49,65
+Wales,2021-03-13,,estimate,43,44.3,14,24,34,40,47,53,69
+Wales,2021-03-14,,estimate,40,41.1,13.2,21,32,37,43,49,65
+Wales,2021-03-15,,estimate,34,35.5,11.5,19,27,32,37,43,56
+Wales,2021-03-16,,estimate,42,43.1,13.4,24,33,38,45,51,67
+Wales,2021-03-17,,estimate,39,40.1,12.9,22,31,36,42,48,63
+Wales,2021-03-18,,estimate,39,40.5,13,22,31,36,42,48,64
+Wales,2021-03-19,,estimate,34,35.3,11.5,19,27,31,37,42,56
+Wales,2021-03-20,,estimate,36,36.8,11.8,19,28,33,39,44,58
+Wales,2021-03-21,,estimate,33,33.7,10.9,18,26,30,35,40,54
+Wales,2021-03-22,,estimate,27,28.3,9.5,15,22,25,29,34,46
+Wales,2021-03-23,,estimate,32,33.7,11.1,18,26,30,35,40,54
+Wales,2021-03-24,,estimate,30,30.8,10.3,16,23,27,32,37,50
+Wales,2021-03-25,,estimate,29,30.5,10.2,16,23,27,32,37,49
+Wales,2021-03-26,,estimate,26,26.8,9.2,13,20,24,28,32,43
+Wales,2021-03-27,,estimate,27,28,9.4,14,21,25,30,33.2,45
+Wales,2021-03-28,,estimate,25,25.4,8.5,13,19,23,27,30,41
+Wales,2021-03-29,,estimate,21,21.4,7.6,10,16,19,22,26,35
+Wales,2021-03-30,,estimate,24,25.3,8.6,13,19,22,27,30,40
+Wales,2021-03-31,,estimate,23,23.5,8.1,11,18,21,25,28,38
+Wales,2021-04-01,,estimate,22,23.3,8.1,12,18,21,25,28,38
+Wales,2021-04-02,,estimate,20,20.5,7.4,10,15,18,22,25,34
+Wales,2021-04-03,,estimate,20,21.3,7.5,11,16,19,22,26,35
+Wales,2021-04-04,,estimate,19,19.6,7,10,15,17,21,24,32
+Wales,2021-04-05,,estimate,16,16.5,6.4,7,12,14,17,20,28
+Wales,2021-04-06,,estimate,19,19.8,7.1,10,15,17,21,24,32
+Wales,2021-04-07,,estimate,18,18.6,6.7,9,14,16,20,23,30
+Wales,2021-04-08,,estimate,18,18.9,7,9,14,16,20,23,31
+Wales,2021-04-09,,estimate,16,16.7,6.2,8,12,15,18,20,28
+Wales,2021-04-10,,estimate,17,17.8,6.5,8,13,16,19,22,29
+Wales,2021-04-11,,estimate,16,16.4,6.1,8,12,14,17,20,27
+Wales,2021-04-12,,estimate,14,14.2,5.5,6,10,12,15,18,24
+Wales,2021-04-13,,estimate,17,17.5,6.4,8,13,15,18,21,29
+Wales,2021-04-14,,estimate,16,16.4,6.2,7,12,14,17,20,28
+Wales,2021-04-15,,estimate,16,16.9,6.2,8,12,15,18,21,28
+Wales,2021-04-16,,estimate,15,15.1,5.7,7,11,13,16,18,25
+Wales,2021-04-17,,estimate,16,16.4,6.1,7,12,14,17,20,27
+Wales,2021-04-18,,estimate,15,15.3,5.8,7,11,13,16,19,26
+Wales,2021-04-19,,estimate,13,13.3,5.3,6,10,11,14,16,23
+Wales,2021-04-20,,estimate,16,16.2,6.1,7,12,14,17,20,27
+Wales,2021-04-21,,estimate,15,15.6,5.8,7,11,14,17,19,26
+Wales,2021-04-22,,estimate,15,16.1,6.1,7,12,14,17,20,27
+Wales,2021-04-23,,estimate,14,14.5,5.5,7,11,13,15,18,24
+Wales,2021-04-24,,estimate,15,15.7,5.9,7,11,14,16.4,19,26
+Wales,2021-04-25,,estimate,14,14.6,5.6,6,11,13,16,18,25
+Wales,2021-04-26,,estimate,12,12.7,4.9,5,9,11,14,16,21
+Wales,2021-04-27,,estimate,15,16,6.2,7,12,14,17,20,27
+Wales,2021-04-28,,estimate,14,15,5.7,7,11,13,16,19,25
+Wales,2021-04-29,,estimate,15,15.7,6,7,11,14,17,19,27
+Wales,2021-04-30,,estimate,14,14.3,5.4,7,10,12,15,18,24
+Wales,2021-05-01,,estimate,15,15.4,5.7,7,11,13,16,19,25
+Wales,2021-05-02,,estimate,14,14.4,5.5,6,11,13,15,18,24
+Wales,2021-05-03,,estimate,12,12.6,5,5,9,11,13,16,22
+Wales,2021-05-04,,estimate,15,15.8,6,7,11,14,17,19,27
+Wales,2021-05-05,,estimate,14,15,5.7,7,11,13,16,18,25
+Wales,2021-05-06,,estimate,15,15.6,6,7,11,13,17,19,27
+Wales,2021-05-07,,estimate,14,14.1,5.4,6,10,12,15,17,24
+Wales,2021-05-08,,estimate,15,15.3,5.8,7,11,13,16,19,26
+Wales,2021-05-09,,estimate,14,14.7,5.5,7,11,13,16,18,24
+Wales,2021-05-10,,estimate,12,12.8,5.1,5,9,11,14,16,22
+Wales,2021-05-11,,estimate,15,15.7,5.9,7,12,14,16,19,27
+Wales,2021-05-12,,estimate,15,15.3,5.9,7,11,13,16,19,26
+Wales,2021-05-13,,estimate,15,15.7,5.8,7,11,14,17,19,26
+Wales,2021-05-14,,estimate,14,14.3,5.5,6,10,12,15,18,24
+Wales,2021-05-15,,estimate,15,15.6,6,7,11,14,17,19,26
+Wales,2021-05-16,,estimate,14,14.8,5.7,7,11,13,16,18,25
+Wales,2021-05-17,,estimate,12,12.8,5.1,5,9,11,14,16,22
+Wales,2021-05-18,,estimate,15,15.7,6.1,7,11,14,16,19,27
+Wales,2021-05-19,,estimate,15,15.3,5.8,7,11,13,16,19,26
+Wales,2021-05-20,,estimate,15,15.8,5.9,7,12,14,17,19,26
+Wales,2021-05-21,,estimate,14,14.1,5.6,6,10,12,15,17,24
+Wales,2021-05-22,,estimate,15,15,5.8,7,11,13,16,18,25
+Wales,2021-05-23,,estimate,14,14.3,5.5,6,10,12,15,18,24
+Wales,2021-05-24,,estimate,12,12.2,5,5,9,10,13,15,21
+Wales,2021-05-25,,estimate,14,14.7,5.5,7,11,13,15,18,25
+Wales,2021-05-26,,estimate,14,14.1,5.5,6,10,12,15,17,24
+Wales,2021-05-27,,estimate,14,14.3,5.4,6,10,12,15,18,24
+Wales,2021-05-28,,estimate,12,12.6,5,5,9,11,13,16,21
+Wales,2021-05-29,,estimate,13,13.2,5.2,6,9,11,14,16,22
+Wales,2021-05-30,,estimate,12,12.2,4.8,5,9,11,13,15,21
+Wales,2021-05-31,,estimate,10,10.4,4.4,4,7,9,11,13,18
+Wales,2021-06-01,,estimate,12,12.4,5,5,9,11,13,15,21
+Wales,2021-06-02,,estimate,11,11.6,4.7,5,8,10,12,14,20
+Wales,2021-06-03,,estimate,11,11.5,4.8,5,8,10,12,14,20
+Wales,2021-06-04,,estimate,10,10.3,4.3,4,7,9,11,13,18
+Wales,2021-06-05,,estimate,10,10.7,4.6,4,7,9,11,13,19
+Wales,2021-06-06,,estimate,9,9.8,4.3,4,7,8,10,12,17
+Wales,2021-06-07,,estimate,8,8.4,3.8,3,6,7,9,11,15
+Wales,2021-06-08,,estimate,10,10,4.2,4,7,9,11,12,17
+Wales,2021-06-09,,estimate,9,9.4,4.1,3,6,8,10,12,17
+Wales,2021-06-10,,estimate,9,9.5,4.1,4,7,8,10,12,17
+Wales,2021-06-11,,estimate,8,8.3,3.8,3,6,7,9,11,15
+Wales,2021-06-12,,estimate,8,8.7,3.8,3,6,7,9,11,16
+Wales,2021-06-13,,estimate,8,8.1,3.6,3,5,7,9,10,15
+Wales,2021-06-14,,estimate,6,6.9,3.3,2,5,6,7,9,13
+Wales,2021-06-15,,estimate,8,8.3,3.7,3,6,7,9,10,15
+Wales,2021-06-16,,estimate,7,7.7,3.5,3,5,6,8,10,14
+Wales,2021-06-17,,estimate,7,7.7,3.6,3,5,6,8,10,14
+Wales,2021-06-18,,estimate based on partial data,6,6.8,3.3,2,4,6,7,9,13
+Wales,2021-06-19,,estimate based on partial data,7,7.2,3.4,2,5,6,8,9,13
+Wales,2021-06-20,,estimate based on partial data,6,6.5,3.1,2,4,5,7,8,12
+Wales,2021-06-21,,estimate based on partial data,5,5.5,2.9,1,3,5,6,7,11
+Wales,2021-06-22,,estimate based on partial data,6,6.5,3.2,2,4,5,7,8,12
+Wales,2021-06-23,,estimate based on partial data,6,6.2,3.1,2,4,5,7,8,12
+Wales,2021-06-24,,estimate based on partial data,6,6.1,3.1,2,4,5,7,8,12
+Wales,2021-06-25,,estimate based on partial data,5,5.4,2.8,1,3,4,6,7,10
+Wales,2021-06-26,,estimate based on partial data,5,5.5,3,1,3,4,6,7,11
+Wales,2021-06-27,,estimate based on partial data,5,5.1,2.8,1,3,4,5,7,10
+Wales,2021-06-28,,estimate based on partial data,4,4.3,2.6,1,2,3,5,6,9
+Wales,2021-06-29,,forecast,5,5.1,2.9,1,3,4,5,7,10
+Wales,2021-06-30,,forecast,4,4.7,2.8,1,3,4,5,6,10
+Wales,2021-07-01,,forecast,4,4.7,2.9,1,3,4,5,6,10
+Wales,2021-07-02,,forecast,4,4.1,2.7,1,2,3,4,6,9
+Wales,2021-07-03,,forecast,4,4.3,2.8,1,2,3,4,6,10
+Wales,2021-07-04,,forecast,3,3.9,2.8,0,2,3,4,5,9
+Wales,2021-07-05,,forecast,3,3.4,2.5,0,2,2,3,5,8
+Wales,2021-07-06,,forecast,3,4,2.9,0,2,3,4,5,9
+Wales,2021-07-07,,forecast,3,3.7,2.9,0,2,3,4,5,9
+Wales,2021-07-08,,forecast,3,3.8,3.1,0,2,3,4,5,10
+Wales,2021-07-09,,forecast,3,3.3,2.9,0,1,2,3,4,8
+Wales,2021-07-10,,forecast,3,3.6,3.4,0,1,2,4,5,9
+Wales,2021-07-11,,forecast,3,3.3,3.4,0,1,2,3,5,9
+Wales,2021-07-12,,forecast,2,2.8,3.1,0,1,2,3,4,8
