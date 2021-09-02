@@ -29,6 +29,11 @@ case_forecast <- readr::read_csv(file = here::here("current_forecasts", "data", 
   dplyr::rename(id = geo_code,
                 geo_name = region)
 
+# Table of all UTLAs in England
+all_utlas <- covid19.nhs.data::utla_names %>%
+  dplyr::filter(grepl("E", geo_code),
+                geo_name != "City of London",
+                geo_name != "Isles of Scilly")
 
 
 # Flag UTLAs --------------------------------------------------------------
@@ -41,9 +46,23 @@ case_summary <- case_forecast %>%
                    by = "id") %>%
   dplyr::select(id, id_name, date, median, upper_90, last_case)
 
+# Note UTLAs with case forecasts
+all_forecast_utlas <- case_summary %>%
+  dplyr::filter(date > forecast_date) %>%
+  dplyr::mutate(id = ifelse(id == "Hackney and City of London", "Hackney", id),
+                id = ifelse(id == "Cornwall and Isles of Scilly", "Cornwall", id)) %>%
+  dplyr::pull(id_name) %>%
+  unique()
+
 flag_utlas <- case_summary %>%
+  # Extreme uncertainty
   dplyr::filter(last_case > 10,
-                (median > 50*last_case | upper_90 > 500*last_case))
+                (median > 50*last_case | upper_90 > 500*last_case)) %>%
+  # Missing forecasts
+  dplyr::bind_rows(all_utlas %>%
+                     dplyr::filter(geo_name %in% setdiff(all_utlas$geo_name, all_forecast_utlas)) %>%
+                     dplyr::rename(id = geo_code, id_name = geo_name) %>%
+                     dplyr::mutate(date = forecast_date + 1))
 
 
 # Run time series case forecasts ------------------------------------------
@@ -61,7 +80,7 @@ if(nrow(flag_utlas) > 0){
     dplyr::select(id, date, cases)
   
   case_tsensemble_samples <- timeseries_samples(data = dat_in, yvar = "cases",
-                                                horizon = 14, samples = 1000, models = "aez", 
+                                                horizon = 14, samples = 1000, models = "a", 
                                                 train_from = forecast_date - 42,
                                                 forecast_from = forecast_date) %>%
     dplyr::mutate(model = "ts_ensemble")
