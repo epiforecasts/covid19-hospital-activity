@@ -10,6 +10,8 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
                       fig.width = 16, fig.height = 9)
 
+fig_text_size <- 14
+
 library(tidyverse)
 library(patchwork)
 library(covid19.nhs.data)
@@ -95,6 +97,11 @@ total_admissions <- dat %>%
   dplyr::summarise(total_adm = sum(adm, na.rm = TRUE),
                    .groups = "drop")
 
+# Top-x Trusts by total admissions
+top_admissions_x <- total_admissions %>%
+  dplyr::arrange(-total_adm) %>%
+  dplyr::slice_head(n = 40)
+
 # Top-50 Trusts by total admissions
 top_admissions_50 <- total_admissions %>%
   dplyr::arrange(-total_adm) %>%
@@ -137,7 +144,8 @@ g_summary_top5 <- dat %>%
   labs(x = "Date", y = "Admissions",
        title = "C") +
   theme_bw() +
-  theme(strip.text.x = element_text(size = 8))
+  theme(text = element_text(size = fig_text_size),
+        strip.text.x = element_text(size = 10))
 
 # National admissions
 g_summary_nat <- dat %>%
@@ -152,12 +160,13 @@ g_summary_nat <- dat %>%
                limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
   labs(x = "", y = "Admissions",
        title = "A") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = fig_text_size))
 
 # Weekly admissions by Trust
 g_summary_trust <- dat_weekly %>%
   dplyr::left_join(total_admissions, by = "id") %>%
-  dplyr::filter(id %in% top_admissions_50$id,
+  dplyr::filter(id %in% top_admissions_x$id,
                 week_ending <= as.Date("2021-02-28")) %>%
   dplyr::group_by(id) %>%
   dplyr::mutate(adm_std = adm/sd(adm, na.rm = TRUE)) %>%
@@ -166,18 +175,25 @@ g_summary_trust <- dat_weekly %>%
   geom_vline(xintercept = as.Date("2021-01-31"), lty = 2) +
   geom_vline(xintercept = as.Date("2020-10-04"), lty = 2) +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 4)], date_labels = "%d %b",
-               limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
-  scale_fill_fermenter(n.breaks = 9) +
+               limits = c(as.Date("2020-08-01"), NA)) +
+  scale_fill_fermenter(n.breaks = 9, direction = 1) +
   labs(x = "Week ending", y = "NHS Trust",
        title = "B",
        fill = "Weekly\nadmissions") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = fig_text_size),
+        legend.position = "top",
+        legend.key.width = unit(2, 'cm'))
 
 ```
 
 ```{r figure 1}
 
-(g_summary_nat / g_summary_trust + plot_layout(heights = c(1, 4))) | g_summary_top5
+(g_summary_nat / g_summary_trust + plot_layout(heights = c(1, 5))) | g_summary_top5
+
+ggsave(filename = here::here("data", "out", "figures", "figure_1.png"),
+       width = 14, height = 10, units = "in",
+       dpi = 500)
 
 ```
 
@@ -221,13 +237,18 @@ g_regional <- dat %>%
   scale_color_brewer(palette = "Set2") +
   labs(x = "Date", y = "Daily admissions",
        col = "NHS region") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = fig_text_size))
 
 ```
 
 ```{r figure s1}
 
 g_regional
+
+ggsave(filename = here::here("data", "out", "figures", "figure_s1.png"),
+       width = 14, height = 8, units = "in",
+       dpi = 500)
 
 ```
 
@@ -252,7 +273,8 @@ g_trust_mapping <- trust_mapping %>%
   scale_x_continuous(breaks = integer_breaks()) +
   labs(x = "Number of matched UTLAs", y = "Count",
        title = "A") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = fig_text_size))
 
 # Bed capacity/total admissions
 g_trust_capacity <- trust_size %>%
@@ -260,9 +282,10 @@ g_trust_capacity <- trust_size %>%
   ggplot(aes(x = total_bed, y = total_adm)) +
   geom_point(alpha = 0.4) +
   geom_rug(alpha = 0.4) +
-  labs(x = "Estimated Trust capacity", y = "Total admissions",
+  labs(x = "Estimated bed capacity", y = "Total admissions",
        title = "B") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = fig_text_size))
 
 # Trust admissions by cluster
 g_trust_admissions <- cluster_dat %>%
@@ -279,12 +302,13 @@ g_trust_admissions <- cluster_dat %>%
   geom_vline(xintercept = as.Date("2021-01-31"), lty = 2, col = "grey50") +
   facet_wrap(. ~ facet, scales = "free_y") +
   scale_x_date(breaks = long_plot_dates[seq(2, 36, 8)], date_labels = "%d %b",
-               limits = c(as.Date("2020-08-01"), as.Date("2021-03-02"))) +
+               limits = c(as.Date("2020-08-01"), as.Date("2021-02-14"))) +
   scale_color_brewer(palette = "Set2", na.value = "grey50") +
-  labs(x = "Week ending", y = "Weekly admissions (std)",
+  labs(x = "Week ending", y = "Weekly admissions",
        title = "C") +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  theme(text = element_text(size = fig_text_size))
 
 # Trust location by cluster
 g_trust_locations <- covid19.nhs.data::england_utla_shape %>%
@@ -300,13 +324,18 @@ g_trust_locations <- covid19.nhs.data::england_utla_shape %>%
   labs(x = "", y = "", col = paste0("Cluster ID (", n_clusters, ")"),
        title = "D") +
   theme_bw() +
-  theme(legend.position = "none")
+  theme(legend.position = "none") +
+  theme(text = element_text(size = fig_text_size))
 
 ```
 
 ```{r figure s2}
 
 ((g_trust_mapping | g_trust_capacity) / g_trust_admissions + plot_layout(heights = c(1, 3))) | g_trust_locations
+
+ggsave(filename = here::here("data", "out", "figures", "figure_s2.png"),
+       width = 14, height = 8, units = "in",
+       dpi = 500)
 
 ```
 
@@ -336,6 +365,18 @@ trust_size %>%
 ## Figure S4
 ```{r}
 
+main_models <- c("snaive",
+                 "ts_ensemble_aez",
+                 "arima_case7_forecast_raw",
+                 "convolution_rt",
+                 "median_ensemble_forecast")
+main_model_labels <- c("Baseline",
+                       "Time series\nensemble",
+                       "ARIMA\nregression",
+                       "Convolution",
+                       "Median\nensemble")
+tb_main <- tibble::tibble(model = main_models, label = main_model_labels)
+
 # Additional prep
 observed_in <- dat %>%
   dplyr::select(id, date, observed = adm) %>%
@@ -344,40 +385,46 @@ observed_in <- dat %>%
                 date < as.Date("2021-02-14"))
 forecast_in <- forecast_adm %>%
   dplyr::rename(date = date_horizon, median = lower_0) %>%
-  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code"))
+  dplyr::left_join(covid19.nhs.data::trust_names, by = c("id" = "trust_code")) %>%
+  dplyr::left_join(tb_main, by = "model") %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(!is.na(label)) %>%
+  dplyr::select(-model) %>%
+  dplyr::rename(model = label)
 
 # Ribbons (all horizons)
 g_example_ribbon <- plot_forecast_ribbons(observed = observed_in,
                       forecast = forecast_in,
-                      trusts = top_admissions_5$id[c(1)],
+                      trusts = "R0A",
                       forecast_dates = plot_dates[13],
-                      models = c("ts_ensemble_aez",
-                                 "arima_case7_forecast_raw",
-                                 "convolution_rt",
-                                 "median_ensemble_forecast"),
+                      models = setdiff(main_model_labels, "Baseline"),
                       facet_models = TRUE) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-01"))) +
-  labs(title = "A")
+  labs(title = "A") +
+  theme(text = element_text(size = fig_text_size))
 
 # Bars (fixed horizon)
 g_example_bar <- plot_forecast_bars(observed = observed_in,
                    forecast = forecast_in,
-                   trusts = top_admissions_5$id[c(1)],
+                   trusts = "R0A",
                    use_dates = plot_dates[seq(1, 18, 2)],
-                   models = c("ts_ensemble_aez",
-                              "arima_case7_forecast_raw",
-                              "convolution_rt",
-                              "median_ensemble_forecast"),
+                   models = setdiff(main_model_labels, "Baseline"),
                    h = 7) +
   scale_x_date(breaks = plot_dates[seq(2, 18, 4)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-02-01"))) +
-  labs(title = "B")
+  scale_y_continuous(limits = c(0, 80)) +
+  labs(title = "B") +
+  theme(text = element_text(size = fig_text_size))
 
 ```
 
 ```{r figure s4}
 
 g_example_ribbon | g_example_bar
+
+ggsave(filename = here::here("data", "out", "figures", "figure_s4.png"),
+       width = 14, height = 8, units = "in",
+       dpi = 500)
 
 ```
