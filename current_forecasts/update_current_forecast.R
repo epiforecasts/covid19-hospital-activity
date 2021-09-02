@@ -10,7 +10,7 @@ source(here::here("R", "utils.R"))
 
 # Forecast date -----------------------------------------------------------
 
-forecast_date <- as.Date("2021-07-18")
+forecast_date <- as.Date("2021-08-15")
 
 # Check UTLA-level case forecasts -----------------------------------------
 
@@ -44,6 +44,30 @@ obs <- raw_obs %>%
 file_name <- paste0("cases_by_report_", forecast_date, ".csv")
 case_forecast_utla_raw <- readr::read_csv(file = here::here("current_forecasts", "data", "cases_utla", file_name))
 
+### Also have case_tsensemble_samples and case_tsensemble_summary for flag_utlas
+if(nrow(flag_utlas) > 0){
+  
+  flag_case_forecast_summary <- case_tsensemble_summary %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(id %in% flag_utlas$id,
+                  quantile_label == 'lower_0') %>%
+    dplyr::select(id, date = date_horizon, cases = value)
+  
+  flag_case_forecast_samples <- case_tsensemble_samples %>%
+    dplyr::ungroup() %>%
+    dplyr::filter(id %in% flag_utlas$id) %>%
+    dplyr::mutate(date = forecast_from + horizon,
+                  value = round(value)) %>%
+    dplyr::select(id, date, sample, cases = value)
+  
+} else {
+  
+  flag_case_forecast_summary <- flag_utlas %>% select(id, date, cases = median)
+  flag_case_forecast_samples <- flag_utlas %>% select(id, date, sample = upper_90, cases = median)
+  
+}
+
+
 
 # Reshape data ------------------------------------------------------------
 
@@ -61,6 +85,8 @@ case_forecast_utla <- case_forecast_utla_raw %>%
 # Map forecasts cases (median) from UTLA to Trust
 case_forecast_trust <- case_forecast_utla %>%
   dplyr::select(id, date, cases = median) %>%
+  dplyr::filter(!id %in% flag_utlas$id) %>%
+  dplyr::bind_rows(flag_case_forecast_summary) %>%
   dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
   dplyr::mutate(trust_value = p_geo*cases) %>%
   dplyr::group_by(trust_code, date) %>%
@@ -79,6 +105,8 @@ combined_trust <- obs %>%
 #
 case_forecast_trust_samples <- epinow_samples(df = case_forecast_utla) %>%
   dplyr::select(id, date, sample, cases = value) %>%
+  dplyr::filter(!id %in% flag_utlas$id) %>%
+  dplyr::bind_rows(flag_case_forecast_samples) %>%
   dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
   dplyr::mutate(trust_value = p_geo*cases) %>%
   dplyr::group_by(trust_code, date, sample) %>%
