@@ -43,20 +43,18 @@ case_summary <- case_forecast %>%
 
 flag_utlas <- case_summary %>%
   dplyr::filter(last_case > 10,
-                median > 50*last_case,
-                upper_90 > 500*last_case) %>%
-  dplyr::group_by(id, id_name) %>%
-  dplyr::filter(date == max(date, na.rm = TRUE)) %>%
-  dplyr::mutate(flag = TRUE) %>%
-  dplyr::ungroup()
-
-saveRDS(object = flag_utlas,
-        file = here::here("current_forecasts", "data", "flag_utla.rds"))
+                (median > 50*last_case | upper_90 > 500*last_case))
 
 
 # Run time series case forecasts ------------------------------------------
 
 if(nrow(flag_utlas) > 0){
+  
+  flag_utlas <- flag_utlas %>%
+    dplyr::group_by(id, id_name) %>%
+    dplyr::filter(date == max(date, na.rm = TRUE)) %>%
+    dplyr::mutate(flag = TRUE) %>%
+    dplyr::ungroup()
   
   dat_in <- case_obs %>%
     dplyr::filter(id %in% flag_utlas$id) %>%
@@ -94,6 +92,9 @@ if(nrow(flag_utlas) > 0){
     dplyr::mutate(model = "Rt")
   
 }
+
+saveRDS(object = flag_utlas,
+        file = here::here("current_forecasts", "data", "flag_utla.rds"))
 
 
 # Vis current case forecast -----------------------------------------------
