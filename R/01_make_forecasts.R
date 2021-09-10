@@ -38,7 +38,8 @@ for(forecast_date in forecast_dates){
   case_forecast <- load_case_forecasts(obs_case_data = case_dat,
                                        forecast_date = forecast_date,
                                        level = "trust",
-                                       replace_flag = TRUE)
+                                       replace_flag = TRUE,
+                                       replace_model = "ae")
   
   # Baseline
   source(here::here("R", "run_baseline.R"))
