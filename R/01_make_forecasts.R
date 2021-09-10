@@ -18,9 +18,13 @@ options(mc.cores = 4)
 # Forecast dates to forecast from (defined as first day of forecast)
 forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02") + 63,
                                         by = "week",
-                                        length = 18))
+                                        length = 30))
 
-# Load combined Trust-level data
+# Load observed UTLA-level cases
+case_dat <- load_case_data() %>%
+  dplyr::left_join(covid19.nhs.data::utla_names, by = c("id" = "geo_code"))
+
+# Load combined Trust-level data (admissions + cases)
 dat <- load_combined_data()
 
 
@@ -29,6 +33,12 @@ dat <- load_combined_data()
 for(forecast_date in forecast_dates){
   
   forecast_date <- as.Date(forecast_date)
+  
+  # Load case forecasts
+  case_forecast <- load_case_forecasts(obs_case_data = case_dat,
+                                       forecast_date = forecast_date,
+                                       level = "trust",
+                                       replace_flag = TRUE)
   
   # Baseline
   source(here::here("R", "run_baseline.R"))

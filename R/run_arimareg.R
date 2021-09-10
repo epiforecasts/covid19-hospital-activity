@@ -1,21 +1,9 @@
 
 # Load case forecasts -----------------------------------------------------
 
-case_forecast_file <- paste0("epinow_utla_", forecast_date, ".rds")
-case_forecast <- readRDS(file = here::here("data", "out", "epinow2_case_forecast", case_forecast_file)) %>%
-  dplyr::mutate(region = ifelse(region == "Hackney and City of London", "Hackney", region),
-                region = ifelse(region == "Cornwall and Isles of Scilly", "Cornwall", region)) %>%
-  dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
-  dplyr::select(geo_code, date, case_forecast = median) %>%
-  dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = "geo_code") %>%
-  dplyr::mutate(case_forecast_trust = p_geo * case_forecast) %>%
-  dplyr::group_by(id = trust_code, date) %>%
-  dplyr::summarise(case_forecast = round(sum(case_forecast_trust, na.rm = TRUE)),
-                   .groups = "drop")
-
 dat_in <- dat %>%
   dplyr::select(id, date, adm = all_adm, case_raw = cases) %>%
-  dplyr::left_join(case_forecast, by = c("id", "date")) %>%
+  dplyr::left_join(case_forecast$summary, by = c("id", "date")) %>%
   dplyr::mutate(case_forecast = ifelse(date <= forecast_date, case_raw, case_forecast))
 
 # No lag -----------------------------------------------------------------

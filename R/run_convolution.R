@@ -47,21 +47,8 @@ convolution_summary_observed <- forecast_summary(samples = convolution_samples_o
 
 # Forecast cases ----------------------------------------------------------
 
-# Get forecast samples from summary output
-case_forecast_file <- paste0("epinow_utla_", forecast_date, ".rds")
-case_forecast_summary <- readRDS(file = here::here("data", "out", "epinow2_case_forecast", case_forecast_file))
-case_forecast_samples <- epinow_samples(df = case_forecast_summary)
-
 # Convert forecast from UTLA to Trust
-df_forecast <- case_forecast_samples %>%
-  dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
-  dplyr::mutate(trust_value = p_geo*value) %>%
-  dplyr::group_by(forecast_from, trust_code, date, sample) %>%
-  dplyr::summarise(value = round(sum(trust_value, na.rm = TRUE)),
-                   value = ifelse(is.na(value), 0, value),
-                   .groups = "drop") %>%
-  dplyr::filter(!is.na(trust_code)) %>%
-  dplyr::select(region = trust_code, date, sample, cases = value)
+df_forecast <- case_forecast$samples
 dt_forecast <- data.table::data.table(df_forecast)
 
 # Run forecast
