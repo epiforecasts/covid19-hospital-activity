@@ -121,7 +121,7 @@ load_population_data <- function(level = "utla"){
 ## level (str): level to return case forecasts at ("trust" or "utla")
 ## replace_flag (bool): flag and replace 'bad' Rt forecasts with ARIMA-ETS ensemble
 
-load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", replace_flag = TRUE){
+load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", replace_flag = TRUE, replace_model = "ae"){
   
   # Load Rt forecast
   case_forecast_file <- paste0("cases_by_report_", forecast_date, ".csv")
@@ -145,7 +145,7 @@ load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", r
       dplyr::filter(id %in% flagged_utlas$id) %>%
       dplyr::select(id, date, cases)
     case_tsensemble_samples <- timeseries_samples(data = case_dat_in, yvar = "cases",
-                                                  horizon = 14, samples = 1000, models = "ae", 
+                                                  horizon = 14, samples = 1000, models = replace_model, 
                                                   train_from = forecast_date - 42,
                                                   forecast_from = forecast_date) %>%
       dplyr::mutate(model = "ts_ensemble")
