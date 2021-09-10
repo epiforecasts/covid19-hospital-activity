@@ -4,7 +4,7 @@ source("R/utils.R")
 
 # Load raw data
 all_data <- load_hospital_data(keep_data = c("all_adm", "bed_occ", "ga_covid", "ga_other", "ga_unocc")) %>%
-  dplyr::filter(date <= as.Date("2021-01-31"))
+  dplyr::filter(date < as.Date("2021-05-01"))
 
 # Weekly data
 weekly_data <- all_data %>%
