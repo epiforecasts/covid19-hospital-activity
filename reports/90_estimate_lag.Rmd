@@ -32,7 +32,7 @@ Estimating the optimal lag between cases and hospital admissions (national and b
 
 ```{r init}
 
-forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02")+63, by = "week", length = 18))
+forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02")+63, to = as.Date("2021-04-25"), by = "week"))
 df <- load_combined_data()
 
 ```
@@ -41,7 +41,7 @@ df <- load_combined_data()
 
 df_nat <- df %>%
   dplyr::filter(date >= as.Date("2020-08-02"),
-                date < as.Date("2021-02-01")) %>%
+                date < as.Date("2021-05-02")) %>%
   dplyr::mutate(id = "England") %>%
   dplyr::group_by(id, date) %>%
   dplyr::summarise(all_adm = sum(all_adm, na.rm = TRUE),
@@ -52,7 +52,7 @@ df_nat <- df %>%
 
 df_reg <- df %>%
     dplyr::filter(date >= as.Date("2020-08-02"),
-                date < as.Date("2021-02-01")) %>%
+                date < as.Date("2021-05-02")) %>%
   dplyr::group_by(id = nhs_region, date) %>%
   dplyr::summarise(all_adm = sum(all_adm, na.rm = TRUE),
                    cases = sum(cases, na.rm = TRUE)) %>%
@@ -145,13 +145,15 @@ g_combined_reg <- df_reg %>%
 corr_nat %>%
   dplyr::group_by(id, lag_days) %>%
   dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
-  dplyr::filter(corr > 0.99*max(corr))
+  dplyr::filter(corr > 0.995*max(corr))
 
 # By NHS region
 corr_reg %>%
   dplyr::group_by(id, lag_days) %>%
   dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
-  dplyr::filter(corr > 0.99*max(corr))
+  dplyr::filter(corr > 0.995*max(corr)) %>%
+  dplyr::group_by(id) %>%
+  dplyr::filter(lag_days %in% c(max(lag_days), min(lag_days)))
 
 ```
 
@@ -241,6 +243,10 @@ g_correlation_reg <- corr_reg %>%
 #####
 g_correlation_nat | g_correlation_reg
 #####
+
+ggsave(filename = here::here("data", "out", "figures", "figure_s3.png"),
+       width = 14, height = 8, units = "in",
+       dpi = 500)
 
 ```
 
