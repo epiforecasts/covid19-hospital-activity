@@ -39,7 +39,7 @@ loc <- purrr::map_df(.x = raw_data$id, .f = ~{
   
 })
 
-saveRDS(object = loc, file = here::here("data", "out", "trust_locations.rds"))
+saveRDS(object = loc, file = here::here("data", "out", "trust_characteristics", "trust_locations.rds"))
 
 # Trust size --------------------------------------------------------------
 
@@ -52,7 +52,7 @@ trust_size <- all_data %>%
   dplyr::ungroup()
 
 saveRDS(object = trust_size,
-        file = here::here("data", "out", "trust_size.rds"))
+        file = here::here("data", "out", "trust_characteristics", "trust_size.rds"))
 
 # Total Covid-19 admissions -----------------------------------------------
 
@@ -62,7 +62,7 @@ trust_adms <- all_data %>%
   dplyr::summarise(total_adm = sum(all_adm, na.rm = TRUE))
 
 saveRDS(object = trust_adms,
-        file = here::here("data", "out", "trust_total.rds"))
+        file = here::here("data", "out", "trust_characteristics", "trust_total.rds"))
 
 # Mapping size ------------------------------------------------------------
 
@@ -74,7 +74,7 @@ trust_mapping <- covid19.nhs.data::trust_utla_mapping %>%
                    n_20 = length(p_geo[which(p_geo > 0.2)]))
 
 saveRDS(object = trust_mapping,
-        file = here::here("data", "out", "trust_mapping.rds"))
+        file = here::here("data", "out", "trust_characteristics", "trust_mapping.rds"))
 
 # Clustering --------------------------------------------------------------
 
