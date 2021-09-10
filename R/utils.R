@@ -1,4 +1,10 @@
 
+
+# Quiet loading functions -------------------------------------------------
+
+read_xls_quietly <- purrr::quietly(readxl::read_xls)
+read_csv_quietly <- purrr::quietly(readr::read_csv)
+
 ## To only allow integer breaks on plots (https://www.r-bloggers.com/setting-axes-to-integer-values-in-ggplot2/)
 integer_breaks <- function(n = 5, ...){
   
@@ -119,5 +125,56 @@ return_clusters <- function(df, k = 6, exclude_ids = NULL){
   out_clusters <- tibble::tibble(id = names(clusters), cluster = clusters)
   
   return(list(tree_plot = g, clusters = out_clusters))
+  
+}
+
+
+# Check UTLA-level Rt case forecasts --------------------------------------
+
+check_case_forecasts <- function(obs_data, forecast_date){
+  
+  message("Checking UTLA-level case forecasts...")
+  
+  # Load and reshape data
+  pop_est <- load_population_data()
+  
+  recent_cases <- obs_data %>%
+    dplyr::filter(date == forecast_date) %>%
+    dplyr::left_join(pop_est %>% dplyr::select(-id_name), by = "id") %>%
+    dplyr::mutate(forecast_from = forecast_date) %>%
+    dplyr::select(id, id_name = geo_name, population, forecast_from, last_case = cases)
+  
+  case_forecast_file <- paste0("cases_by_report_", forecast_date, ".csv")
+  case_forecast <- read_csv_quietly(file = here::here("data", "out", "epinow2_case_forecast", case_forecast_file))$result %>%
+    dplyr::mutate(region = ifelse(region == "Hackney and City of London", "Hackney", region),
+                  region = ifelse(region == "Cornwall and Isles of Scilly", "Cornwall", region)) %>%
+    dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
+    dplyr::select(id = geo_code, id_name = region, date, median, mean, sd, contains("lower"), contains("upper"))
+  
+  data_in <- case_forecast %>%
+    dplyr::left_join(recent_cases %>% dplyr::select(-id_name), by = "id")
+  
+  # Flag UTLAS
+  ## (1) UTLAs missing case forecasts
+  check_missing <- recent_cases %>%
+    dplyr::filter(id %in% setdiff(recent_cases$id, unique(case_forecast$id))) %>%
+    dplyr::mutate(flag = "missing")
+  ## (2) forecast 90% CI exceeds UTLA population
+  check_population <- data_in %>%
+    dplyr::filter(upper_90 > population) %>%
+    dplyr::mutate(flag = "population")
+  ## (3) check runaway uncertainty (def as)
+  check_uncertainty <- data_in %>%
+    dplyr::filter(
+      (last_case > 10 & upper_90 > 1e3*last_case) |
+        (last_case > 1 & upper_90 > 1e4*last_case)
+    ) %>%
+    dplyr::mutate(flag = "uncertainty")
+  
+  flag_utlas <- check_missing %>%
+    dplyr::bind_rows(check_population) %>%
+    dplyr::bind_rows(check_uncertainty)
+  
+  return(flag_utlas)
   
 }
