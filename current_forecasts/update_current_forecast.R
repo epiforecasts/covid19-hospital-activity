@@ -8,137 +8,51 @@ source(here::here("R", "forecast_fns.R"))
 source(here::here("R", "regional_secondary_fns.R"))
 source(here::here("R", "utils.R"))
 
-# Forecast date -----------------------------------------------------------
 
-forecast_date <- as.Date("2021-08-15")
+# Set up ------------------------------------------------------------------
 
-# Check UTLA-level case forecasts -----------------------------------------
+forecast_date <- as.Date("2021-09-05")
 
-# Visually check current_case_forecast.pdf for flagged UTLAs
 
-source("current_forecasts/R/current_case_forecast.R")
+# Load and check case forecasts -------------------------------------------
 
-flag_trusts <- covid19.nhs.data::trust_utla_mapping %>%
-  covid19.nhs.data::get_names() %>%
-  dplyr::filter(geo_name %in% flag_utlas$id_name,
-                p_geo > 0.2) %>%
-  dplyr::group_by(trust_code, trust_name) %>%
-  dplyr::summarise(n = n(),
-                   utla_names = paste(geo_name, collapse = ", ")) %>%
-  dplyr::mutate(label = ifelse(n == 1,
-                               paste0(trust_name, " (UTLA: ", utla_names, ")" ),
-                               paste0(trust_name, " (UTLAs: ", utla_names, ")" ))) %>%
-  dplyr::ungroup()
+case_dat <- load_case_data() %>%
+  dplyr::left_join(covid19.nhs.data::utla_names, by = c("id" = "geo_code"))
 
-# Load raw observed data --------------------------------------------------
+case_forecast <- load_case_forecasts(obs_case_data = case_dat,
+                                     forecast_date = forecast_date,
+                                     forecast_path = here::here("current_forecasts",
+                                                                "data",
+                                                                "cases_utla"),
+                                     level = "trust",
+                                     replace_flag = TRUE,
+                                     replace_model = "ae")
 
-# Combined data
-raw_obs <- load_combined_data(add_private = TRUE)
-obs <- raw_obs %>%
-  # dplyr::select(id, date, all_adm, cases) %>%
-  dplyr::select(-bed_occ) %>%
+case_forecast_samples <- case_forecast$samples
+
+saveRDS(object = case_forecast$flag,
+        file = here::here("current_forecasts", "data", "flagged_utlas.rds"))
+
+
+# Create input data -------------------------------------------------------
+
+# Load 'observed' Trust-level data (admissions + cases)
+dat <- load_combined_data()
+
+dat_in <- dat %>%
+  dplyr::bind_rows(case_forecast$summary %>%
+                     dplyr::rename(cases = case_forecast)) %>%
   dplyr::filter(date >= as.Date("2020-08-02"),
-                date <= forecast_date)
-
-# Forecast cases (Rt)
-file_name <- paste0("cases_by_report_", forecast_date, ".csv")
-case_forecast_utla_raw <- readr::read_csv(file = here::here("current_forecasts", "data", "cases_utla", file_name))
-
-### Also have case_tsensemble_samples and case_tsensemble_summary for flag_utlas
-if(nrow(flag_utlas) > 0){
-  
-  flag_case_forecast_summary <- case_tsensemble_summary %>%
-    dplyr::ungroup() %>%
-    dplyr::filter(id %in% flag_utlas$id,
-                  quantile_label == 'lower_0') %>%
-    dplyr::select(id, date = date_horizon, cases = value)
-  
-  flag_case_forecast_samples <- case_tsensemble_samples %>%
-    dplyr::ungroup() %>%
-    dplyr::filter(id %in% flag_utlas$id) %>%
-    dplyr::mutate(date = forecast_from + horizon,
-                  value = round(value)) %>%
-    dplyr::select(id, date, sample, cases = value)
-  
-} else {
-  
-  flag_case_forecast_summary <- flag_utlas %>% select(id, date, cases = median)
-  flag_case_forecast_samples <- flag_utlas %>% select(id, date, sample = upper_90, cases = median)
-  
-}
-
-
-
-# Reshape data ------------------------------------------------------------
-
-# Format UTLA forecast cases
-case_forecast_utla <- case_forecast_utla_raw %>%
-  dplyr::filter(date > forecast_date) %>%
-  dplyr::mutate(region = ifelse(region == "Hackney and City of London", "Hackney", region),
-                region = ifelse(region == "Cornwall and Isles of Scilly", "Cornwall", region)) %>%
-  dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
-  dplyr::mutate(geo_code = ifelse(geo_code == "E10000002", "E06000060", geo_code)) %>%
-  dplyr::filter(!is.na(geo_code),
-                grepl("E", geo_code)) %>%
-  dplyr::rename(id = geo_code)
-
-# Map forecasts cases (median) from UTLA to Trust
-case_forecast_trust <- case_forecast_utla %>%
-  dplyr::select(id, date, cases = median) %>%
-  dplyr::filter(!id %in% flag_utlas$id) %>%
-  dplyr::bind_rows(flag_case_forecast_summary) %>%
-  dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
-  dplyr::mutate(trust_value = p_geo*cases) %>%
-  dplyr::group_by(trust_code, date) %>%
-  dplyr::summarise(value = round(sum(trust_value, na.rm = TRUE)),
-                   value = ifelse(is.na(value), 0, value),
-                   .groups = "drop") %>%
-  dplyr::filter(!is.na(trust_code)) %>%
-  dplyr::select(id = trust_code, date, cases = value)
-
-combined_trust <- obs %>%
-  dplyr::bind_rows(case_forecast_trust) %>%
-  dplyr::filter(id != "RPY") %>%
+                !is.na(id),
+                !is.na(nhs_region)) %>%
   dplyr::group_by(id) %>%
   dplyr::mutate(cases_lag7 = lag(cases, 7))
-
-#
-case_forecast_trust_samples <- epinow_samples(df = case_forecast_utla) %>%
-  dplyr::select(id, date, sample, cases = value) %>%
-  dplyr::filter(!id %in% flag_utlas$id) %>%
-  dplyr::bind_rows(flag_case_forecast_samples) %>%
-  dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
-  dplyr::mutate(trust_value = p_geo*cases) %>%
-  dplyr::group_by(trust_code, date, sample) %>%
-  dplyr::summarise(value = round(sum(trust_value, na.rm = TRUE)),
-                   value = ifelse(is.na(value), 0, value),
-                   .groups = "drop") %>%
-  dplyr::filter(!is.na(trust_code),
-                trust_code != "RPY") %>%
-  dplyr::select(region = trust_code, date, sample, cases = value)
-
-
-# Drop Trusts missing data ------------------------------------------------
-
-drop_trusts <- combined_trust %>%
-  dplyr::filter(date > forecast_date - 42,
-                date <= forecast_date) %>%
-  dplyr::group_by(id) %>%
-  dplyr::summarise(total_adm = sum(all_adm),
-                   total_case = sum(cases)) %>%
-  dplyr::filter(is.na(total_adm) | total_adm == 0 | is.na(total_case) | total_case == 0) %>%
-  dplyr::pull(id)
-
-message(paste0(c("Dropping the following Trusts for missing data or no recent activity:", c("RBS", drop_trusts)), collapse = " "))
-
-combined_trust <- combined_trust %>%
-  filter(!id %in% drop_trusts)
 
 
 # Update all forecasts ----------------------------------------------------
 
 ## Baseline forecast
-baseline_out <- forecast_baseline(data = combined_trust, yvar = "all_adm",
+baseline_out <- forecast_baseline(data = dat_in, yvar = "all_adm",
                                   horizon = 14, samples = 1000,
                                   train_from = forecast_date - 42,
                                   forecast_from = forecast_date)
@@ -146,7 +60,7 @@ baseline_summary <- baseline_out$summary
 
 
 ## Autoregressive time series 
-tsensemble_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm",
+tsensemble_samples <- timeseries_samples(data = dat_in, yvar = "all_adm",
                                          horizon = 14, samples = 1000, models = "aez", 
                                          train_from = forecast_date - 42,
                                          forecast_from = forecast_date) %>%
@@ -157,7 +71,7 @@ tsensemble_summary_long <- forecast_summary(samples = tsensemble_samples,
 
 
 ## Regression + ARIMA errors
-arimareg_samples <- timeseries_samples(data = combined_trust, yvar = "all_adm", xvars = "cases_lag7",
+arimareg_samples <- timeseries_samples(data = dat_in, yvar = "all_adm", xvars = "cases_lag7",
                                        horizon = 14, samples = 1000, models = "a", 
                                        train_from = forecast_date - 42,
                                        forecast_from = forecast_date) %>%
@@ -170,14 +84,14 @@ arimareg_summary_long <- forecast_summary(samples = arimareg_samples,
 ## Convolution
 future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
 
-convolution_obs <- combined_trust %>%
+convolution_obs <- dat_in %>%
   dplyr::filter(date >= forecast_date - (42+21),
                 date <= forecast_date) %>%
   dplyr::select(region = id, date, primary = cases, secondary = all_adm) %>%
   na.omit()
 
 convolution_forecast_rt <- regional_secondary(reports = convolution_obs,
-                                              case_forecast = case_forecast_trust_samples %>%
+                                              case_forecast = case_forecast_samples %>%
                                                 dplyr::filter(!region %in% drop_trusts),
                                               secondary = secondary_opts(type = "incidence"),
                                               obs = EpiNow2::obs_opts(week_effect = FALSE,
@@ -263,7 +177,7 @@ saveRDS(object = forecast_out_long,
 region_samples <- tsensemble_samples %>%
   dplyr::bind_rows(arimareg_samples) %>%
   dplyr::bind_rows(convolution_samples) %>%
-  dplyr::left_join(obs %>%
+  dplyr::left_join(dat %>%
                      filter(!is.na(nhs_region)) %>%
                      select(nhs_region, id) %>%
                      unique(),
