@@ -7,9 +7,6 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "forecast_fns.R"))
 source(here::here("R", "utils.R"))
 
-devtools::source_gist("https://gist.github.com/seabbs/4dad3958ca8d83daca8f02b143d152e6")
-
-
 # Set-up ------------------------------------------------------------------
 
 future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
@@ -37,6 +34,9 @@ for(forecast_date in forecast_dates){
   # Load case forecasts
   case_forecast <- load_case_forecasts(obs_case_data = case_dat,
                                        forecast_date = forecast_date,
+                                       forecast_path = here::here("data",
+                                                                  "out",
+                                                                  "epinow2_case_forecast"),
                                        level = "trust",
                                        replace_flag = TRUE,
                                        replace_model = "ae")
