@@ -23,16 +23,16 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-08-22")
+forecast_date <- as.Date("2021-09-05")
 
 ```
 
 ```{r new variables, include = FALSE}
 
-flag_utlas <- readRDS(file = here::here("current_forecasts", "data", "flag_utla.rds"))
+flag_utlas <- readRDS(file = here::here("current_forecasts", "data", "flagged_utlas.rds"))
 exclude_utlas <- flag_utlas$id_name
 
-manual_remove <- tibble::tibble(trust_code = c("R1H", "RF4", "RQX"), trust_name = NA, n = NA, utla_names = NA, label = NA)
+manual_remove <- tibble::tibble(trust_code = c(), trust_name = NA, n = NA, utla_names = NA, label = NA)
 
 exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
   covid19.nhs.data::get_names() %>%
@@ -703,7 +703,7 @@ plot_forecast_bars(observed = admissions %>%
 
 ## National and regional
 
-```{r}
+```{r, fig.width = 14, fig.height = 6}
 
 region_obs <- admissions %>%
   dplyr::group_by(nhs_region, date) %>%
@@ -716,34 +716,34 @@ region_obs <- admissions %>%
   dplyr::filter(date >= forecast_date - 84)
 
 plot_forecast_bars(observed = region_obs,
-                   forecast = all_reg_forecasts,
+                   forecast = all_reg_forecasts %>% dplyr::filter(model == "mean_ensemble"),
                    h = 14,
                    use_dates = unique(all_reg_forecasts$forecast_from)[which(unique(all_reg_forecasts$forecast_from) < forecast_date)],
                    trusts = "England",
                    trust_facet_var = "id",
-                   models = c("mean_ensemble", "EpiNow2"),
+                   models = c("mean_ensemble"),
                    facet_models = FALSE) +
-  scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
+  scale_x_date(limits = c(forecast_date - 56, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(limits = c(0, 2500), breaks = integer_breaks()) +
+  scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
     labs(title = "National",
        subtitle = "Past 14-day ahead forecasts, ensemble model") +
-  theme(legend.position = "top")
+  theme(legend.position = "none")
 
 plot_forecast_bars(observed = region_obs,
-                   forecast = all_reg_forecasts %>% dplyr::filter(!(horizon == 14 & id == "London" & model == "mean_ensemble" & forecast_from == as.Date("2021-07-04"))),
+                   forecast = all_reg_forecasts %>% dplyr::filter(model == "mean_ensemble") %>% dplyr::filter(!(horizon == 14 & id == "London" & model == "mean_ensemble" & forecast_from == as.Date("2021-07-04"))),
                    h = 14,
                    use_dates = unique(all_reg_forecasts$forecast_from)[which(unique(all_reg_forecasts$forecast_from) < forecast_date)],
                    trusts = setdiff(unique(region_forecast$id), "England"),
                    trust_facet_var = "id",
-                   models = c("mean_ensemble", "EpiNow2"),
+                   models = c("mean_ensemble"),
                    facet_models = TRUE) +
-  scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
+  scale_x_date(limits = c(forecast_date - 56, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
+  scale_y_continuous(limits = c(0, 300), breaks = integer_breaks()) +
     labs(title = "NHS regions",
        subtitle = "Past 14-day ahead forecasts, ensemble model") +
-  theme(legend.position = "top")
+  theme(legend.position = "none")
 
 ```
 
