@@ -4,6 +4,8 @@
 load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"), add_private = FALSE){
   
   raw_data <- covid19.nhs.data::download_trust_data()
+  trust_mergers <- read_xlsx_quietly(path = here::here("data", "raw", "trust_mergers.xlsx"))$result %>%
+    dplyr::mutate(from_date = as.Date(from_date))
   
   if(format){
     
@@ -20,10 +22,11 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
                                             data == "New hosp cases" ~ "new_adm",
                                             data == "Adult G&A Beds Occupied COVID" ~ "ga_covid",
                                             data == "Adult G&A Bed Occupied NonCOVID" ~ "ga_other",
-                                            data == "Adult G&A Beds Unoccupied" ~ "ga_unocc"),
-                    id = ifelse(id %in% c("RD3", "RDZ"), "R0D", id)) %>%
+                                            data == "Adult G&A Beds Unoccupied" ~ "ga_unocc")) %>%
       dplyr::filter(data %in% keep_data,
                     id %in% covid19.nhs.data::trust_ltla_mapping$trust_code) %>%
+      dplyr::left_join(trust_mergers, by = c("id" = "trust_code_old")) %>% 
+      dplyr::mutate(id = ifelse(!is.na(trust_code_new) & date >= from_date, trust_code_new, id)) %>%
       dplyr::group_by(nhs_region, id, date, data) %>%
       dplyr::summarise(value = sum(value, na.rm = TRUE),
                        .groups = "drop") %>%
@@ -43,12 +46,20 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
       dplyr::filter(date > max(out$date)) %>%
       dplyr::mutate(all_adm = ifelse(is.na(all_adm), 0, all_adm)) %>%
       tidyr::complete(id = unique(out$id), date) %>%
-      dplyr::right_join(out %>% dplyr::select(nhs_region, id) %>% unique() %>% na.omit(), by = "id")
+      dplyr::right_join(out %>% dplyr::select(nhs_region, id) %>% unique() %>% na.omit(), by = "id") %>%
+      dplyr::left_join(trust_mergers, by = c("id" = "trust_code_old")) %>% 
+      dplyr::mutate(id = ifelse(!is.na(trust_code_new) & date >= from_date, trust_code_new, id)) %>%
+      dplyr::group_by(nhs_region, id, date) %>%
+      dplyr::summarise(all_adm = sum(all_adm, na.rm = TRUE),
+                       .groups = "drop") %>%
+      dplyr::ungroup()
     
     out <- out %>%
       dplyr::bind_rows(out_private)
     
   }
+  
+  
   
   return(out)
   
@@ -76,10 +87,14 @@ load_combined_data <- function(add_private = FALSE){
   
   adm <- load_hospital_data(add_private = add_private)
   case <- load_case_data()
+  trust_mergers <- read_xlsx_quietly(path = here::here("data", "raw", "trust_mergers.xlsx"))$result %>%
+    dplyr::mutate(from_date = as.Date(from_date))
   
   case_trust <- case %>%
     dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
     dplyr::mutate(trust_case = p_geo*cases) %>%
+    dplyr::left_join(trust_mergers, by = c("trust_code" = "trust_code_old")) %>% 
+    dplyr::mutate(trust_code = ifelse(!is.na(trust_code_new) & date >= from_date, trust_code_new, trust_code)) %>%
     dplyr::group_by(trust_code, date) %>%
     dplyr::summarise(trust_case = round(sum(trust_case, na.rm = TRUE)),
                      trust_case = ifelse(is.na(trust_case), 0, trust_case),
@@ -121,11 +136,15 @@ load_population_data <- function(level = "utla"){
 ## level (str): level to return case forecasts at ("trust" or "utla")
 ## replace_flag (bool): flag and replace 'bad' Rt forecasts with ARIMA-ETS ensemble
 
-load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", replace_flag = TRUE, replace_model = "ae"){
+load_case_forecasts <- function(obs_case_data, forecast_date, forecast_path, level = "trust", replace_flag = TRUE, replace_model = "ae"){
+  
+  trust_mergers <- read_xlsx_quietly(path = here::here("data", "raw", "trust_mergers.xlsx"))$result %>%
+    dplyr::mutate(from_date = as.Date(from_date))
   
   # Load Rt forecast
   case_forecast_file <- paste0("cases_by_report_", forecast_date, ".csv")
-  case_forecast <- read_csv_quietly(file = here::here("data", "out", "epinow2_case_forecast", case_forecast_file))$result %>%
+  case_forecast <- read_csv_quietly(file = here::here(forecast_path, case_forecast_file))$result %>%
+    dplyr::filter(date > forecast_date) %>%
     dplyr::mutate(region = ifelse(region == "Hackney and City of London", "Hackney", region),
                   region = ifelse(region == "Cornwall and Isles of Scilly", "Cornwall", region)) %>%
     dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
@@ -135,7 +154,8 @@ load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", r
   
   # Check for flagged UTLAs 
   flagged_utlas <- check_case_forecasts(obs_data = obs_case_data,
-                                        forecast_date = forecast_date)
+                                        forecast_date = forecast_date,
+                                        forecast_path = forecast_path)
   ## Replace flagged forecasts with ARIMA+ETS ensemble
   if(replace_flag & nrow(flagged_utlas) > 0){
     
@@ -168,6 +188,30 @@ load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", r
     
   }
   
+  message("Plotting UTLA case forecasts...")
+  g <- case_forecast %>%
+    dplyr::filter(!is.na(id),
+                  grepl("E", id)) %>%
+    dplyr::mutate(model = ifelse(id %in% flagged_utlas$id, "ARIMA+ETS", "Rt")) %>%
+    ggplot(aes(x = date, y = median)) +
+    geom_line(data = obs_case_data %>%
+                dplyr::ungroup() %>%
+                dplyr::filter(date > forecast_date - 21,
+                              date <= forecast_date,
+                              id %in% case_forecast$id,
+                              grepl("E", id)),
+              aes(x = date, y = cases)) +
+    geom_line(aes(col = model), lwd = 0.8) +
+    geom_ribbon(aes(ymin = lower_90, ymax = upper_90, fill = model), col = NA, alpha = 0.4) +
+    facet_wrap(. ~ id, scales = "free_y") +
+    scale_x_date(breaks = c(forecast_date - 14, forecast_date, forecast_date + 14), date_labels = "%d%b") +
+    scale_y_continuous(limits = c(0, NA)) +
+    labs(title = "UTLA case forecasts",
+         subtitle = paste0("Forecast from ", format.Date(forecast_date, "%d %B %Y")),
+         x = "Date", y = "Cases", col = "Model", fill = "Model") +
+    theme_bw() +
+    theme(legend.position = "none", strip.text.x = element_text(size = 8))
+  
   # Optionally map from UTLA to Trust
   ## NB formatting to use in run_arimareg.R and run_convolution.R
   if(level == "trust"){
@@ -176,6 +220,8 @@ load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", r
       dplyr::select(geo_code = id, date, case_forecast = median) %>%
       dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = "geo_code") %>%
       dplyr::mutate(case_forecast_trust = p_geo * case_forecast) %>%
+      dplyr::left_join(trust_mergers, by = c("trust_code" = "trust_code_old")) %>% 
+      dplyr::mutate(trust_code = ifelse(!is.na(trust_code_new) & date >= from_date, trust_code_new, trust_code)) %>%
       dplyr::group_by(id = trust_code, date) %>%
       dplyr::summarise(case_forecast = round(sum(case_forecast_trust, na.rm = TRUE)),
                        .groups = "drop")
@@ -183,6 +229,8 @@ load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", r
     case_forecast_samples <- case_forecast_samples %>%
       dplyr::left_join(covid19.nhs.data::trust_utla_mapping, by = c("id" = "geo_code")) %>%
       dplyr::mutate(trust_value = p_geo*value) %>%
+      dplyr::left_join(trust_mergers, by = c("trust_code" = "trust_code_old")) %>% 
+      dplyr::mutate(trust_code = ifelse(!is.na(trust_code_new) & date >= from_date, trust_code_new, trust_code)) %>%
       dplyr::group_by(forecast_from, trust_code, date, sample) %>%
       dplyr::summarise(value = round(sum(trust_value, na.rm = TRUE)),
                        value = ifelse(is.na(value), 0, value),
@@ -193,7 +241,9 @@ load_case_forecasts <- function(obs_case_data, forecast_date, level = "trust", r
   }
   
   return(list(summary = case_forecast,
-              samples = case_forecast_samples))
+              samples = case_forecast_samples,
+              flag = flagged_utlas,
+              plot = g))
   
 }
 
