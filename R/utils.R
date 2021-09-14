@@ -3,6 +3,7 @@
 # Quiet loading functions -------------------------------------------------
 
 read_xls_quietly <- purrr::quietly(readxl::read_xls)
+read_xlsx_quietly <- purrr::quietly(readxl::read_xlsx)
 read_csv_quietly <- purrr::quietly(readr::read_csv)
 
 ## To only allow integer breaks on plots (https://www.r-bloggers.com/setting-axes-to-integer-values-in-ggplot2/)
@@ -131,7 +132,9 @@ return_clusters <- function(df, k = 6, exclude_ids = NULL){
 
 # Check UTLA-level Rt case forecasts --------------------------------------
 
-check_case_forecasts <- function(obs_data, forecast_date){
+check_case_forecasts <- function(obs_data, 
+                                 forecast_date,
+                                 forecast_path = here::here("data", "out", "epinow2_case_forecast")){
   
   message("Checking UTLA-level case forecasts...")
   
@@ -145,7 +148,7 @@ check_case_forecasts <- function(obs_data, forecast_date){
     dplyr::select(id, id_name = geo_name, population, forecast_from, last_case = cases)
   
   case_forecast_file <- paste0("cases_by_report_", forecast_date, ".csv")
-  case_forecast <- read_csv_quietly(file = here::here("data", "out", "epinow2_case_forecast", case_forecast_file))$result %>%
+  case_forecast <- read_csv_quietly(file = here::here(forecast_path, case_forecast_file))$result %>%
     dplyr::mutate(region = ifelse(region == "Hackney and City of London", "Hackney", region),
                   region = ifelse(region == "Cornwall and Isles of Scilly", "Cornwall", region)) %>%
     dplyr::left_join(covid19.nhs.data::utla_names, by = c("region" = "geo_name")) %>%
