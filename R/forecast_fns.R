@@ -46,15 +46,15 @@ forecast_baseline <- function(data = NULL, yvar = NULL,
     dplyr::filter(date > as.Date(train_from),
                   date <= as.Date(forecast_from) + horizon)
   
-  snaive_summary <- data %>%
+  baseline_summary <- data %>%
     dplyr::group_by(id) %>%
     dplyr::group_modify( ~ forecast_baseline_int(y = .x %>% filter(!forecast) %>% pull(yvar),
                                                  horizon = 14)) %>%
-    dplyr::mutate(model = "snaive",
+    dplyr::mutate(model = "baseline",
                   forecast_from = as.Date(forecast_from),
                   date_horizon = forecast_from + horizon)
   
-  snaive_samples <- snaive_summary %>%
+  baseline_samples <- baseline_summary %>%
     dplyr::filter(quantile_label %in% c("upper_0", "upper_90")) %>%
     dplyr::select(model, forecast_from, id, horizon, quantile, value) %>%
     tidyr::pivot_wider(id_cols = -c(quantile, value), names_from = quantile) %>%
@@ -66,7 +66,7 @@ forecast_baseline <- function(data = NULL, yvar = NULL,
     ) %>%
     dplyr::mutate(value = ifelse(value < 0, 0, value))
   
-  return(list(samples = snaive_samples, summary = snaive_summary))
+  return(list(samples = baseline_samples, summary = baseline_summary))
   
 }
 
