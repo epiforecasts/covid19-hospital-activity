@@ -1,3 +1,6 @@
+# Copy of https://github.com/seabbs/regional-secondary/blob/master/regional-secondary.R
+# Saved 2021-09-14
+
 # load required packages
 library(EpiNow2)
 library(future.apply)
