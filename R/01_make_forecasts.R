@@ -5,6 +5,7 @@ library(future, quietly = TRUE)
 
 source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "forecast_fns.R"))
+source(here::here("R", "regional_secondary_fns.R"))
 source(here::here("R", "utils.R"))
 
 # Set-up ------------------------------------------------------------------
@@ -13,16 +14,16 @@ future::plan("multisession",  gc = TRUE, earlySignal = TRUE)
 options(mc.cores = 4)
 
 # Forecast dates to forecast from (defined as first day of forecast)
-forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02") + 63,
-                                        by = "week",
-                                        length = 30))
+forecast_dates <- as.character(seq.Date(from = as.Date("2020-10-04"),
+                                        to = as.Date("2021-04-25"),
+                                        by = "week"))
 
 # Load observed UTLA-level cases
 case_dat <- load_case_data() %>%
   dplyr::left_join(covid19.nhs.data::utla_names, by = c("id" = "geo_code"))
 
 # Load combined Trust-level data (admissions + cases)
-dat <- load_combined_data()
+dat <- load_combined_data(add_private = TRUE)
 
 
 # Update individual model forecasts ---------------------------------------
@@ -62,17 +63,17 @@ for(forecast_date in forecast_dates){
 
 # Make ensemble forecasts -------------------------------------------------
 
-# Define constiuent models
-ensemble_observed_models <- c("ts_ensemble_aez",
-                              "arima_case7_observed_raw",
+# Define constituent models
+ensemble_observed_models <- c("tsensemble_aez",
+                              "arimareg_7_observed",
                               "convolution_observed")
-ensemble_forecast_models <- c("ts_ensemble_aez",
-                              "arima_case7_forecast_raw",
-                              "convolution_rt")
+ensemble_forecast_models <- c("tsensemble_aez",
+                              "arimareg_7_forecast",
+                              "convolution_forecast")
 
-# Load constiuent model forecasts
-summary_dir <- here::here("data", "out", "admissions_forecast")
-summary_files <- list.files(summary_dir)[grepl("admissions", list.files(summary_dir))]
+# Load constituent model forecasts
+summary_dir <- here::here("data", "out", "admissions_forecast", "summary")
+summary_files <- list.files(summary_dir)
 
 forecast_summary <- purrr::map_df(.x = summary_files, .f = ~{
   
@@ -89,5 +90,5 @@ ensemble_summary <- ensemble_forecast(model_forecasts = forecast_summary,
                                      models = ensemble_forecast_models) %>%
                      dplyr::mutate(model = paste0(model, "_forecast")))
 
-forecast_name <- "admissions_ensemble.rds"
+forecast_name <- paste0("fullensemble_", forecast_date, ".rds")
 saveRDS(object = ensemble_summary, file = here::here("data", "out", "admissions_forecast", "summary", forecast_name))
