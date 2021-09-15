@@ -1,5 +1,4 @@
 
-
 # Quiet loading functions -------------------------------------------------
 
 read_xls_quietly <- purrr::quietly(readxl::read_xls)
@@ -158,7 +157,7 @@ check_case_forecasts <- function(obs_data,
     dplyr::left_join(recent_cases %>% dplyr::select(-id_name), by = "id")
   
   # Flag UTLAS
-  ## (1) UTLAs missing case forecasts
+  ## (1) missing case forecasts
   check_missing <- recent_cases %>%
     dplyr::filter(id %in% setdiff(recent_cases$id, unique(case_forecast$id))) %>%
     dplyr::mutate(flag = "missing")
@@ -166,11 +165,10 @@ check_case_forecasts <- function(obs_data,
   check_population <- data_in %>%
     dplyr::filter(upper_90 > population) %>%
     dplyr::mutate(flag = "population")
-  ## (3) check runaway uncertainty (def as)
+  ## (3) uncertainty
   check_uncertainty <- data_in %>%
-    dplyr::filter(
-      (last_case > 10 & upper_90 > 1e3*last_case) |
-        (last_case > 1 & upper_90 > 1e4*last_case)
+    dplyr::filter(!id %in% check_population$id,
+                  (last_case > 0 & upper_90 > 1e3*last_case)
     ) %>%
     dplyr::mutate(flag = "uncertainty")
   
