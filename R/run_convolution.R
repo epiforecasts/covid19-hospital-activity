@@ -66,8 +66,7 @@ convolution_forecast_observed <- regional_secondary(reports = dt_observed,
                                                       mean = 2.5, mean_sd = 0.5,
                                                       sd = 0.47, sd_sd = 0.25, max = 30
                                                     )),
-                                                    obs = EpiNow2::obs_opts(week_effect = FALSE,
-                                                                            scale = list(mean = 0.2, sd = 0.1)),
+                                                    obs = EpiNow2::obs_opts(week_effect = FALSE),
                                                     burn_in = 14,
                                                     control = list(adapt_delta = 0.99, max_treedepth = 15),
                                                     return_fit = FALSE,
@@ -95,14 +94,14 @@ dt_forecast <- data.table::data.table(df_forecast)
 # Run forecast
 convolution_forecast_rt <- regional_secondary(reports = dt_observed,
                                               case_forecast = dt_forecast,
+                                              priors = priors,
                                               secondary = secondary_opts(type = "incidence"),
                                               delays = delay_opts(list(
                                                 mean = 2.5, mean_sd = 0.5,
                                                 sd = 0.47, sd_sd = 0.25, max = 30
                                               )),
-                                              obs = EpiNow2::obs_opts(week_effect = FALSE,
-                                                                      scale = list(mean = 0.2, sd = 0.1)),
-                                              burn_in = 21,
+                                              obs = EpiNow2::obs_opts(week_effect = FALSE),
+                                              burn_in = 14,
                                               control = list(adapt_delta = 0.99, max_treedepth = 15),
                                               return_fit = FALSE,
                                               return_plots = FALSE,
