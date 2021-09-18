@@ -30,9 +30,7 @@ run_arimareg_x <- function(lag = 7, forecast_date, dat_in){
   return(list(samples = arima_samples,
               summary = arima_summary))
   
-  
 }
-
 
 # Lag 0 -------------------------------------------------------------------
 
