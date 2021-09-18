@@ -1,4 +1,11 @@
 
+# Models ------------------------------------------------------------------
+
+# 1. observed future cases, CHR prior scale = list(mean = 0.2, sd = 0.1)
+# 2. observed future cases, regional CHR prior
+# 3. forecast future cases, CHR prior scale = list(mean = 0.2, sd = 0.1)
+# 4. observed future cases, regional CHR prior
+
 # Estimate priors ---------------------------------------------------------
 
 # Reshape observed data
@@ -33,7 +40,8 @@ priors <- fit$summarised_posterior %>%
   dplyr::select(region = id, variable, mean, se_mean, sd, contains("lower"), median, contains("upper"))
 
 
-# Observed cases ----------------------------------------------------------
+
+# Set-up ------------------------------------------------------------------
 
 # Reshape observed data
 df_observed <- dat %>%
@@ -43,88 +51,160 @@ df_observed <- dat %>%
   na.omit()
 dt_observed <- data.table::data.table(df_observed)
 
-# Future case values (observed values)
-df_forecast_in <- dat %>%
+# Future case values (observed)
+df_future_in <- dat %>%
   dplyr::filter(date > forecast_date,
                 date <= forecast_date + 14) %>%
   dplyr::select(region = id, date, cases)
-df_forecast <- purrr::map_df(.x = 1:1000, .f = ~ {
-  out <- df_forecast_in %>%
+df_future_obs <- purrr::map_df(.x = 1:1000, .f = ~ {
+  out <- df_future_in %>%
     dplyr::mutate(sample = as.integer(.x))
   return(out)
 }) %>%
   dplyr::bind_rows()
-dt_forecast <- data.table::data.table(df_forecast)
+dt_future_obs <- data.table::data.table(df_future_obs)
+
+# Future case values (forecast)
+df_future_forecast <- case_forecast$samples
+dt_future_forecast <- data.table::data.table(df_future_forecast)
 
 
-# Run forecast
-convolution_forecast_observed <- regional_secondary(reports = dt_observed,
-                                                    case_forecast = dt_forecast,
-                                                    priors = priors,
-                                                    secondary = secondary_opts(type = "incidence"),
-                                                    delays = delay_opts(list(
-                                                      mean = 2.5, mean_sd = 0.5,
-                                                      sd = 0.47, sd_sd = 0.25, max = 30
-                                                    )),
-                                                    obs = EpiNow2::obs_opts(week_effect = FALSE),
-                                                    burn_in = 14,
-                                                    control = list(adapt_delta = 0.99, max_treedepth = 15),
-                                                    return_fit = FALSE,
-                                                    return_plots = FALSE,
-                                                    verbose = TRUE)
 
-# Reshape forecast samples
-convolution_samples_observed <- convolution_forecast_observed$samples %>%
+# Observed cases, no `priors` ---------------------------------------------
+
+convolution_forecast <- regional_secondary(reports = dt_observed,
+                                           case_forecast = dt_future_obs,
+                                           secondary = secondary_opts(type = "incidence"),
+                                           delays = delay_opts(list(
+                                             mean = 2.5, mean_sd = 0.5,
+                                             sd = 0.47, sd_sd = 0.25, max = 30
+                                           )),
+                                           obs = EpiNow2::obs_opts(week_effect = FALSE,
+                                                                   scale = list(mean = 0.2, sd = 0.1)),
+                                           burn_in = 14,
+                                           control = list(adapt_delta = 0.99, max_treedepth = 15),
+                                           return_fit = FALSE,
+                                           return_plots = FALSE,
+                                           verbose = TRUE)
+
+# Model samples and summary
+convolution_model_samples <- convolution_forecast$samples %>%
   dplyr::mutate(value = round(value)) %>%
   dplyr::filter(date > forecast_date) %>%
   dplyr::mutate(forecast_from = forecast_date,
                 horizon = as.integer(date - forecast_from),
-                model = "convolution_observed") %>%
+                model = "convolution_observed_noprior") %>%
   dplyr::select(id = region, sample, horizon, value, forecast_from, model)
-# Make forecast summary
-convolution_summary_observed <- forecast_summary(samples = convolution_samples_observed)
+convolution_model_summary <- forecast_summary(samples = convolution_model_samples)
 
+# Full output
+convolution_samples <- convolution_model_samples
+convolution_summary <- convolution_model_summary
 
-# Forecast cases ----------------------------------------------------------
+# Observed cases, regional `priors` ---------------------------------------
 
-# Convert forecast from UTLA to Trust
-df_forecast <- case_forecast$samples
-dt_forecast <- data.table::data.table(df_forecast)
+convolution_forecast <- regional_secondary(reports = dt_observed,
+                                           case_forecast = dt_future_obs,
+                                           priors = priors,
+                                           secondary = secondary_opts(type = "incidence"),
+                                           delays = delay_opts(list(
+                                             mean = 2.5, mean_sd = 0.5,
+                                             sd = 0.47, sd_sd = 0.25, max = 30
+                                           )),
+                                           obs = EpiNow2::obs_opts(week_effect = FALSE),
+                                           burn_in = 14,
+                                           control = list(adapt_delta = 0.99, max_treedepth = 15),
+                                           return_fit = FALSE,
+                                           return_plots = FALSE,
+                                           verbose = TRUE)
 
-# Run forecast
-convolution_forecast_rt <- regional_secondary(reports = dt_observed,
-                                              case_forecast = dt_forecast,
-                                              priors = priors,
-                                              secondary = secondary_opts(type = "incidence"),
-                                              delays = delay_opts(list(
-                                                mean = 2.5, mean_sd = 0.5,
-                                                sd = 0.47, sd_sd = 0.25, max = 30
-                                              )),
-                                              obs = EpiNow2::obs_opts(week_effect = FALSE),
-                                              burn_in = 14,
-                                              control = list(adapt_delta = 0.99, max_treedepth = 15),
-                                              return_fit = FALSE,
-                                              return_plots = FALSE,
-                                              verbose = TRUE)
-
-# Reshape forecast samples
-convolution_samples_rt <- convolution_forecast_rt$samples %>%
+# Model samples and summary
+convolution_model_samples <- convolution_forecast$samples %>%
   dplyr::mutate(value = round(value)) %>%
   dplyr::filter(date > forecast_date) %>%
   dplyr::mutate(forecast_from = forecast_date,
                 horizon = as.integer(date - forecast_from),
-                model = "convolution_forecast") %>%
+                model = "convolution_observed_regprior") %>%
   dplyr::select(id = region, sample, horizon, value, forecast_from, model)
-# Make forecast summary
-convolution_summary_rt <- forecast_summary(samples = convolution_samples_rt)
+convolution_model_summary <- forecast_summary(samples = convolution_model_samples)
+
+# Full output
+convolution_samples <- convolution_samples %>%
+  dplyr::bind_rows(convolution_model_samples)
+convolution_summary <- convolution_summary %>%
+  dplyr::bind_rows(convolution_model_summary)
 
 
-# Save forecast -----------------------------------------------------------
+# Forecast cases, no `priors` ---------------------------------------------
 
-convolution_samples <- convolution_samples_observed %>%
-  dplyr::bind_rows(convolution_samples_rt)
-convolution_summary <- convolution_summary_observed %>%
-  dplyr::bind_rows(convolution_summary_rt)
+convolution_forecast <- regional_secondary(reports = dt_observed,
+                                           case_forecast = dt_future_forecast,
+                                           secondary = secondary_opts(type = "incidence"),
+                                           delays = delay_opts(list(
+                                             mean = 2.5, mean_sd = 0.5,
+                                             sd = 0.47, sd_sd = 0.25, max = 30
+                                           )),
+                                           obs = EpiNow2::obs_opts(week_effect = FALSE,
+                                                                   scale = list(mean = 0.2, sd = 0.1)),
+                                           burn_in = 14,
+                                           control = list(adapt_delta = 0.99, max_treedepth = 15),
+                                           return_fit = FALSE,
+                                           return_plots = FALSE,
+                                           verbose = TRUE)
+
+# Model samples and summary
+convolution_model_samples <- convolution_forecast$samples %>%
+  dplyr::mutate(value = round(value)) %>%
+  dplyr::filter(date > forecast_date) %>%
+  dplyr::mutate(forecast_from = forecast_date,
+                horizon = as.integer(date - forecast_from),
+                model = "convolution_forecast_noprior") %>%
+  dplyr::select(id = region, sample, horizon, value, forecast_from, model)
+convolution_model_summary <- forecast_summary(samples = convolution_model_samples)
+
+# Full output
+convolution_samples <- convolution_samples %>%
+  dplyr::bind_rows(convolution_model_samples)
+convolution_summary <- convolution_summary %>%
+  dplyr::bind_rows(convolution_model_summary)
+
+
+
+# Forecast cases, regional `priors` ---------------------------------------
+
+convolution_forecast <- regional_secondary(reports = dt_observed,
+                                           case_forecast = dt_future_forecast,
+                                           priors = priors,
+                                           secondary = secondary_opts(type = "incidence"),
+                                           delays = delay_opts(list(
+                                             mean = 2.5, mean_sd = 0.5,
+                                             sd = 0.47, sd_sd = 0.25, max = 30
+                                           )),
+                                           obs = EpiNow2::obs_opts(week_effect = FALSE),
+                                           burn_in = 14,
+                                           control = list(adapt_delta = 0.99, max_treedepth = 15),
+                                           return_fit = FALSE,
+                                           return_plots = FALSE,
+                                           verbose = TRUE)
+
+# Model samples and summary
+convolution_model_samples <- convolution_forecast$samples %>%
+  dplyr::mutate(value = round(value)) %>%
+  dplyr::filter(date > forecast_date) %>%
+  dplyr::mutate(forecast_from = forecast_date,
+                horizon = as.integer(date - forecast_from),
+                model = "convolution_forecast_regprior") %>%
+  dplyr::select(id = region, sample, horizon, value, forecast_from, model)
+convolution_model_summary <- forecast_summary(samples = convolution_model_samples)
+
+# Full output
+convolution_samples <- convolution_samples %>%
+  dplyr::bind_rows(convolution_model_samples)
+convolution_summary <- convolution_summary %>%
+  dplyr::bind_rows(convolution_model_summary)
+
+# Save results ------------------------------------------------------------
+
 forecast_name <- paste0("convolution_", forecast_date, ".rds")
 saveRDS(object = convolution_samples, file = here::here("data", "out", "admissions_forecast", "samples", forecast_name))
 saveRDS(object = convolution_summary, file = here::here("data", "out", "admissions_forecast", "summary", forecast_name))
