@@ -109,5 +109,13 @@ ensemble_summary <- ensemble_forecast(model_forecasts = forecast_summary,
                                      models = ensemble_forecast_models) %>%
                      dplyr::mutate(model = paste0(model, "_forecast")))
 
-forecast_name <- paste0("fullensemble_", forecast_date, ".rds")
-saveRDS(object = ensemble_summary, file = here::here("data", "out", "admissions_forecast", "summary", forecast_name))
+# Save individual ensemble forecast summaries
+for(f in forecast_dates){
+  
+  forecast_name <- paste0("fullensemble_", f, ".rds")
+  saveRDS(object = ensemble_summary %>%
+            dplyr::filter(forecast_from == as.Date(f)),
+          file = here::here("data", "out", "admissions_forecast", "summary", forecast_name))
+  
+}
+
