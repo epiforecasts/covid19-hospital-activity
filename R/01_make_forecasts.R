@@ -25,6 +25,10 @@ case_dat <- load_case_data() %>%
 # Load combined Trust-level data (admissions + cases)
 dat <- load_combined_data(add_private = TRUE)
 
+# List of Trust mergers
+trust_mergers <- read_xlsx_quietly(path = here::here("data", "raw", "trust_mergers.xlsx"))$result %>%
+  dplyr::mutate(from_date = as.Date(from_date))
+
 
 # Update individual model forecasts ---------------------------------------
 
@@ -41,6 +45,21 @@ for(forecast_date in forecast_dates){
                                        level = "trust",
                                        replace_flag = TRUE,
                                        replace_model = "ae")
+  
+  # Manually 
+  if(forecast_date + 14 > as.Date("2021-02-01")){
+    
+    dat <- dat %>%
+      dplyr::filter(id != "RT3")
+    
+    if(forecast_date + 14 > as.Date("2021-04-01")){
+      
+      dat <- dat %>%
+        dplyr::filter(id != "RXH")
+      
+    }
+    
+  }
   
   # Baseline
   source(here::here("R", "run_baseline.R"))
@@ -66,10 +85,10 @@ for(forecast_date in forecast_dates){
 # Define constituent models
 ensemble_observed_models <- c("tsensemble_aez",
                               "arimareg_7_observed",
-                              "convolution_observed")
+                              "convolution_observed_noprior")
 ensemble_forecast_models <- c("tsensemble_aez",
                               "arimareg_7_forecast",
-                              "convolution_forecast")
+                              "convolution_forecast_noprior")
 
 # Load constituent model forecasts
 summary_dir <- here::here("data", "out", "admissions_forecast", "summary")
