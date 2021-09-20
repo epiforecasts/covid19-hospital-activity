@@ -11,7 +11,7 @@ source(here::here("R", "utils.R"))
 
 # Set up ------------------------------------------------------------------
 
-forecast_date <- as.Date("2021-09-05")
+forecast_date <- as.Date("2021-09-12")
 
 
 # Load and check case forecasts -------------------------------------------
@@ -91,8 +91,7 @@ convolution_obs <- dat_in %>%
   na.omit()
 
 convolution_forecast_rt <- regional_secondary(reports = convolution_obs,
-                                              case_forecast = case_forecast_samples %>%
-                                                dplyr::filter(!region %in% drop_trusts),
+                                              case_forecast = case_forecast_samples,
                                               secondary = secondary_opts(type = "incidence"),
                                               obs = EpiNow2::obs_opts(week_effect = FALSE,
                                                                       scale = list(mean = 0.2, sd = 0.1)),
