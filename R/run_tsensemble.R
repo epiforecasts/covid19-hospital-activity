@@ -19,8 +19,8 @@ tsensemble_samples <- ae_samples %>%
   dplyr::bind_rows(aez_samples)
 
 tsensemble_name <- paste0("tsensemble_", forecast_date, ".rds")
-saveRDS(object = aez_samples, file = here::here("data", "out", "admissions_forecast", "samples", tsensemble_name))
-saveRDS(object = aez_summary, file = here::here("data", "out", "admissions_forecast", "summary", tsensemble_name))
+saveRDS(object = tsensemble_samples, file = here::here("data", "out", "admissions_forecast", "samples", tsensemble_name))
+saveRDS(object = tsensemble_summary, file = here::here("data", "out", "admissions_forecast", "summary", tsensemble_name))
 
 
 
