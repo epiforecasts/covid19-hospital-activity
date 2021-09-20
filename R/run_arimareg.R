@@ -62,6 +62,19 @@ arimareg7 <- run_arimareg_x(dat_in = dat_in,
                             lag = 7,
                             forecast_date = forecast_date)
 
+
+# Lag 8 -------------------------------------------------------------------
+
+arimareg8 <- run_arimareg_x(dat_in = dat_in,
+                            lag = 8,
+                            forecast_date = forecast_date)
+
+# Lag 9 -------------------------------------------------------------------
+
+arimareg9 <- run_arimareg_x(dat_in = dat_in,
+                            lag = 9,
+                            forecast_date = forecast_date)
+
 # Lag 10 ------------------------------------------------------------------
 
 arimareg10 <- run_arimareg_x(dat_in = dat_in,
@@ -77,6 +90,8 @@ arimareg_samples <- arimareg0$samples %>%
   dplyr::bind_rows(arimareg5$samples) %>%
   dplyr::bind_rows(arimareg6$samples) %>%
   dplyr::bind_rows(arimareg7$samples) %>%
+  dplyr::bind_rows(arimareg8$samples) %>%
+  dplyr::bind_rows(arimareg9$samples) %>%
   dplyr::bind_rows(arimareg10$samples)
 
 arimareg_summary <- arimareg0$summary %>%
@@ -84,6 +99,8 @@ arimareg_summary <- arimareg0$summary %>%
   dplyr::bind_rows(arimareg5$summary) %>%
   dplyr::bind_rows(arimareg6$summary) %>%
   dplyr::bind_rows(arimareg7$summary) %>%
+  dplyr::bind_rows(arimareg8$summary) %>%
+  dplyr::bind_rows(arimareg9$summary) %>%
   dplyr::bind_rows(arimareg10$summary)
 
 arimareg_name <- paste0("arimareg_", forecast_date, ".rds")
