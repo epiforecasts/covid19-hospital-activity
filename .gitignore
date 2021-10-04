@@ -7,3 +7,5 @@ data/private/
 data/out/_archive/
 R/_archive/
 reports/_archive
+data/out/admissions_forecast/regional_chr.rds
+data/out/admissions_forecast/samples/
