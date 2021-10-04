@@ -32,7 +32,9 @@ Estimating the optimal lag between cases and hospital admissions (national and b
 
 ```{r init}
 
-forecast_dates <- as.character(seq.Date(from = as.Date("2020-08-02")+63, to = as.Date("2021-04-25"), by = "week"))
+forecast_dates <- as.character(seq.Date(from = as.Date("2020-10-04"),
+                                        to = as.Date("2021-04-25"),
+                                        by = "week"))
 df <- load_combined_data()
 
 ```
@@ -145,7 +147,8 @@ g_combined_reg <- df_reg %>%
 corr_nat %>%
   dplyr::group_by(id, lag_days) %>%
   dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
-  dplyr::filter(corr > 0.995*max(corr))
+  dplyr::filter(corr > 0.995*max(corr)) %>%
+  dplyr::arrange(lag_days)
 
 # By NHS region
 corr_reg %>%
@@ -153,7 +156,8 @@ corr_reg %>%
   dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
   dplyr::filter(corr > 0.995*max(corr)) %>%
   dplyr::group_by(id) %>%
-  dplyr::filter(lag_days %in% c(max(lag_days), min(lag_days)))
+  dplyr::filter(lag_days %in% c(max(lag_days), min(lag_days))) %>%
+  dplyr::arrange(lag_days)
 
 ```
 
@@ -211,34 +215,53 @@ g_correlation_nat <- corr_nat %>%
   dplyr::group_by(id, lag_days) %>%
   dplyr::summarise(corr = mean(corr)) %>%
   ggplot(aes(x = lag_days, y = corr)) +
-  geom_line() +
+  geom_line(lwd = 0.8) +
+  geom_point(data = corr_nat %>%
+               dplyr::group_by(id, lag_days) %>%
+               dplyr::summarise(corr = mean(corr)) %>%
+               dplyr::filter(corr == max(corr)),
+             size = 3) +
   scale_x_continuous(breaks = seq(0, 20, 2)) +
-  scale_y_continuous(limits = c(0.5, 1)) +
+  scale_y_continuous(limits = c(0.7, 1)) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   labs(x = "Lag (days)", y = "Correlation",
        col = "NHS region",
        title = "A") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = 14))
 
 g_correlation_reg <- corr_reg %>%
   dplyr::filter(!is.na(id)) %>%
   dplyr::group_by(id, lag_days) %>%
   dplyr::summarise(corr = mean(corr)) %>%
   ggplot(aes(x = lag_days, y = corr)) +
-  geom_line(aes(col = id), lwd = 0.6) +
+  geom_line(aes(col = id), lwd = 0.8) +
+  geom_point(data = corr_reg %>%
+               dplyr::group_by(id, lag_days) %>%
+               dplyr::summarise(corr = mean(corr)) %>%
+               dplyr::group_by(id) %>%
+               dplyr::filter(corr == max(corr)),
+             aes(col = id), size = 3) +
   geom_line(data = corr_reg %>%
               dplyr::filter(!is.na(id)) %>%
               dplyr::group_by(lag_days) %>%
-              dplyr::summarise(corr = mean(corr)), lwd = 0.6, lty = 2) +
+              dplyr::summarise(corr = mean(corr)), lwd = 0.8, lty = 2) +
+  geom_point(data = corr_reg %>%
+              dplyr::filter(!is.na(id)) %>%
+              dplyr::group_by(lag_days) %>%
+              dplyr::summarise(corr = mean(corr)) %>%
+               dplyr::filter(corr == max(corr)),
+             size = 3) +
   scale_x_continuous(breaks = seq(0, 20, 2)) +
-  scale_y_continuous(limits = c(0.5, 1)) +
+  scale_y_continuous(limits = c(0.7, 1)) +
   scale_color_brewer(palette = "Set2") +
   scale_fill_brewer(palette = "Set2") +
   labs(x = "Lag (days)", y = "",
        col = "NHS region",
        title = "B") +
-  theme_bw()
+  theme_bw() +
+  theme(text = element_text(size = 14))
 
 #####
 g_correlation_nat | g_correlation_reg
