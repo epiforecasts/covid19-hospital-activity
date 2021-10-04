@@ -88,7 +88,7 @@ trust_cluster_daily <- purrr::map_df(.x = 3:10, .f = ~ {
   
   out <- return_clusters(df = dat_daily_in,
                          k = .x,
-                         exclude_ids = trust_adms$id[which(trust_adms$total_adm < 400)])$clusters %>%
+                         exclude_ids = trust_adms$id[which(trust_adms$total_adm < 1000)])$clusters %>%
     dplyr::mutate(k = .x)
   
 }) %>%
@@ -105,7 +105,7 @@ trust_cluster_weekly <- purrr::map_df(.x = 3:10, .f = ~ {
   
   out <- return_clusters(df = dat_weekly_in,
                          k = .x,
-                         exclude_ids = trust_adms$id[which(trust_adms$total_adm < 400)])$clusters %>%
+                         exclude_ids = trust_adms$id[which(trust_adms$total_adm < 1000)])$clusters %>%
     dplyr::mutate(k = .x)
   
 }) %>%
