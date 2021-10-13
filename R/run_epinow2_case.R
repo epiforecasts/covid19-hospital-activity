@@ -17,7 +17,8 @@ reported_cases <- raw_case %>%
 # Define Covid-19 distributions
 generation_time <- EpiNow2::get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
 incubation_period <- EpiNow2::get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
-reporting_delay <- readRDS(file = here::here("data", "raw", "onset_to_admission_delay.rds"))
+# Reporting delay from https://github.com/epiforecasts/covid-rt-estimates/tree/master/data
+reporting_delay <- readRDS(file = here::here("data", "raw", "uk_onset_to_case.rds"))
 
 # Set-up for EpiNow2::regional_epinow
 n_cores <- EpiNow2::setup_future(reported_cases = reported_cases)
