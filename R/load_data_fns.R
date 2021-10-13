@@ -59,7 +59,8 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
     
   }
   
-  
+  out <- out %>%
+    dplyr::filter(! id %in% trust_mergers$trust_code_old[which(trust_mergers$from_date < max(out$date))])
   
   return(out)
   
