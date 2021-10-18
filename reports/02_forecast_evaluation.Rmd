@@ -183,21 +183,16 @@ g_overall_calibration <- emp_coverage %>%
   theme(text = element_text(size = 14)) +
   guides(col = guide_legend(nrow=1, byrow=TRUE))
 
-g_swis_horizon <- rank_horizon %>%
-  dplyr::filter(model != "baseline") %>%
+g_rwis_horizon <- rank_horizon %>%
   dplyr::left_join(tb_main, by = "model") %>%
   dplyr::group_by(horizon) %>%
   dplyr::mutate(label = ordered(label, rev(main_model_labels)),
                 horizon = as.character(horizon),
                 horizon = ordered(horizon, c("7", "14"))) %>%
-  ggplot(aes(y = label, x = swis - 1, col = horizon)) +
+  ggplot(aes(y = label, x = rwis, col = horizon)) +
   geom_point(size = 4) +
-  geom_vline(xintercept = 0, lty = 2) +
-  scale_x_continuous(limits = c(-0.4, NA),
-                     breaks = seq(-1, 2, 0.2),
-                     labels = seq(-1, 2, 0.2) + 1) +
   scale_color_brewer(palette = "Paired") +
-  labs(x = "Scaled WIS", y = "",
+  labs(x = "Relative WIS", y = "",
        title = "B",
        col = "Horizon (days)") +
   theme_bw() +
@@ -225,7 +220,7 @@ g_individual_rank <- rank_all %>%
 
 #####
 
-g_fig2 <- (g_overall_calibration | g_swis_horizon) /
+g_fig2 <- (g_overall_calibration | g_rwis_horizon) /
   g_individual_rank
 
 ggsave(plot = g_fig2,
@@ -266,36 +261,6 @@ tb_scores %>%
   dplyr::mutate(bias = "") %>%
   kableExtra::kbl() %>%
   kableExtra::kable_styling()
-
-```
-
-### Figure S5
-```{r}
-
-g_wiscontrib <- tb_scores %>%
-  dplyr::mutate(p_Sharpness = sharpness/interval_score,
-                p_Underprediction = underprediction/interval_score,
-                p_Overprediction = overprediction/interval_score) %>%
-  dplyr::select(horizon, model, label, contains("p_")) %>%
-  tidyr::pivot_longer(cols = contains("p_")) %>%
-  dplyr::mutate(name = str_remove(name, "p_"),
-                label = ordered(label, rev(main_model_labels))) %>%
-  ggplot(aes(y = label, x = value, fill = name)) +
-  geom_col() +
-  geom_vline(xintercept = 0.333, col = "white", lty = 2) +
-  geom_vline(xintercept = 0.666, col = "white", lty = 2) +
-  facet_wrap(horizon ~ .) +
-  scale_x_continuous(breaks = seq(0, 1, 0.2)) +
-  scale_fill_brewer(palette = "Dark2") +
-  labs(x = "WIS contribution", y = "",
-       fill = "WIS component") +
-  theme_bw() +
-  theme(text = element_text(size = fig_text_size))
-
-ggsave(plot = g_wiscontrib,
-       filename = here::here("data", "out", "figures", "figure_s5.png"),
-       width = 14, height = 8, units = "in",
-       dpi = 500)
 
 ```
 
@@ -348,6 +313,11 @@ rank_time %>%
   dplyr::filter(rank == min(rank)) %>%
   dplyr::group_by(horizon, model) %>%
   dplyr::summarise(n = n())
+
+# improvement of mean-ensemble over baseline
+rank_time %>%
+  dplyr::filter(horizon == 7,
+                model == "mean_ensemble_forecast")
 
 ```
 
@@ -429,7 +399,7 @@ ggsave(plot = g_figure_3,
 ```
 
 
-### Figure S6
+### Figure S5
 ```{r}
 
 # Observed average daily admissions
@@ -491,14 +461,14 @@ g_time_mae <- mae_time %>%
 
 #####
 
-g_figure_s6 <- guide_area() /
+g_figure_s5 <- guide_area() /
   g_time_rwis /
   g_time_mae /
   g_time_obs +
   plot_layout(guides = "collect", heights = c(0.2, 1, 1, 1))
 
-ggsave(plot = g_figure_s6,
-       filename = here::here("data", "out", "figures", "figure_s6.png"),
+ggsave(plot = g_figure_s5,
+       filename = here::here("data", "out", "figures", "figure_s5.png"),
        width = 14, height = 8, units = "in",
        dpi = 500)
 
@@ -648,7 +618,7 @@ ggsave(plot = g_figure_4,
 
 ```
 
-### Figure S7
+### Figure S6
 ```{r}
 
 g_location_scatter <- rank_trust %>%
@@ -725,12 +695,12 @@ g_location_scattermae <- mae_trust %>%
 
 #####
 
-g_figure_s7 <- (g_location_scatter | g_location_scattermae) /
+g_figure_s6 <- (g_location_scatter | g_location_scattermae) /
   (g_location_rank + plot_layout(guides = "keep")) +
   plot_layout(heights = c(3, 1.5), guides = "collect")
 
-ggsave(plot = g_figure_s7,
-       filename = here::here("data", "out", "figures", "figure_s7.png"),
+ggsave(plot = g_figure_s6,
+       filename = here::here("data", "out", "figures", "figure_s6.png"),
        width = 14, height = 10, units = "in",
        dpi = 500)
 
@@ -766,18 +736,18 @@ rank_obs_all <- readRDS(file = here::here(score_dir, "pairwise_observed.rds"))
 
 # Comparing to models using forecast future COVID-19 cases
 compare_horizon <- rank_horizon %>%
-  dplyr::select(horizon, model_for = model, swis_for = swis) %>%
+  dplyr::select(horizon, model_for = model, wis_for = swis) %>%
   dplyr::left_join(tb_main,
                    by = c("model_for" = "model")) %>%
   dplyr::left_join(tb_obs,
                    by = "label")  %>%
   dplyr::left_join(rank_obs_horizon %>%
-                     dplyr::select(horizon, model, swis_obs = swis),
+                     dplyr::select(horizon, model, wis_obs = swis),
                    by = c("horizon", "model")) %>%
-  dplyr::select(horizon, label, swis_for, swis_obs) %>%
+  dplyr::select(horizon, label, wis_for, wis_obs) %>%
   dplyr::mutate(label = ordered(label, main_model_labels),
-                swis_for = round(swis_for, 2),
-                swis_obs = round(swis_obs, 2))
+                wis_for = round(wis_for, 2),
+                wis_obs = round(wis_obs, 2))
 
 compare_time <- rank_time %>%
   dplyr::select(horizon, forecast_from, model_for = model, wis_for = swis) %>%
@@ -875,7 +845,7 @@ compare_horizon %>%
 
 ```
 
-### Figure S9
+### Figure S7
 ```{r}
 
 g_value_arima_time <- compare_time %>%
@@ -951,12 +921,12 @@ g_value_convolution_trust <- compare_trust %>%
 
 #####
 
-g_fig_s9 <- (g_value_arima_time | g_value_arima_trust) /
+g_fig_s7 <- (g_value_arima_time | g_value_arima_trust) /
   (g_value_convolution_time | g_value_convolution_trust) +
   plot_layout(heights = c(1, 2))
 
-ggsave(plot = g_fig_s9,
-       filename = here::here("data", "out", "figures", "figure_s9.png"),
+ggsave(plot = g_fig_s7,
+       filename = here::here("data", "out", "figures", "figure_s7.png"),
        width = 14, height = 8, units = "in",
        dpi = 500)
 
@@ -964,7 +934,7 @@ ggsave(plot = g_fig_s9,
 
 ```
 
-### Figures S10 and S11
+### Figures S8 and S9
 ```{r}
 
 # Calibration
@@ -990,20 +960,15 @@ g_value_calibration <- emp_coverage %>%
   guides(col = guide_legend(nrow=1, byrow=TRUE))
 
 g_value_horizon <- rank_obs_horizon %>%
-  dplyr::filter(model != "baseline") %>%
   dplyr::left_join(tb_obs, by = "model") %>%
   dplyr::group_by(horizon) %>%
   dplyr::mutate(label = ordered(label, rev(main_model_labels)),
                 horizon = as.character(horizon),
                 horizon = ordered(horizon, c("7", "14"))) %>%
-  ggplot(aes(y = label, x = swis - 1, col = horizon)) +
+  ggplot(aes(y = label, x = rwis, col = horizon)) +
   geom_point(size = 4) +
-  geom_vline(xintercept = 0, lty = 2) +
-  scale_x_continuous(limits = c(-0.4, NA),
-                     breaks = seq(-1, 2, 0.2),
-                     labels = seq(-1, 2, 0.2) + 1) +
   scale_color_brewer(palette = "Paired") +
-  labs(x = "Scaled WIS", y = "",
+  labs(x = "Relative WIS", y = "",
        title = "B",
        col = "Horizon (days)") +
   theme_bw() +
@@ -1041,7 +1006,7 @@ g_value_time7 <- rank_obs_time %>%
   geom_bump(lwd = 0.8) +
   geom_point(size = 2) +
   # facet_grid(model ~ .) +
-  scale_x_date(breaks = plot_dates[seq(2, length(plot_dates), 4)], date_labels = "%d %b %y",
+  scale_x_date(breaks = plot_dates[seq(2, length(plot_dates), 8)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-05-01"))) +
   scale_y_continuous(limits = c(0.5, 2.4), breaks = seq(0, 3, 0.4)) +
   color_models +
@@ -1061,7 +1026,7 @@ g_value_time14 <- rank_obs_time %>%
   ggplot(aes(x = forecast_from, y = rwis, col = label)) +
   geom_bump(lwd = 0.8) +
   geom_point(size = 2) +
-  scale_x_date(breaks = plot_dates[seq(2, length(plot_dates), 4)], date_labels = "%d %b %y",
+  scale_x_date(breaks = plot_dates[seq(2, length(plot_dates), 8)], date_labels = "%d %b %y",
                limits = c(as.Date("2020-10-01"), as.Date("2021-05-01"))) +
   scale_y_continuous(limits = c(0.5, 2.4), breaks = seq(0, 3, 0.4)) +
   color_models +
@@ -1126,21 +1091,21 @@ g_value_trust14 <- rank_obs_trust %>%
 
 #####
 
-g_fig_s10 <- ((g_value_calibration | (g_value_horizon + plot_layout(guides = "keep"))) /
+g_fig_s8 <- ((g_value_calibration | (g_value_horizon + plot_layout(guides = "keep"))) /
      g_value_rwisrank + plot_layout(guides = "keep"))
 
-ggsave(plot = g_fig_s10,
-       filename = here::here("data", "out", "figures", "figure_s10.png"),
+ggsave(plot = g_fig_s8,
+       filename = here::here("data", "out", "figures", "figure_s8.png"),
        width = 14, height = 8, units = "in",
        dpi = 500)
 
-g_fig_s11 <- guide_area() /
+g_fig_s9 <- guide_area() /
   (g_value_time7 | g_value_time14) /
   (g_value_trust7 | g_value_trust14) +
   plot_layout(heights = c(0.2, 1, 1), guides = "collect")
 
-ggsave(plot = g_fig_s11,
-       filename = here::here("data", "out", "figures", "figure_s11.png"),
+ggsave(plot = g_fig_s9,
+       filename = here::here("data", "out", "figures", "figure_s9.png"),
        width = 14, height = 8, units = "in",
        dpi = 500)
 
