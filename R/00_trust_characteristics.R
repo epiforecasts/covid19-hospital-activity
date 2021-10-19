@@ -1,5 +1,6 @@
 
 library(tidyverse); library(covid19.nhs.data)
+source(here("R", "load_data_fns.R"))
 source("R/utils.R")
 
 # Load raw data
@@ -20,7 +21,9 @@ weekly_data <- all_data %>%
 raw_data <- readr::read_csv(file = here::here("data", "raw", "etr.csv"),
                             col_names = FALSE) %>%
   dplyr::select(id = X1, postcode = X10) %>%
-  dplyr::filter(id %in% covid19.nhs.data::trust_ltla_mapping$trust_code)
+  dplyr::filter(id %in% covid19.nhs.data::trust_ltla_mapping$trust_code) %>%
+  dplyr::mutate(postcode = ifelse(postcode == "CB23 3RE", "CB2 0AY", postcode)) %>%
+  dplyr::bind_rows(tibble(id = "R0A", postcode = "M13 9WL"))
 
 # Trust location (long-lat) -----------------------------------------------
 
