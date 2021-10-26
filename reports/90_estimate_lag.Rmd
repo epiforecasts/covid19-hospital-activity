@@ -213,7 +213,7 @@ guide_area() / (g_tile_nat | g_tile_reg) +
 
 g_correlation_nat <- corr_nat %>%
   dplyr::group_by(id, lag_days) %>%
-  dplyr::summarise(corr = mean(corr)) %>%
+  dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
   ggplot(aes(x = lag_days, y = corr)) +
   geom_line(lwd = 0.8) +
   geom_point(data = corr_nat %>%
@@ -234,7 +234,7 @@ g_correlation_nat <- corr_nat %>%
 g_correlation_reg <- corr_reg %>%
   dplyr::filter(!is.na(id)) %>%
   dplyr::group_by(id, lag_days) %>%
-  dplyr::summarise(corr = mean(corr)) %>%
+  dplyr::summarise(corr = mean(corr, na.rm = TRUE)) %>%
   ggplot(aes(x = lag_days, y = corr)) +
   geom_line(aes(col = id), lwd = 0.8) +
   geom_point(data = corr_reg %>%
