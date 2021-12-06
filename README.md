@@ -2,10 +2,10 @@
 
 This repo contains forecasts of Trust-level Covid-19 hospital admissions in England. It is split into two (related) parts:
 
-1. Forecasts and analyses for the manuscript "*Short-term forecasting of Covid-19 hospital admissions in NHS Trusts in England, August 2020 - January 2021*".
+1. Forecasts and analyses for the manuscript "*Comparative assessment of methods for short-term forecasts of COVID-19 admissions in England at the local level*".
 2. Ongoing weekly forecasts from 14 March 2021, contained in [current_forecasts/](https://github.com/epiforecasts/covid19-hospital-activity/tree/main/current_forecasts).
 
-## *Short-term forecasting of Covid-19 hospital admissions in NHS Trusts in England, August 2020 - January 2021*
+## *Comparative assessment of methods for short-term forecasts of COVID-19 admissions in England at the local level*
 
 Forecasts and related analyses are made with the following scripts:
 
