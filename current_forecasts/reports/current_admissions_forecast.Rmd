@@ -24,6 +24,7 @@ source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
 forecast_date <- as.Date("2021-12-08")
+areas <- c()
 
 ```
 
@@ -44,7 +45,6 @@ exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
   dplyr::mutate(label = ifelse(n == 1,
                                paste0(trust_name, " (UTLA: ", utla_names, ")" ),
                                paste0(trust_name, " (UTLAs: ", utla_names, ")" )))
-  # dplyr::bind_rows(manual_remove)
 
 ```
 
@@ -678,6 +678,37 @@ plot_forecast_ribbons(observed = admissions %>%
 
 ```
 
+## Focus Trusts {.tabset .tabset-pills}
+
+```{r}
+
+focus_trusts <- scatter_data %>%
+  arrange(-p_14) %>%
+  slice_head(n = 5) %>%
+  unique()
+
+plot_forecast_ribbons(observed = admissions %>%
+                        dplyr::filter(date > forecast_date - 28,
+                                      date <= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+                      forecast = current_forecast,
+                      trusts = focus_trusts$id,
+                      models = c("ts_ensemble", "regression_arima", "convolution_rt"),
+                      facet_models = TRUE) +
+  scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
+  scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
+  labs(title = "Top 5 Trusts with biggest probability of increase",
+       subtitle = "Time series ensemble, ARIMA regression, and convolution",
+       caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
+  theme(legend.position = "none", strip.text.x = element_text(size = 8)) +
+  ## Adding current observed data (dashed)
+  geom_line(data = admissions %>%
+                        dplyr::filter(id %in% focus_trusts,
+                                      date >= forecast_date) %>%
+                        dplyr::rename(observed = adm),
+            aes(x = date, y = observed), lty = 2)
+
+```
 
 
 # Past forecasts {.tabset}
