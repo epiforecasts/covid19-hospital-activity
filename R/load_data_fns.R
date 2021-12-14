@@ -41,9 +41,18 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
   
   if(add_private){
     
+    minmax_date <- out %>%
+      pivot_longer(cols = -c(nhs_region, id, date)) %>%
+      filter(!is.na(value)) %>%
+      group_by(name) %>%
+      summarise(max_date = max(date),
+                .groups = "drop") %>%
+      filter(max_date == min(max_date)) %>%
+      pull(max_date)
+    
     out_private <- readRDS(file = here::here("data", "private", "hospitalisations_trusts.rds")) %>%
       dplyr::select(id = org_code, date, all_adm = hospitalisations) %>%
-      dplyr::filter(date > max(out$date) | date < min(out$date)) %>%
+      dplyr::filter(date > minmax_date | date < min(out$date)) %>%
       dplyr::mutate(all_adm = ifelse(is.na(all_adm), 0, all_adm)) %>%
       tidyr::complete(id = unique(out$id), date) %>%
       dplyr::right_join(out %>% dplyr::select(nhs_region, id) %>% unique() %>% na.omit(), by = "id") %>%
@@ -55,6 +64,7 @@ load_hospital_data <- function(format = TRUE, keep_data = c("all_adm", "bed_occ"
       dplyr::ungroup()
     
     out <- out %>%
+      dplyr::filter(date <= minmax_date) %>%
       dplyr::bind_rows(out_private)
     
   }

@@ -11,7 +11,7 @@ source(here::here("R", "utils.R"))
 
 # Set up ------------------------------------------------------------------
 
-forecast_date <- as.Date("2021-10-17")
+forecast_date <- as.Date("2021-12-08")
 
 
 # Load and check case forecasts -------------------------------------------
@@ -37,16 +37,25 @@ saveRDS(object = case_forecast$flag,
 # Create input data -------------------------------------------------------
 
 # Load 'observed' Trust-level data (admissions + cases)
-dat <- load_combined_data()
+dat <- load_combined_data(add_private = TRUE)
+
+# Trust mergers
+trust_mergers <- readxl::read_xlsx(path = here::here("data", "raw", "trust_mergers.xlsx")) %>%
+  mutate(from_date = as.Date(from_date))
 
 dat_in <- dat %>%
   dplyr::bind_rows(case_forecast$summary %>%
                      dplyr::rename(cases = case_forecast)) %>%
+  # dplyr::filter(date >= as.Date("2020-08-02"),
+  #               !is.na(id),
+  #               !is.na(nhs_region)) %>%
   dplyr::filter(date >= as.Date("2020-08-02"),
                 !is.na(id),
-                !is.na(nhs_region)) %>%
+                !id %in% trust_mergers$trust_code_old,
+                id != "RPY") %>%
   dplyr::group_by(id) %>%
-  dplyr::mutate(cases_lag7 = lag(cases, 7))
+  dplyr::mutate(cases_lag7 = lag(cases, 7)) %>%
+  dplyr::select(-bed_occ)
 
 
 # Update all forecasts ----------------------------------------------------

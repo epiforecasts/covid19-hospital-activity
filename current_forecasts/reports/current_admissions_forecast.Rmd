@@ -23,7 +23,7 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2021-10-17")
+forecast_date <- as.Date("2021-12-08")
 
 ```
 
@@ -622,7 +622,8 @@ plot_forecast_ribbons(observed = admissions %>%
                                       horizon <= 14),
                      trusts = "England",
                      trust_facet_var = "id",
-                     models = c("mean_ensemble", "EpiNow2"),
+                     models = c("mean_ensemble"),
+                     # models = c("mean_ensemble", "EpiNow2"),
                      facet_models = TRUE) +
   scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
   scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
@@ -658,7 +659,8 @@ plot_forecast_ribbons(observed = admissions %>%
                      trusts = setdiff(unique(region_forecast$id), "England"),
                      trust_facet_var = "id",
                      facet_col = 3,
-                     models = c("mean_ensemble", "EpiNow2"),
+                     models = c("mean_ensemble"),
+                     # models = c("mean_ensemble", "EpiNow2"),
                      facet_models = TRUE) +
   scale_x_date(breaks = "2 weeks", date_labels = "%d %b") +
   scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
