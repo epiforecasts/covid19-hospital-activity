@@ -11,7 +11,7 @@ source(here::here("R", "utils.R"))
 
 # Set up ------------------------------------------------------------------
 
-forecast_date <- as.Date("2021-12-08")
+forecast_date <- as.Date("2021-12-15")
 
 
 # Load and check case forecasts -------------------------------------------
