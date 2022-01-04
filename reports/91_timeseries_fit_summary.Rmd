@@ -1,0 +1,150 @@
+---
+title: "Summary of model structure"
+author: "Sophie Meakin"
+date: "16/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+```
+
+# Summary
+
+```{r}
+
+model_summary <- readRDS(file = here::here("data",
+                                           "out",
+                                           "evaluation",
+                                           "timeseries_fit_summary.rds"))
+
+```
+
+We summarise key characteristics of two autoregressive time series model (ARIMA and ETS).
+
+# ARIMA results
+
+
+```{r}
+
+arima_summary <- model_summary %>%
+  filter(model == "arima")
+
+```
+
+```{r}
+
+arima_pdq <- arima_summary %>%
+  filter(parameter %in% c("p", "d", "q")) %>%
+  mutate(parameter = ordered(parameter, c("p", "d", "q"))) %>%
+  group_by(parameter, model_ver, value) %>%
+  summarise(n = n()) %>%
+  pivot_wider(id_cols = c(parameter, value), names_from = model_ver, values_from = n)
+
+arima_intercept_trend <- arima_summary %>%
+  filter(parameter %in% c("intercept", "drift")) %>%
+  complete(id = unique(arima_summary$id), model_ver, forecast_date, model, parameter, fill = list(value = NA)) %>%
+  group_by(model_ver, parameter, forecast_date, id) %>%
+  summarise(has_intercept = !is.na(value)) %>%
+  group_by(model_ver, parameter) %>%
+  summarise(n = sum(has_intercept, na.rm = TRUE)) %>%
+  pivot_wider(id_cols = c(parameter), names_from = model_ver, values_from = n)
+
+arima_seasonal <- arima_summary %>%
+  filter(grepl("season", parameter)) %>%
+  group_by(model_ver, forecast_date, id) %>%
+  summarise(is_season = sum(value) > 0,
+            .groups = "drop") %>%
+  group_by(model_ver) %>%
+  summarise(n = sum(is_season, na.rm = TRUE),
+            .groups = "drop") %>%
+  mutate(parameter = "seasonal") %>%
+  pivot_wider(id_cols = c(parameter), names_from = model_ver, values_from = n) %>%
+  mutate(non_seasonal = 0)
+  
+```
+
+```{r}
+
+arima_pdq %>%
+  bind_rows(arima_intercept_trend) %>%
+  bind_rows(arima_seasonal)
+
+arima_pdq %>%
+  bind_rows(arima_intercept_trend) %>%
+  bind_rows(arima_seasonal) %>%
+  mutate(non_seasonal = round(100*non_seasonal/3780),
+         seasonal = round(100*seasonal/3780))
+
+```
+
+```{r}
+
+# Number of seasonal models per forecast date
+arima_summary %>%
+  filter(grepl("season", parameter)) %>%
+  group_by(forecast_date, id) %>%
+  summarise(is_season = sum(value) > 0) %>%
+  group_by(forecast_date) %>%
+  summarise(n_season = sum(is_season)) %>%
+  ggplot(aes(x = n_season)) +
+  geom_histogram(binwidth = 1)
+
+# Number of seasonal models per Trust
+arima_summary %>%
+  filter(grepl("season", parameter)) %>%
+  group_by(forecast_date, id) %>%
+  summarise(is_season = sum(value) > 0) %>%
+  group_by(id) %>%
+  summarise(n_season = sum(is_season)) %>%
+  ggplot(aes(x = n_season)) +
+  geom_histogram(binwidth = 1)
+
+```
+
+# ETS results
+
+## Trend component
+
+```{r}
+
+ets <- model_summary %>%
+  filter(model == "ets") %>%
+  mutate(parameter = ordered(parameter, c("error", "trend", "season")),
+         value = case_when(value == 0 ~ "None",
+                           value == 1 ~ "Additive",
+                           value == 2 ~ "Multiplicative"),
+         value = ordered(value, c("None", "Additive", "Multiplicative")))
+
+ets %>%
+  group_by(parameter, model_ver, value) %>%
+  summarise(n = n(),
+            .groups = "drop") %>%
+  ungroup() %>%
+  pivot_wider(id_cols = c(parameter, value), names_from = model_ver, values_from = n) %>%
+  complete(parameter, value, fill = list(non_seasonal = 0, seasonal = 0))
+
+ets %>%
+  group_by(parameter, model_ver, value) %>%
+  summarise(n = n(),
+            .groups = "drop_last") %>%
+  mutate(p = round(100*n/sum(n), 0)) %>%
+  select(-n) %>%
+  ungroup() %>%
+  pivot_wider(id_cols = c(parameter, value), names_from = model_ver, values_from = p) %>%
+  complete(parameter, value, fill = list(non_seasonal = 0, seasonal = 0))
+
+```
+
+
+# seastests
+
+```{r}
+
+model_summary %>%
+  filter(parameter == "season_test") %>% with(table(value))
+
+```
