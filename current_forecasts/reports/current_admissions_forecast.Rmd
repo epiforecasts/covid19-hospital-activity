@@ -91,7 +91,9 @@ The main forecasting model is an unweighted ensemble of three individual models:
 2. regression + 7-day-lagged cases (cases mapped from UTLA to Trust using Trust-UTLA mapping in `covid19.nhs.data`)
 3. convolution from cases to admissions (scaled; cases mapped to Trusts as above)
 
-All models are trained on the last 6 weeks of data (from `r format.Date(forecast_date - 42, format = "%d %B")`) and forecasts are made for the following 14 days.
+The time series ensemble and regression models are trained on the last 6 weeks of data from `r format.Date(forecast_date - 6*7, format = "%d %B")`; the case-convolution model is trained on the last 9 weeks of data (from `r format.Date(forecast_date - 9*7, format = "%d %B")`), of which 6 are used in the likelihood. Forecasts are made for the following 14 days.
+
+For details of the fitted models, see our preprint ["Comparative assessment of methods for short-term forecasts of COVID-19 admissions in England at the local level"](https://www.medrxiv.org/content/10.1101/2021.10.18.21265046v1).
 
 
 ```{r load forecasts}
