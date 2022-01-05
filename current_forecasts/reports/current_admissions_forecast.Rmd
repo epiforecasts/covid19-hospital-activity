@@ -46,6 +46,12 @@ exclude_trusts <- covid19.nhs.data::trust_utla_mapping %>%
                                paste0(trust_name, " (UTLA: ", utla_names, ")" ),
                                paste0(trust_name, " (UTLAs: ", utla_names, ")" )))
 
+# Custom palettes
+col_ensemble <- RColorBrewer::brewer.pal(n=3,"Set2")[1]
+col_epinow2 <- RColorBrewer::brewer.pal(n=3,"Set2")[2]
+col_timeser <- technocolour::technocolours(name = "ibrik", n = 6)[5]
+col_convoln <- technocolour::technocolours(name = "fluorescent_rush", n = 6)[2]
+
 ```
 
 ```{r observed, include = FALSE}
@@ -717,8 +723,8 @@ plot_forecast_ribbons(observed = admissions %>%
                       facet_models = TRUE) +
   scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
   scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  scale_color_brewer(palette = "Accent") +
-  scale_fill_brewer(palette = "Accent") +
+  scale_color_manual(values = c(col_timeser, col_convoln)) +
+  scale_fill_manual(values = c(col_timeser, col_convoln)) +
   labs(title = "Top 5 Trusts with biggest forecast probability of increase",
        subtitle = "Time series ensemble and case-convolution",
        caption = paste0("Forecasts from ", format.Date(forecast_date, format = "%d %B %Y"))) +
@@ -745,8 +751,8 @@ plot_forecast_ribbons(observed = admissions %>%
                       facet_models = TRUE) +
   scale_x_date(breaks = "1 weeks", date_labels = "%d %b") +
   scale_y_continuous(breaks = integer_breaks(), limits = c(0, NA)) +
-  scale_color_brewer(palette = "Accent") +
-  scale_fill_brewer(palette = "Accent") +
+  scale_color_manual(values = c(col_timeser, col_convoln)) +
+  scale_fill_manual(values = c(col_timeser, col_convoln)) +
   labs(title = "Top 5 Trusts with biggest forecast probability of increase",
        subtitle = "Time series ensemble and case-convolution",
        caption = paste0("Forecasts from ", format.Date(forecast_date - 7, format = "%d %B %Y"))) +
@@ -764,19 +770,24 @@ plot_forecast_ribbons(observed = admissions %>%
 
 # Past forecasts {.tabset}
 
+```{r, include = FALSE}
+plot_dates <- unique(all_reg_forecasts$forecast_from)[which(unique(all_reg_forecasts$forecast_from) < forecast_date - 7 & unique(all_reg_forecasts$forecast_from) > forecast_date - 42)]
+```
+
 ## Trusts, all regions
 
 ```{r}
 
 plot_forecast_bars(observed = admissions %>%
-                       dplyr::filter(date >= forecast_date - 84) %>%
+                       dplyr::filter(date >= forecast_date - 42) %>%
                        dplyr::rename(observed = adm),
                    forecast = all_forecasts,
                    h = 14,
+                   use_dates = plot_dates,
                    trusts = plot_trusts_observed,
                    models = "mean_ensemble",
                    facet_models = FALSE) +
-  scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
+  scale_x_date(limits = c(forecast_date - 42, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
   scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
     labs(title = "Top 25 Trusts with most admissions in last 28 days",
@@ -784,23 +795,29 @@ plot_forecast_bars(observed = admissions %>%
   theme(legend.position = "none")
 
 plot_forecast_bars(observed = admissions %>%
-                       dplyr::filter(date >= forecast_date - 84) %>%
+                       dplyr::filter(date >= forecast_date - 42) %>%
                        dplyr::rename(observed = adm),
                    forecast = all_forecasts,
                    h = 14,
+                   use_dates = plot_dates,
                    trusts = plot_trusts_observed,
                    models = "convolution_rt",
                    facet_models = FALSE) +
-  scale_x_date(limits = c(forecast_date - 63, forecast_date + 1),
+  scale_x_date(limits = c(forecast_date - 42, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
   scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
+  scale_color_manual(values = c(col_convoln)) +
+  scale_fill_manual(values = c(col_convoln)) +
     labs(title = "Top 25 Trusts with most admissions in last 28 days",
        subtitle = "Past 14-day ahead forecasts, case-convolution model") +
   theme(legend.position = "none")
 
 ```
 
-## National and regional
+## National
+
+We derive forecasts of national hospital admissions from the Trust-level admissions. For each of the individual models, the forecast samples are summed to get national forecasts, then summarised into quantile forecasts. The ensemble forecast is created from the national quantile forecasts.
+
 
 ```{r, fig.width = 14, fig.height = 6}
 
@@ -812,37 +829,51 @@ region_obs <- admissions %>%
                      dplyr::group_by(date) %>%
                      dplyr::summarise(observed = sum(adm, na.rm = TRUE)) %>%
                      dplyr::mutate(id = "England")) %>%
-  dplyr::filter(date >= forecast_date - 84)
+  dplyr::filter(date >= forecast_date - 42)
 
 plot_forecast_bars(observed = region_obs,
-                   forecast = all_reg_forecasts %>% dplyr::filter(model == "mean_ensemble"),
+                   forecast = all_reg_forecasts,
                    h = 14,
-                   use_dates = unique(all_reg_forecasts$forecast_from)[which(unique(all_reg_forecasts$forecast_from) < forecast_date)],
+                   use_dates = plot_dates,
                    trusts = "England",
                    trust_facet_var = "id",
-                   models = c("mean_ensemble"),
-                   facet_models = FALSE) +
-  scale_x_date(limits = c(forecast_date - 56, forecast_date + 1),
+                   models = c("convolution_rt", "mean_ensemble"),
+                   facet_models = TRUE) +
+  scale_x_date(limits = c(forecast_date - 42, forecast_date + 1),
                breaks = "2 weeks", date_labels = "%d %b") +
   scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
+  scale_color_manual(values = c(col_convoln, col_ensemble)) +
+  scale_fill_manual(values = c(col_convoln, col_ensemble)) +
     labs(title = "National",
-       subtitle = "Past 14-day ahead forecasts, ensemble model") +
-  theme(legend.position = "none")
-
-plot_forecast_bars(observed = region_obs,
-                   forecast = all_reg_forecasts %>% dplyr::filter(model == "mean_ensemble") %>% dplyr::filter(!(horizon == 14 & id == "London" & model == "mean_ensemble" & forecast_from == as.Date("2021-07-04"))),
-                   h = 14,
-                   use_dates = unique(all_reg_forecasts$forecast_from)[which(unique(all_reg_forecasts$forecast_from) < forecast_date)],
-                   trusts = setdiff(unique(region_forecast$id), "England"),
-                   trust_facet_var = "id",
-                   models = c("mean_ensemble"),
-                   facet_models = TRUE) +
-  scale_x_date(limits = c(forecast_date - 56, forecast_date + 1),
-               breaks = "2 weeks", date_labels = "%d %b") +
-  scale_y_continuous(limits = c(0, 300), breaks = integer_breaks()) +
-    labs(title = "NHS regions",
-       subtitle = "Past 14-day ahead forecasts, ensemble model") +
+       subtitle = "Past 14-day ahead forecasts") +
   theme(legend.position = "none")
 
 ```
+
+## Regional
+
+We derive forecasts of regional hospital admissions from the Trust-level admissions. For each of the individual models, the forecast samples are summed to get regional forecasts, then summarised into quantile forecasts. The ensemble forecast is created from the regional quantile forecasts.
+
+
+```{r}
+
+plot_forecast_bars(observed = region_obs,
+                   forecast = all_reg_forecasts,
+                   h = 14,
+                   use_dates = plot_dates,
+                   trusts = setdiff(unique(region_forecast$id), "England"),
+                   trust_facet_var = "id",
+                   models = c("convolution_rt", "mean_ensemble"),
+                   facet_models = TRUE) +
+  scale_x_date(limits = c(forecast_date - 42, forecast_date + 1),
+               breaks = "2 weeks", date_labels = "%d %b") +
+  scale_y_continuous(limits = c(0, NA), breaks = integer_breaks()) +
+  scale_color_manual(values = c(col_convoln, col_ensemble)) +
+  scale_fill_manual(values = c(col_convoln, col_ensemble)) +
+    labs(title = "NHS regions",
+       subtitle = "Past 14-day ahead forecasts") +
+  theme(legend.position = "none")
+
+```
+
 
