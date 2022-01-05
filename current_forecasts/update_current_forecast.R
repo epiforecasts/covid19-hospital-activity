@@ -11,7 +11,7 @@ source(here::here("R", "utils.R"))
 
 # Set up ------------------------------------------------------------------
 
-forecast_date <- as.Date("2021-12-15")
+forecast_date <- as.Date("2021-12-22")
 
 
 # Load and check case forecasts -------------------------------------------
@@ -68,7 +68,7 @@ baseline_out <- forecast_baseline(data = dat_in, yvar = "all_adm",
 baseline_summary <- baseline_out$summary
 
 
-## Autoregressive time series 
+## Autoregressive time series
 tsensemble_samples <- timeseries_samples(data = dat_in, yvar = "all_adm",
                                          horizon = 14, samples = 1000, models = "aez", 
                                          train_from = forecast_date - 42,
