@@ -228,6 +228,11 @@ ggsave(plot = g_fig2,
        width = 14, height = 8, units = "in",
        dpi = 500)
 
+ggsave(plot = g_fig2,
+       filename = here::here("data", "out", "figures", "figure_2.pdf"),
+       width = 14, height = 10, units = "in",
+       dpi = 500)
+
 ```
 
 ### Table S3
@@ -392,6 +397,11 @@ g_figure_3 <- guide_area() /
 ggsave(plot = g_figure_3,
        filename = here::here("data", "out", "figures", "figure_3.png"),
        width = 14, height = 8, units = "in",
+       dpi = 500)
+
+ggsave(plot = g_figure_3,
+       filename = here::here("data", "out", "figures", "figure_3.pdf"),
+       width = 14, height = 10, units = "in",
        dpi = 500)
 
 #####
@@ -611,6 +621,11 @@ g_figure_4 <- (g_location_scatter + g_location_scattermae) /
 
 ggsave(plot = g_figure_4,
        filename = here::here("data", "out", "figures", "figure_4.png"),
+       width = 14, height = 10, units = "in",
+       dpi = 500)
+
+ggsave(plot = g_figure_4,
+       filename = here::here("data", "out", "figures", "figure_4.pdf"),
        width = 14, height = 10, units = "in",
        dpi = 500)
 
