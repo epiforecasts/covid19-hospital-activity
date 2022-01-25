@@ -23,7 +23,7 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2022-01-12")
+forecast_date <- as.Date("2022-01-19")
 areas <- c()
 
 ```
