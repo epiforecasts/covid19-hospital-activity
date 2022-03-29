@@ -23,7 +23,7 @@ source(here::here("R", "load_data_fns.R"))
 source(here::here("R", "plot_fns.R"))
 source(here::here("R", "utils.R"))
 
-forecast_date <- as.Date("2022-01-19")
+forecast_date <- as.Date("2022-02-25")
 areas <- c()
 
 ```
@@ -607,16 +607,16 @@ We derive forecasts of national and regional hospital admissions from the Trust-
 
 ```{r}
 
-en2 <- read_csv(file = here::here("current_forecasts",
-                                  "data",
-                                  "admissions_region",
-                                  paste0("epinow2_admisssions_", forecast_date, ".csv"))) %>%
-  filter(type == "forecast",
-         !region %in% c("Northern Ireland", "Scotland", "Wales", "United Kingdom")) %>%
-  dplyr::mutate(forecast_from = forecast_date,
-                model = "EpiNow2",
-                horizon = as.integer(date - forecast_date)) %>%
-  select(forecast_from, model, id = region, date, horizon, median, lower_90, lower_50, upper_50, upper_90)
+# en2 <- read_csv(file = here::here("current_forecasts",
+#                                   "data",
+#                                   "admissions_region",
+#                                   paste0("epinow2_admisssions_", forecast_date, ".csv"))) %>%
+#   filter(type == "forecast",
+#          !region %in% c("Northern Ireland", "Scotland", "Wales", "United Kingdom")) %>%
+#   dplyr::mutate(forecast_from = forecast_date,
+#                 model = "EpiNow2",
+#                 horizon = as.integer(date - forecast_date)) %>%
+#   select(forecast_from, model, id = region, date, horizon, median, lower_90, lower_50, upper_50, upper_90)
 
 plot_forecast_ribbons(observed = admissions %>%
                         dplyr::filter(date > forecast_date - 28,
@@ -625,7 +625,7 @@ plot_forecast_ribbons(observed = admissions %>%
                         dplyr::summarise(observed = sum(adm, na.rm = TRUE)) %>%
                         dplyr::mutate(id = "England"),
                       forecast = region_forecast %>%
-                        dplyr::bind_rows(en2) %>%
+                        # dplyr::bind_rows(en2) %>%
                         dplyr::filter(id == "England",
                                       horizon <= 14),
                      trusts = "England",
@@ -661,7 +661,7 @@ plot_forecast_ribbons(observed = admissions %>%
                         dplyr::summarise(observed = sum(adm, na.rm = TRUE)) %>%
                         dplyr::rename(id = nhs_region),
                       forecast = region_forecast %>%
-                        dplyr::bind_rows(en2) %>%
+                        # dplyr::bind_rows(en2) %>%
                         dplyr::filter(id != "England",
                                       horizon <= 14),
                      trusts = setdiff(unique(region_forecast$id), "England"),
@@ -690,7 +690,7 @@ plot_forecast_ribbons(observed = admissions %>%
 
 We compare last weeks forecasts (from `r format.Date(forecast_date - 7, format = "%d %B %Y")`) to the current observed data.
 
-```{r}
+```{r, eval = FALSE}
 
 focus_trusts <- scatter_data %>%
   arrange(-p_14, -change) %>%
@@ -713,7 +713,7 @@ focus_forecast <- readRDS(file = here::here("current_forecasts",
 ```
 
 ### Current week
-```{r}
+```{r, eval = FALSE}
 
 plot_forecast_ribbons(observed = admissions %>%
                         dplyr::filter(date > forecast_date - 28,
@@ -741,7 +741,7 @@ plot_forecast_ribbons(observed = admissions %>%
 ```
 
 ### Last week
-```{r}
+```{r, eval = FALSE}
 
 plot_forecast_ribbons(observed = admissions %>%
                         dplyr::filter(date > forecast_date - 7 - 28,
@@ -778,7 +778,7 @@ plot_dates <- unique(all_reg_forecasts$forecast_from)[which(unique(all_reg_forec
 
 ## Trusts, all regions
 
-```{r}
+```{r, eval = FALSE}
 
 plot_forecast_bars(observed = admissions %>%
                        dplyr::filter(date >= forecast_date - 42) %>%
@@ -821,7 +821,7 @@ plot_forecast_bars(observed = admissions %>%
 We derive forecasts of national hospital admissions from the Trust-level admissions. For each of the individual models, the forecast samples are summed to get national forecasts, then summarised into quantile forecasts. The ensemble forecast is created from the national quantile forecasts.
 
 
-```{r, fig.width = 14, fig.height = 6}
+```{r, eval = FALSE, fig.width = 14, fig.height = 6}
 
 region_obs <- admissions %>%
   dplyr::group_by(nhs_region, date) %>%
@@ -857,7 +857,7 @@ plot_forecast_bars(observed = region_obs,
 We derive forecasts of regional hospital admissions from the Trust-level admissions. For each of the individual models, the forecast samples are summed to get regional forecasts, then summarised into quantile forecasts. The ensemble forecast is created from the regional quantile forecasts.
 
 
-```{r}
+```{r, eval = FALSE}
 
 plot_forecast_bars(observed = region_obs,
                    forecast = all_reg_forecasts,
